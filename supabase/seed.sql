@@ -16,6 +16,10 @@ insert into auth.users (
   email,
   encrypted_password,
   email_confirmed_at,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
   raw_app_meta_data,
   raw_user_meta_data,
   created_at,
@@ -29,12 +33,39 @@ values (
   'seed@sociosim.local',
   crypt('changeme', gen_salt('bf')),
   now(),
+  '',
+  '',
+  '',
+  '',
   '{"provider":"email","providers":["email"]}',
   '{}',
   now(),
   now()
 )
 on conflict (id) do nothing;
+
+insert into auth.identities (
+  provider_id,
+  user_id,
+  identity_data,
+  provider,
+  last_sign_in_at,
+  created_at,
+  updated_at
+)
+values (
+  '206c1ef0-edb3-42b6-b118-7cc162b353fa',
+  '206c1ef0-edb3-42b6-b118-7cc162b353fa',
+  jsonb_build_object(
+    'sub', '206c1ef0-edb3-42b6-b118-7cc162b353fa',
+    'email', 'seed@sociosim.local'
+  ),
+  'email',
+  now(),
+  now(),
+  now()
+)
+on conflict (provider_id, provider) do nothing;
 
 insert into public.users (id, name, email, role)
 values (
