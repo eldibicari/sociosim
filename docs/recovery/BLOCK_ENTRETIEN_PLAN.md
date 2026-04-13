@@ -115,11 +115,16 @@ Cette etape pourra demander du backend et peut-etre une evolution du schema.
 
 - etape 1 faite : largeur plus utile + meilleure hierarchie de sidebar
 - etape 2 faite : titres automatiques derives du premier message utilisateur
-- etape 3 commencee : suppression simple des chats depuis la sidebar
-- restent a faire dans l'etape 3 :
-  - renommage
-  - epinglage
-  - eventuellement un vrai menu d'actions
+- etape 3 faite cote front :
+  - menu `...` par chat
+  - suppression depuis la sidebar
+  - renommage local du titre
+  - epinglage local
+  - scroll complet de l'historique
+- reste a consolider dans le bloc entretien :
+  - polish visuel de la sidebar
+  - verifier le ressenti du bloc `Retour sur l'entretien`
+  - decider plus tard si rename/pin doivent devenir persistants en base
 
 ### Etape 4
 

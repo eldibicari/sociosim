@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file.
 - **Agent Policy Module:** Centralize all agent visibility, toggle, and interview-start rules in `src/lib/agentPolicy.ts`, replacing duplicated `isAdminLike()` checks across 3 API routes.
 
 ### Changed
-- **Interview Sidebar:** Add generated chat titles, wider history layout, and a first delete action directly from the sidebar.
+- **Interview Sidebar:** Add a per-chat actions menu (`...`) with rename, pin, and delete actions, plus a more scrollable history layout with clearer current/pinned/recent sections.
 - **Interviews Route:** Rename `/dashboard` to `/interviews`.
 - **Admin Interviews:** Admins can view all interviews without resuming someone else’s session.
 - **Tests:** Auth flow tests now pass with bad input assertions and coverage reporting.

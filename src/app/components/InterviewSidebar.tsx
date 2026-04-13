@@ -3,14 +3,16 @@
 import {
   Badge,
   Box,
-  ButtonGroup,
+  Button,
   Heading,
   HStack,
   IconButton,
   Link,
+  Menu,
   Stack,
   Text,
   Tooltip,
+  useBreakpointValue,
   VStack,
 } from "@chakra-ui/react";
 import {
@@ -20,15 +22,19 @@ import {
   CirclePlus,
   FileDown,
   FileText,
-  Menu,
+  Menu as MenuIcon,
+  MoreHorizontal,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Pin,
+  Pencil,
   Trash2,
   X,
 } from "lucide-react";
 import { marked } from "marked";
-import { useBreakpointValue } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type InterviewStats = {
   answeredQuestions: number;
@@ -51,6 +57,16 @@ type HistoryMessage = {
   created_at?: string;
 };
 
+type SidebarPrefs = {
+  customTitles: Record<string, string>;
+  pinnedIds: string[];
+};
+
+const EMPTY_PREFS: SidebarPrefs = {
+  customTitles: {},
+  pinnedIds: [],
+};
+
 function buildHistoryTitle(messages: HistoryMessage[] | undefined, fallbackAgentName: string) {
   if (!messages || messages.length === 0) {
     return fallbackAgentName;
@@ -71,6 +87,119 @@ function buildHistoryTitle(messages: HistoryMessage[] | undefined, fallbackAgent
 
   const normalized = content.replace(/\s+/g, " ");
   return normalized.length > 64 ? `${normalized.slice(0, 61)}...` : normalized;
+}
+
+function getSidebarPrefsKey(historyUserId?: string | null, agentId?: string | null) {
+  return `mimesis:interview-sidebar:${historyUserId ?? "anonymous"}:${agentId ?? "all"}`;
+}
+
+function formatRepliesLabel(count: number) {
+  return `${count} ${count > 1 ? "reponses" : "reponse"}`;
+}
+
+function HistoryCard({
+  item,
+  title,
+  isCurrent = false,
+  isPinned = false,
+  onRename,
+  onTogglePin,
+  onDelete,
+  isDeleting,
+}: {
+  item: HistoryItem;
+  title: string;
+  isCurrent?: boolean;
+  isPinned?: boolean;
+  onRename: (item: HistoryItem) => void;
+  onTogglePin: (itemId: string) => void;
+  onDelete: (itemId: string) => void;
+  isDeleting: boolean;
+}) {
+  return (
+    <Box
+      padding={3}
+      borderRadius="xl"
+      borderWidth="1px"
+      borderColor={isCurrent ? "cyan.200" : "rgba(15, 23, 42, 0.08)"}
+      backgroundColor={isCurrent ? "cyan.50" : "bg.surface"}
+      boxShadow={isCurrent ? "0 8px 24px rgba(8, 145, 178, 0.08)" : "none"}
+    >
+      <HStack justify="space-between" align="start" gap={3}>
+        <Link
+          as={NextLink}
+          href={`/interview/${item.id}`}
+          flex="1"
+          minWidth={0}
+          _hover={{ textDecoration: "none" }}
+        >
+          <Stack gap={1}>
+            <HStack gap={2} flexWrap="wrap">
+              {isCurrent ? (
+                <Badge colorPalette="cyan" variant="subtle" borderRadius="full">
+                  Actuel
+                </Badge>
+              ) : null}
+              {isPinned ? (
+                <Badge colorPalette="blue" variant="subtle" borderRadius="full">
+                  Epingle
+                </Badge>
+              ) : null}
+            </HStack>
+            <Text fontSize="sm" fontWeight="700" color="fg.default" lineClamp={2}>
+              {title}
+            </Text>
+            <Text fontSize="xs" color="fg.muted">
+              {item.agentName}
+            </Text>
+            <Text fontSize="xs" color="fg.muted">
+              {item.date} · {formatRepliesLabel(item.qaCount)}
+            </Text>
+          </Stack>
+        </Link>
+
+        <Menu.Root positioning={{ placement: "bottom-end" }}>
+          <Menu.Trigger asChild>
+            <IconButton
+              aria-label={`Actions du chat ${title}`}
+              size="2xs"
+              variant="ghost"
+              borderRadius="full"
+            >
+              <MoreHorizontal size={14} />
+            </IconButton>
+          </Menu.Trigger>
+          <Menu.Positioner>
+            <Menu.Content minWidth="190px">
+              <Menu.Item value={`rename-${item.id}`} onClick={() => onRename(item)}>
+                <HStack gap={2}>
+                  <Pencil size={14} />
+                  <Text>Renommer</Text>
+                </HStack>
+              </Menu.Item>
+              <Menu.Item value={`pin-${item.id}`} onClick={() => onTogglePin(item.id)}>
+                <HStack gap={2}>
+                  <Pin size={14} />
+                  <Text>{isPinned ? "Desepingler" : "Epingler"}</Text>
+                </HStack>
+              </Menu.Item>
+              <Menu.Item
+                value={`delete-${item.id}`}
+                color="red.600"
+                onClick={() => onDelete(item.id)}
+                disabled={isDeleting}
+              >
+                <HStack gap={2}>
+                  <Trash2 size={14} />
+                  <Text>Supprimer</Text>
+                </HStack>
+              </Menu.Item>
+            </Menu.Content>
+          </Menu.Positioner>
+        </Menu.Root>
+      </HStack>
+    </Box>
+  );
 }
 
 type InterviewSidebarProps = {
@@ -118,9 +247,11 @@ export function InterviewSidebar({
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [sidebarPrefs, setSidebarPrefs] = useState<SidebarPrefs>(EMPTY_PREFS);
   const [newInterviewError, setNewInterviewError] = useState<string | null>(null);
   const isCompact = useBreakpointValue({ base: true, lg: false }) ?? false;
   const router = useRouter();
+  const prefsKey = useMemo(() => getSidebarPrefsKey(historyUserId, agentId), [historyUserId, agentId]);
 
   useEffect(() => {
     if (isCompact) {
@@ -130,6 +261,31 @@ export function InterviewSidebar({
       setIsCollapsed(false);
     }
   }, [isCompact]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const raw = window.localStorage.getItem(prefsKey);
+      if (!raw) {
+        setSidebarPrefs(EMPTY_PREFS);
+        return;
+      }
+
+      const parsed = JSON.parse(raw) as Partial<SidebarPrefs>;
+      setSidebarPrefs({
+        customTitles: parsed.customTitles ?? {},
+        pinnedIds: Array.isArray(parsed.pinnedIds) ? parsed.pinnedIds : [],
+      });
+    } catch {
+      setSidebarPrefs(EMPTY_PREFS);
+    }
+  }, [prefsKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(prefsKey, JSON.stringify(sidebarPrefs));
+  }, [prefsKey, sidebarPrefs]);
 
   useEffect(() => {
     if (!historyUserId) return;
@@ -174,7 +330,6 @@ export function InterviewSidebar({
             const dateB = new Date(b.updated_at ?? b.started_at ?? 0).getTime();
             return dateB - dateA;
           })
-          .slice(0, 6)
           .map((item) => {
             const rawName = item.agents?.agent_name ?? "Agent";
             const agentName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
@@ -204,7 +359,7 @@ export function InterviewSidebar({
           setHistoryAgentId(formatted[0]?.agentId ?? null);
         }
       } catch (loadError) {
-        const message = loadError instanceof Error ? loadError.message : "Unknown error";
+        const message = loadError instanceof Error ? loadError.message : "Erreur inconnue";
         console.error("[Interview] Failed to load history:", message);
         if (isMounted) {
           setHistoryError(message);
@@ -226,7 +381,7 @@ export function InterviewSidebar({
       try {
         const response = await fetch("/docs/guide_entretien_court.md");
         if (!response.ok) {
-          throw new Error("Failed to load interview guide");
+          throw new Error("Impossible de charger le guide");
         }
 
         const markdown = await response.text();
@@ -245,7 +400,7 @@ export function InterviewSidebar({
         setIntroPreview(previewLine);
         setIntroHtml(parsed);
       } catch (loadError) {
-        const message = loadError instanceof Error ? loadError.message : "Unknown error";
+        const message = loadError instanceof Error ? loadError.message : "Erreur inconnue";
         console.error("[Interview] Failed to load guide:", message);
         if (isMounted) {
           setIntroPreview("");
@@ -263,11 +418,11 @@ export function InterviewSidebar({
 
   const handleNewInterview = async () => {
     if (!userId) {
-      setNewInterviewError("Impossible de démarrer un entretien sans utilisateur.");
+      setNewInterviewError("Impossible de demarrer un entretien sans utilisateur.");
       return;
     }
     if (!agentId) {
-      setNewInterviewError("Impossible de démarrer un entretien sans agent.");
+      setNewInterviewError("Impossible de demarrer un entretien sans persona.");
       return;
     }
 
@@ -286,7 +441,7 @@ export function InterviewSidebar({
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
-        const message = payload?.error ?? "Impossible de créer une nouvelle session";
+        const message = payload?.error ?? "Impossible de creer une nouvelle session.";
         throw new Error(message);
       }
 
@@ -295,7 +450,7 @@ export function InterviewSidebar({
         `/interview?interviewId=${data.interviewId}&sessionId=${data.sessionId}&adkSessionId=${data.adkSessionId}`
       );
     } catch (createError) {
-      const message = createError instanceof Error ? createError.message : "Unknown error";
+      const message = createError instanceof Error ? createError.message : "Erreur inconnue";
       console.error("[InterviewSidebar] Failed to start new interview:", message);
       setNewInterviewError(message);
     } finally {
@@ -324,12 +479,20 @@ export function InterviewSidebar({
       }
 
       setHistoryItems((items) => items.filter((item) => item.id !== interviewId));
+      setSidebarPrefs((current) => {
+        const customTitles = { ...current.customTitles };
+        delete customTitles[interviewId];
+        return {
+          customTitles,
+          pinnedIds: current.pinnedIds.filter((id) => id !== interviewId),
+        };
+      });
 
       if (currentInterviewId === interviewId) {
         router.push("/interviews");
       }
     } catch (deleteError) {
-      const message = deleteError instanceof Error ? deleteError.message : "Unknown error";
+      const message = deleteError instanceof Error ? deleteError.message : "Erreur inconnue";
       console.error("[InterviewSidebar] Failed to delete interview:", message);
       setHistoryError(message);
     } finally {
@@ -338,14 +501,45 @@ export function InterviewSidebar({
   };
 
   const currentHistoryItem = historyItems.find((item) => item.id === currentInterviewId) ?? null;
-  const recentHistoryItems = historyItems.filter((item) => item.id !== currentInterviewId);
+  const otherHistoryItems = historyItems.filter((item) => item.id !== currentInterviewId);
+  const pinnedHistoryItems = otherHistoryItems.filter((item) => sidebarPrefs.pinnedIds.includes(item.id));
+  const recentHistoryItems = otherHistoryItems.filter((item) => !sidebarPrefs.pinnedIds.includes(item.id));
+  const getDisplayTitle = (item: HistoryItem) => {
+    const override = sidebarPrefs.customTitles[item.id]?.trim();
+    return override && override.length > 0 ? override : item.title;
+  };
+  const handleRenameInterview = (item: HistoryItem) => {
+    const nextTitle = window.prompt("Renommer ce chat", getDisplayTitle(item));
+    if (nextTitle === null) return;
+    const trimmed = nextTitle.trim();
+    setSidebarPrefs((current) => {
+      const customTitles = { ...current.customTitles };
+      if (!trimmed || trimmed === item.title) {
+        delete customTitles[item.id];
+      } else {
+        customTitles[item.id] = trimmed;
+      }
+      return { ...current, customTitles };
+    });
+  };
+  const handleTogglePin = (itemId: string) => {
+    setSidebarPrefs((current) => {
+      const alreadyPinned = current.pinnedIds.includes(itemId);
+      return {
+        ...current,
+        pinnedIds: alreadyPinned
+          ? current.pinnedIds.filter((id) => id !== itemId)
+          : [itemId, ...current.pinnedIds],
+      };
+    });
+  };
   const sidebarWidth = isCompact
-    ? "min(85vw, 360px)"
+    ? "min(88vw, 380px)"
     : isCollapsed
       ? "56px"
       : isExpanded
-        ? "380px"
-        : "320px";
+        ? "440px"
+        : "360px";
 
   return (
     <>
@@ -364,7 +558,7 @@ export function InterviewSidebar({
               zIndex={30}
               backgroundColor="bg.subtle"
             >
-              <Menu size={16} />
+              <MenuIcon size={16} />
             </IconButton>
           </Tooltip.Trigger>
           <Tooltip.Positioner>
@@ -394,8 +588,9 @@ export function InterviewSidebar({
         position={isCompact ? "fixed" : "sticky"}
         top={0}
         left={isCompact ? 0 : "auto"}
-        height={isCompact ? "100dvh" : "100%"}
-        alignSelf={{ base: "stretch", lg: "flex-start" }}
+        display="flex"
+        flexDirection="column"
+        height="100dvh"
         zIndex={25}
         overflow="hidden"
         transition={isCompact ? "transform 0.2s ease" : "width 0.2s ease, padding 0.2s ease"}
@@ -414,7 +609,7 @@ export function InterviewSidebar({
                 right={2}
                 borderRadius="full"
               >
-                <Menu size={16} />
+                <MenuIcon size={16} />
               </IconButton>
             </Tooltip.Trigger>
             <Tooltip.Positioner>
@@ -430,116 +625,62 @@ export function InterviewSidebar({
         ) : (
           <Stack
             gap={4}
+            height="100%"
+            minHeight={0}
             opacity={isCollapsed ? 0 : 1}
             pointerEvents={isCollapsed ? "none" : "auto"}
             transition="opacity 0.2s ease"
           >
-            <Stack gap={2}>
-              <HStack justify="space-between" align="center">
-                <HStack gap={1}>
-                  <Tooltip.Root openDelay={150}>
-                    <Tooltip.Trigger asChild>
-                      <IconButton
-                        aria-label="Commencer un nouvel entretien"
-                        size="sm"
-                        variant="outline"
-                        rounded="full"
-                        colorPalette="blue"
-                        backgroundColor="blue.400"
-                        color="white"
-                        borderColor="blue.400"
-                        _hover={{ backgroundColor: "blue.500" }}
-                        onClick={handleNewInterview}
-                        loading={isCreatingSession}
-                        disabled={isCreatingSession}
-                      >
-                        {isCreatingSession ? "Création..." : <CirclePlus size={18} />}
-                      </IconButton>
-                    </Tooltip.Trigger>
-                    <Tooltip.Positioner>
-                      <Tooltip.Content px={3} py={2}>Commencer un nouvel entretien</Tooltip.Content>
-                    </Tooltip.Positioner>
-                  </Tooltip.Root>
+            <Stack gap={3}>
+              <HStack justify="space-between" align="start">
+                <Button
+                  size="sm"
+                  flex="1"
+                  justifyContent="start"
+                  borderRadius="full"
+                  colorPalette="blue"
+                  onClick={handleNewInterview}
+                  loading={isCreatingSession}
+                  disabled={isCreatingSession}
+                >
+                  <CirclePlus size={16} />
+                  Nouvel entretien
+                </Button>
 
+                <HStack gap={1}>
                   <Tooltip.Root openDelay={150}>
                     <Tooltip.Trigger asChild>
                       <IconButton
                         aria-label="Aide pour l'entretien"
                         size="sm"
                         variant="outline"
-                        rounded="full"
+                        borderRadius="full"
                         onClick={() => setIsHelpOpen(true)}
                       >
-                        <BookOpenText size={18} />
+                        <BookOpenText size={16} />
                       </IconButton>
                     </Tooltip.Trigger>
                     <Tooltip.Positioner>
-                      <Tooltip.Content px={3} py={2}>Aide pour l'entretien</Tooltip.Content>
+                      <Tooltip.Content px={3} py={2}>Aide</Tooltip.Content>
                     </Tooltip.Positioner>
                   </Tooltip.Root>
 
-                  <ButtonGroup size="sm" variant="outline" marginLeft={2}>
-                    <Tooltip.Root openDelay={150}>
-                      <Tooltip.Trigger asChild>
-                        <IconButton
-                          aria-label="Exporter en PDF"
-                          rounded="full"
-                          onClick={onExportPdf}
-                          loading={isExportingPdf}
-                          disabled={disableExport}
-                        >
-                          <FileDown size={18} />
-                        </IconButton>
-                      </Tooltip.Trigger>
-                      <Tooltip.Positioner>
-                        <Tooltip.Content px={3} py={2}>Exporter en PDF</Tooltip.Content>
-                      </Tooltip.Positioner>
-                    </Tooltip.Root>
-
-                    {onExportGoogleDocs ? (
-                      <Tooltip.Root openDelay={150}>
-                        <Tooltip.Trigger asChild>
-                          <IconButton
-                            aria-label="Exporter vers Google docs"
-                            rounded="full"
-                            onClick={onExportGoogleDocs}
-                            loading={isExportingGoogleDocs}
-                            disabled={disableExport}
-                          >
-                            <FileText size={18} />
-                          </IconButton>
-                        </Tooltip.Trigger>
-                        <Tooltip.Positioner>
-                          <Tooltip.Content px={3} py={2}>Exporter vers Google docs</Tooltip.Content>
-                        </Tooltip.Positioner>
-                      </Tooltip.Root>
-                    ) : null}
-                  </ButtonGroup>
-                </HStack>
-
-                <HStack gap={1}>
                   {!isCompact ? (
                     <Tooltip.Root openDelay={150}>
                       <Tooltip.Trigger asChild>
                         <IconButton
-                          aria-label={isExpanded ? "Réduire la largeur" : "Agrandir le panneau"}
+                          aria-label={isExpanded ? "Reduire la largeur" : "Agrandir le panneau"}
                           size="sm"
                           variant="ghost"
-                          onClick={() => setIsExpanded((prev) => !prev)}
                           borderRadius="full"
+                          onClick={() => setIsExpanded((prev) => !prev)}
                         >
-                          <ArrowRight
-                            size={16}
-                            style={{
-                              transform: isExpanded ? "rotate(180deg)" : "none",
-                              transition: "transform 0.2s ease",
-                            }}
-                          />
+                          {isExpanded ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
                         </IconButton>
                       </Tooltip.Trigger>
                       <Tooltip.Positioner>
                         <Tooltip.Content px={3} py={2}>
-                          {isExpanded ? "Réduire la largeur" : "Agrandir le panneau"}
+                          {isExpanded ? "Reduire la largeur" : "Agrandir le panneau"}
                         </Tooltip.Content>
                       </Tooltip.Positioner>
                     </Tooltip.Root>
@@ -548,43 +689,97 @@ export function InterviewSidebar({
                   <Tooltip.Root openDelay={150}>
                     <Tooltip.Trigger asChild>
                       <IconButton
-                        aria-label="Réduire le panneau"
+                        aria-label="Reduire le panneau"
                         size="sm"
                         variant="ghost"
-                        onClick={() => setIsCollapsed(true)}
                         borderRadius="full"
+                        onClick={() => setIsCollapsed(true)}
                       >
                         <ChevronsLeft size={16} />
                       </IconButton>
                     </Tooltip.Trigger>
                     <Tooltip.Positioner>
-                      <Tooltip.Content px={3} py={2}>Réduire le panneau</Tooltip.Content>
+                      <Tooltip.Content px={3} py={2}>Reduire</Tooltip.Content>
                     </Tooltip.Positioner>
                   </Tooltip.Root>
                 </HStack>
               </HStack>
 
-              <Heading as="h2" size="lg" color={{ base: "blue.700", _dark: "blue.200" }}>
-                {agentDisplayName ?? "Chargement de l'entretien..."}
-              </Heading>
+              <Box
+                padding={4}
+                borderRadius="2xl"
+                backgroundColor="bg.surface"
+                borderWidth="1px"
+                borderColor="rgba(15, 23, 42, 0.08)"
+              >
+                <Stack gap={3}>
+                  <Stack gap={1}>
+                    <Heading as="h2" size="lg" color={{ base: "blue.700", _dark: "blue.200" }}>
+                      {agentDisplayName ?? "Entretien"}
+                    </Heading>
+                    {agentDescription ? (
+                      <Text fontSize="sm" color="fg.muted" lineHeight="1.5">
+                        {agentDescription}
+                      </Text>
+                    ) : null}
+                  </Stack>
 
-              {agentDescription ? (
-                <Text fontSize="xs" color="fg.muted" lineHeight="1.4">
-                  {agentDescription}
-                </Text>
-              ) : null}
+                  <Stack gap={1}>
+                    <Text fontSize="sm">par {userName ?? "..."}</Text>
+                    <Text fontSize="sm">le {dateDisplay ?? "..."}</Text>
+                  </Stack>
 
-              {agentDisplayName && userName && dateDisplay ? (
-                <>
-                  <Text fontSize="sm">par {userName}</Text>
-                  <Text fontSize="sm">le {dateDisplay}</Text>
-                </>
-              ) : (
-                <>
-                  <Text fontSize="sm">par ...</Text>
-                  <Text fontSize="sm">le ...</Text>
-                </>
-              )}
+                  <HStack gap={2} flexWrap="wrap">
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      borderRadius="full"
+                      onClick={onExportPdf}
+                      loading={isExportingPdf}
+                      disabled={disableExport}
+                    >
+                      <FileDown size={14} />
+                      PDF
+                    </Button>
+
+                    {onExportGoogleDocs ? (
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        borderRadius="full"
+                        onClick={onExportGoogleDocs}
+                        loading={isExportingGoogleDocs}
+                        disabled={disableExport}
+                      >
+                        <FileText size={14} />
+                        Google Docs
+                      </Button>
+                    ) : null}
+                  </HStack>
+
+                  <Box
+                    height="1px"
+                    backgroundColor={{ base: "rgba(226, 232, 240, 0.7)", _dark: "rgba(31, 41, 55, 0.6)" }}
+                  />
+
+                  <HStack gap={4} align="start">
+                    <Box flex="1">
+                      <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
+                        Reponses
+                      </Text>
+                      <Text fontWeight="700">{stats.answeredQuestions}</Text>
+                    </Box>
+                    <Box flex="1">
+                      <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
+                        Tokens
+                      </Text>
+                      <Text fontWeight="700">
+                        {stats.inputTokens} → {stats.outputTokens}
+                      </Text>
+                    </Box>
+                  </HStack>
+                </Stack>
+              </Box>
 
               {newInterviewError ? (
                 <Text fontSize="sm" color="red.600">
@@ -593,54 +788,92 @@ export function InterviewSidebar({
               ) : null}
             </Stack>
 
-            <Stack gap={1}>
-              <Text fontSize="sm">
-                {stats.answeredQuestions} {stats.answeredQuestions === 1 ? "réponse" : "réponses"}
-              </Text>
-              <Text fontSize="sm">
-                Tokens : {stats.inputTokens} → {stats.outputTokens}
-              </Text>
-            </Stack>
-
-            <Box
-              height="1px"
-              backgroundColor={{ base: "rgba(226, 232, 240, 0.6)", _dark: "rgba(31, 41, 55, 0.6)" }}
-            />
-
-            <Stack gap={2}>
+            <Stack gap={3} flex={1} minHeight={0} overflow="hidden">
               <HStack justify="space-between" align="center">
                 <Heading as="h3" size="sm">
-                  Historique
+                  Conversations
                 </Heading>
                 <Tooltip.Root openDelay={150}>
                   <Tooltip.Trigger asChild>
                     <IconButton
-                      aria-label="Voir plus"
+                      aria-label="Voir tous les entretiens"
                       size="xs"
                       variant="ghost"
-                      onClick={() => router.push(`/interviews${historyAgentId ? `?agent=${historyAgentId}` : ""}`)}
                       borderRadius="full"
+                      onClick={() => router.push(`/interviews${historyAgentId ? `?agent=${historyAgentId}` : ""}`)}
                     >
                       <ArrowRight size={14} />
                     </IconButton>
                   </Tooltip.Trigger>
                   <Tooltip.Positioner>
-                    <Tooltip.Content px={3} py={2}>Voir plus</Tooltip.Content>
+                    <Tooltip.Content px={3} py={2}>Voir tout</Tooltip.Content>
                   </Tooltip.Positioner>
                 </Tooltip.Root>
               </HStack>
 
-              {historyError ? (
-                <Text fontSize="sm" color="red.600">
-                  {historyError}
-                </Text>
-              ) : historyItems.length === 0 ? (
-                <Text fontSize="sm" color="fg.muted">
-                  Aucun entretien précédent.
-                </Text>
-              ) : (
-                <Stack gap={3}>
-                  {currentHistoryItem ? (
+              <Stack gap={3} flex={1} minHeight={0} overflowY="auto" paddingRight={1}>
+                {historyError ? (
+                  <Text fontSize="sm" color="red.600">
+                    {historyError}
+                  </Text>
+                ) : historyItems.length === 0 ? (
+                  <Text fontSize="sm" color="fg.muted">
+                    Aucun entretien precedent.
+                  </Text>
+                ) : (
+                  <>
+                    {currentHistoryItem ? (
+                      <Stack gap={2}>
+                        <Text
+                          fontSize="xs"
+                          fontWeight="700"
+                          color="fg.muted"
+                          textTransform="uppercase"
+                          letterSpacing="0.08em"
+                        >
+                          Chat en cours
+                        </Text>
+                        <HistoryCard
+                          item={currentHistoryItem}
+                          title={getDisplayTitle(currentHistoryItem)}
+                          isCurrent
+                          isPinned={sidebarPrefs.pinnedIds.includes(currentHistoryItem.id)}
+                          onRename={handleRenameInterview}
+                          onTogglePin={handleTogglePin}
+                          onDelete={handleDeleteInterview}
+                          isDeleting={pendingDeleteId === currentHistoryItem.id}
+                        />
+                      </Stack>
+                    ) : null}
+
+                    {pinnedHistoryItems.length > 0 ? (
+                      <Stack gap={2}>
+                        <Text
+                          fontSize="xs"
+                          fontWeight="700"
+                          color="fg.muted"
+                          textTransform="uppercase"
+                          letterSpacing="0.08em"
+                        >
+                          Epingles
+                        </Text>
+                        <Stack gap={2}>
+                          {pinnedHistoryItems.map((item) => (
+                            <HistoryCard
+                              key={item.id}
+                              item={item}
+                              title={getDisplayTitle(item)}
+                              isPinned
+                              onRename={handleRenameInterview}
+                              onTogglePin={handleTogglePin}
+                              onDelete={handleDeleteInterview}
+                              isDeleting={pendingDeleteId === item.id}
+                            />
+                          ))}
+                        </Stack>
+                      </Stack>
+                    ) : null}
+
                     <Stack gap={2}>
                       <Text
                         fontSize="xs"
@@ -649,138 +882,31 @@ export function InterviewSidebar({
                         textTransform="uppercase"
                         letterSpacing="0.08em"
                       >
-                        Chat en cours
+                        Recents
                       </Text>
-
-                      <Box
-                        padding={3}
-                        borderRadius="xl"
-                        backgroundColor="cyan.50"
-                        borderWidth="1px"
-                        borderColor="cyan.200"
-                        color="cyan.900"
-                      >
+                      {recentHistoryItems.length === 0 ? (
+                        <Text fontSize="sm" color="fg.muted">
+                          Aucun autre chat recent.
+                        </Text>
+                      ) : (
                         <Stack gap={2}>
-                          <HStack justify="space-between" align="start" gap={2}>
-                            <Link
-                              as={NextLink}
-                              href={`/interview/${currentHistoryItem.id}`}
-                              flex="1"
-                              minWidth={0}
-                              _hover={{ textDecoration: "none" }}
-                            >
-                              <Text fontSize="sm" fontWeight="700" lineClamp={2}>
-                                {currentHistoryItem.title}
-                              </Text>
-                            </Link>
-
-                            <HStack gap={2} align="start">
-                              <Badge colorPalette="cyan" variant="subtle" borderRadius="full">
-                                Actuel
-                              </Badge>
-                              <Tooltip.Root openDelay={150}>
-                                <Tooltip.Trigger asChild>
-                                  <IconButton
-                                    aria-label={`Supprimer le chat ${currentHistoryItem.title}`}
-                                    size="2xs"
-                                    variant="ghost"
-                                    color="cyan.900"
-                                    onClick={() => handleDeleteInterview(currentHistoryItem.id)}
-                                    loading={pendingDeleteId === currentHistoryItem.id}
-                                  >
-                                    <Trash2 size={14} />
-                                  </IconButton>
-                                </Tooltip.Trigger>
-                                <Tooltip.Positioner>
-                                  <Tooltip.Content px={3} py={2}>Supprimer</Tooltip.Content>
-                                </Tooltip.Positioner>
-                              </Tooltip.Root>
-                            </HStack>
-                          </HStack>
-
-                          <Text fontSize="xs" color="cyan.800">
-                            {currentHistoryItem.agentName}
-                          </Text>
-                          <Text fontSize="xs" color="cyan.800">
-                            {currentHistoryItem.date} · {currentHistoryItem.qaCount} réponses
-                          </Text>
+                          {recentHistoryItems.map((item) => (
+                            <HistoryCard
+                              key={item.id}
+                              item={item}
+                              title={getDisplayTitle(item)}
+                              onRename={handleRenameInterview}
+                              onTogglePin={handleTogglePin}
+                              onDelete={handleDeleteInterview}
+                              isDeleting={pendingDeleteId === item.id}
+                            />
+                          ))}
                         </Stack>
-                      </Box>
+                      )}
                     </Stack>
-                  ) : null}
-
-                  <Stack gap={2}>
-                    <Text
-                      fontSize="xs"
-                      fontWeight="700"
-                      color="fg.muted"
-                      textTransform="uppercase"
-                      letterSpacing="0.08em"
-                    >
-                      Récents
-                    </Text>
-
-                    {recentHistoryItems.length === 0 ? (
-                      <Text fontSize="sm" color="fg.muted">
-                        Aucun autre chat récent.
-                      </Text>
-                    ) : (
-                      <Stack gap={2}>
-                        {recentHistoryItems.map((item) => (
-                          <Box
-                            key={item.id}
-                            padding={3}
-                            borderRadius="xl"
-                            backgroundColor="transparent"
-                            borderWidth="1px"
-                            borderColor="rgba(15, 23, 42, 0.08)"
-                            _hover={{ backgroundColor: "bg.muted" }}
-                          >
-                            <HStack justify="space-between" align="start" gap={3}>
-                              <Link
-                                as={NextLink}
-                                href={`/interview/${item.id}`}
-                                flex="1"
-                                minWidth={0}
-                                _hover={{ textDecoration: "none" }}
-                              >
-                                <Stack gap={1}>
-                                  <Text fontSize="sm" fontWeight="600" color="fg.default" lineClamp={2}>
-                                    {item.title}
-                                  </Text>
-                                  <Text fontSize="xs" color="fg.muted">
-                                    {item.agentName}
-                                  </Text>
-                                  <Text fontSize="xs" color="fg.muted">
-                                    {item.date} · {item.qaCount} réponses
-                                  </Text>
-                                </Stack>
-                              </Link>
-
-                              <Tooltip.Root openDelay={150}>
-                                <Tooltip.Trigger asChild>
-                                  <IconButton
-                                    aria-label={`Supprimer le chat ${item.title}`}
-                                    size="2xs"
-                                    variant="ghost"
-                                    onClick={() => handleDeleteInterview(item.id)}
-                                    loading={pendingDeleteId === item.id}
-                                  >
-                                    <Trash2 size={14} />
-                                  </IconButton>
-                                </Tooltip.Trigger>
-                                <Tooltip.Positioner>
-                                  <Tooltip.Content px={3} py={2}>Supprimer</Tooltip.Content>
-                                </Tooltip.Positioner>
-                              </Tooltip.Root>
-                            </HStack>
-                          </Box>
-                        ))}
-                      </Stack>
-                    )}
-                  </Stack>
-                </Stack>
-              )}
+                  </>
+                )}
+              </Stack>
             </Stack>
           </Stack>
         )}

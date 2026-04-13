@@ -2,14 +2,24 @@
 
 import type { RefObject } from "react";
 import type { BoxProps } from "@chakra-ui/react";
-import { Badge, Box, Button, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react";
+import {
+  Badge,
+  Box,
+  Button,
+  Collapsible,
+  HStack,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { InterviewSidebar } from "@/app/components/InterviewSidebar";
 import { AssistantSkeleton } from "@/components/AssistantSkeleton";
 import { ChatMessage } from "@/components/ChatMessage";
-import { InterviewSidebar } from "@/app/components/InterviewSidebar";
 import { MessageInput } from "@/components/MessageInput";
-import type { UIMessage } from "@/types/ui";
-import { useState } from "react";
 import type { InterviewAnalysis } from "@/lib/schemas";
+import type { UIMessage } from "@/types/ui";
 
 type InterviewStats = {
   answeredQuestions: number;
@@ -49,9 +59,9 @@ type InterviewLayoutProps = {
 };
 
 const DEFAULT_SUGGESTED_QUESTIONS = [
-  "Pouvez-vous me parler de votre quotidien étudiant ?",
+  "Pouvez-vous me parler de votre quotidien etudiant ?",
   "Comment utilisez-vous l'IA dans votre travail universitaire ?",
-  "Pouvez-vous me raconter une situation récente où vous avez utilisé ChatGPT ?",
+  "Pouvez-vous me raconter une situation recente ou vous avez utilise ChatGPT ?",
 ];
 
 export function InterviewLayout({
@@ -85,16 +95,15 @@ export function InterviewLayout({
   isAnalysisLoading = false,
 }: InterviewLayoutProps) {
   const [draftMessage, setDraftMessage] = useState("");
+  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const showSuggestions =
-    showInput &&
-    messages.length === 0 &&
-    !isStreaming &&
-    draftMessage.trim().length === 0;
+    showInput && messages.length === 0 && !isStreaming && draftMessage.trim().length === 0;
 
   const handleSuggestedQuestion = (question: string) => {
     setDraftMessage("");
     onSendMessage(question);
   };
+
   const showAnalysisPanel = messages.length > 0 && (isAnalysisLoading || !!analysis || !!analysisError);
   const qualityLabel =
     analysis?.material_quality === "exploitable"
@@ -170,12 +179,7 @@ export function InterviewLayout({
                   {emptyStateText}
                 </Text>
                 {showSuggestions ? (
-                  <HStack
-                    gap={3}
-                    flexWrap="wrap"
-                    justify="center"
-                    maxWidth="4xl"
-                  >
+                  <HStack gap={3} flexWrap="wrap" justify="center" maxWidth="4xl">
                     {DEFAULT_SUGGESTED_QUESTIONS.map((question) => (
                       <Button
                         key={question}
@@ -204,68 +208,93 @@ export function InterviewLayout({
                     timestamp={msg.timestamp}
                   />
                 ))}
-                {showAssistantSkeleton && <AssistantSkeleton />}
+                {showAssistantSkeleton ? <AssistantSkeleton /> : null}
               </Stack>
             )}
           </Box>
+
           {showAnalysisPanel ? (
-            <Box
-              marginX={4}
-              marginBottom={4}
-              padding={5}
-              borderRadius="2xl"
-              borderWidth="1px"
-              borderColor="border.muted"
-              backgroundColor="bg.subtle"
-            >
-              {isAnalysisLoading ? (
-                <Text color="fg.muted">Analyse du matériau en cours...</Text>
-              ) : analysisError ? (
-                <Text color="red.600">{analysisError}</Text>
-              ) : analysis ? (
-                <Stack gap={4}>
-                  <HStack justify="space-between" align="center" flexWrap="wrap">
-                    <Heading as="h3" size="sm">
-                      Retour sur l'entretien
-                    </Heading>
-                    <Badge colorPalette={qualityPalette} variant="subtle" px={3} py={1} borderRadius="full">
-                      {qualityLabel}
-                    </Badge>
-                  </HStack>
-                  <Stack gap={1}>
-                    <Text fontWeight="600">{analysis.feedback_title}</Text>
-                    <Text color="fg.muted">{analysis.feedback_text}</Text>
-                  </Stack>
-                  <Stack gap={3} direction={{ base: "column", md: "row" }} align="stretch">
-                    <Stack gap={2} flex={1} minWidth={0}>
-                      <Text fontWeight="600">Points forts</Text>
-                      {analysis.strengths.map((item) => (
-                        <Text key={item} fontSize="sm" color="fg.muted">
-                          • {item}
-                        </Text>
-                      ))}
-                    </Stack>
-                    <Stack gap={2} flex={1} minWidth={0}>
-                      <Text fontWeight="600">Limites</Text>
-                      {analysis.limits.map((item) => (
-                        <Text key={item} fontSize="sm" color="fg.muted">
-                          • {item}
-                        </Text>
-                      ))}
-                    </Stack>
-                    <Stack gap={2} flex={1} minWidth={0}>
-                      <Text fontWeight="600">Prochaines étapes</Text>
-                      {analysis.next_steps.map((item) => (
-                        <Text key={item} fontSize="sm" color="fg.muted">
-                          • {item}
-                        </Text>
-                      ))}
-                    </Stack>
-                  </Stack>
+            <Box marginX={4} marginBottom={3}>
+              <Collapsible.Root open={isAnalysisOpen} onOpenChange={({ open }) => setIsAnalysisOpen(open)}>
+                <Stack gap={3}>
+                  <Collapsible.Trigger asChild>
+                    <Button
+                      variant="outline"
+                      justifyContent="space-between"
+                      width="100%"
+                      borderRadius="xl"
+                      paddingX={4}
+                      paddingY={3}
+                      height="auto"
+                      backgroundColor="bg.subtle"
+                    >
+                      <HStack justify="space-between" align="center" width="100%">
+                        <HStack gap={3} flexWrap="wrap">
+                          <Text fontWeight="600">Retour sur l&apos;entretien</Text>
+                          {analysis ? (
+                            <Badge colorPalette={qualityPalette} variant="subtle" px={3} py={1} borderRadius="full">
+                              {qualityLabel}
+                            </Badge>
+                          ) : null}
+                        </HStack>
+                        {isAnalysisOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </HStack>
+                    </Button>
+                  </Collapsible.Trigger>
+
+                  <Collapsible.Content>
+                    <Box
+                      padding={5}
+                      borderRadius="2xl"
+                      borderWidth="1px"
+                      borderColor="border.muted"
+                      backgroundColor="bg.subtle"
+                    >
+                      {isAnalysisLoading ? (
+                        <Text color="fg.muted">Analyse du materiau en cours...</Text>
+                      ) : analysisError ? (
+                        <Text color="red.600">{analysisError}</Text>
+                      ) : analysis ? (
+                        <Stack gap={4}>
+                          <Stack gap={1}>
+                            <Text fontWeight="600">{analysis.feedback_title}</Text>
+                            <Text color="fg.muted">{analysis.feedback_text}</Text>
+                          </Stack>
+                          <Stack gap={3} direction={{ base: "column", md: "row" }} align="stretch">
+                            <Stack gap={2} flex={1} minWidth={0}>
+                              <Text fontWeight="600">Points forts</Text>
+                              {analysis.strengths.map((item) => (
+                                <Text key={item} fontSize="sm" color="fg.muted">
+                                  • {item}
+                                </Text>
+                              ))}
+                            </Stack>
+                            <Stack gap={2} flex={1} minWidth={0}>
+                              <Text fontWeight="600">Limites</Text>
+                              {analysis.limits.map((item) => (
+                                <Text key={item} fontSize="sm" color="fg.muted">
+                                  • {item}
+                                </Text>
+                              ))}
+                            </Stack>
+                            <Stack gap={2} flex={1} minWidth={0}>
+                              <Text fontWeight="600">Prochaines etapes</Text>
+                              {analysis.next_steps.map((item) => (
+                                <Text key={item} fontSize="sm" color="fg.muted">
+                                  • {item}
+                                </Text>
+                              ))}
+                            </Stack>
+                          </Stack>
+                        </Stack>
+                      ) : null}
+                    </Box>
+                  </Collapsible.Content>
                 </Stack>
-              ) : null}
+              </Collapsible.Root>
             </Box>
           ) : null}
+
           {showInput ? (
             <MessageInput
               onSendMessage={onSendMessage}
