@@ -174,8 +174,23 @@ export function InterviewLayout({
             width="100%"
           >
             {messages.length === 0 ? (
-              <VStack align="center" justify="center" height="100%" gap={4}>
-                <Text color="fg.muted" fontSize={emptyStateTextSize}>
+              <VStack align="center" justify="center" height="100%" gap={5}>
+                <Badge
+                  colorPalette="orange"
+                  variant="subtle"
+                  borderRadius="full"
+                  px={4}
+                  py={1.5}
+                >
+                  Entretien semi-directif
+                </Badge>
+                <Text
+                  color="fg.default"
+                  fontSize={emptyStateTextSize}
+                  fontWeight="700"
+                  textAlign="center"
+                  maxWidth="2xl"
+                >
                   {emptyStateText}
                 </Text>
                 {showSuggestions ? (
@@ -188,6 +203,7 @@ export function InterviewLayout({
                         backgroundColor="bg.surface"
                         color="blue.900"
                         borderColor="border.muted"
+                        boxShadow="0 8px 20px rgba(15, 23, 42, 0.05)"
                         onClick={() => handleSuggestedQuestion(question)}
                       >
                         {question}
@@ -227,6 +243,7 @@ export function InterviewLayout({
                       paddingY={3}
                       height="auto"
                       backgroundColor="bg.subtle"
+                      boxShadow="0 8px 20px rgba(15, 23, 42, 0.04)"
                     >
                       <HStack justify="space-between" align="center" width="100%">
                         <HStack gap={3} flexWrap="wrap">
@@ -249,6 +266,7 @@ export function InterviewLayout({
                       borderWidth="1px"
                       borderColor="border.muted"
                       backgroundColor="bg.subtle"
+                      boxShadow="0 12px 28px rgba(15, 23, 42, 0.05)"
                     >
                       {isAnalysisLoading ? (
                         <Text color="fg.muted">Analyse du materiau en cours...</Text>

@@ -134,6 +134,14 @@ Finitions visuelles :
 - accentuation de l'etat courant
 - style plus abouti
 
+### Avancement visuel actuel
+
+- cartes de chats plus lisibles et plus contrastées
+- carte persona/stats plus nette
+- zone conversations mieux separee visuellement
+- etat vide du centre plus presentable
+- bloc `Retour sur l'entretien` plus discret et plus lisible
+
 ## Regle de travail
 
 Une seule sous-etape a la fois.

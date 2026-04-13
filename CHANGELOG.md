@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - **Interview Sidebar:** Add a per-chat actions menu (`...`) with rename, pin, and delete actions, plus a more scrollable history layout with clearer current/pinned/recent sections.
+- **Interview UI Polish:** Refine the interview sidebar cards, persona summary card, empty-state suggestions, and collapsible feedback panel for a cleaner demo-ready experience.
 - **Interviews Route:** Rename `/dashboard` to `/interviews`.
 - **Admin Interviews:** Admins can view all interviews without resuming someone else’s session.
 - **Tests:** Auth flow tests now pass with bad input assertions and coverage reporting.

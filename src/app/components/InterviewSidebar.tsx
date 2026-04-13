@@ -119,11 +119,19 @@ function HistoryCard({
   return (
     <Box
       padding={3}
-      borderRadius="xl"
+      borderRadius="2xl"
       borderWidth="1px"
       borderColor={isCurrent ? "cyan.200" : "rgba(15, 23, 42, 0.08)"}
       backgroundColor={isCurrent ? "cyan.50" : "bg.surface"}
-      boxShadow={isCurrent ? "0 8px 24px rgba(8, 145, 178, 0.08)" : "none"}
+      boxShadow={
+        isCurrent ? "0 12px 28px rgba(8, 145, 178, 0.10)" : "0 6px 18px rgba(15, 23, 42, 0.04)"
+      }
+      transition="transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease"
+      _hover={{
+        transform: "translateY(-1px)",
+        boxShadow: isCurrent ? "0 14px 30px rgba(8, 145, 178, 0.12)" : "0 10px 22px rgba(15, 23, 42, 0.08)",
+        borderColor: isCurrent ? "cyan.300" : "rgba(15, 23, 42, 0.16)",
+      }}
     >
       <HStack justify="space-between" align="start" gap={3}>
         <Link
@@ -165,6 +173,8 @@ function HistoryCard({
               size="2xs"
               variant="ghost"
               borderRadius="full"
+              color={isCurrent ? "cyan.900" : "fg.muted"}
+              _hover={{ backgroundColor: isCurrent ? "cyan.100" : "bg.muted" }}
             >
               <MoreHorizontal size={14} />
             </IconButton>
@@ -583,7 +593,7 @@ export function InterviewSidebar({
         borderBottom={{ base: "1px solid", lg: "none" }}
         borderRight={{ base: "none", lg: "1px solid" }}
         borderRightColor={{ base: "transparent", lg: "rgba(15, 23, 42, 0.08)" }}
-        backgroundColor="bg.subtle"
+        backgroundColor={{ base: "rgba(248, 250, 252, 0.98)", _dark: "bg.subtle" }}
         padding={isCompact ? 4 : isCollapsed ? 2 : 4}
         position={isCompact ? "fixed" : "sticky"}
         top={0}
@@ -707,12 +717,21 @@ export function InterviewSidebar({
 
               <Box
                 padding={4}
-                borderRadius="2xl"
+                borderRadius="3xl"
                 backgroundColor="bg.surface"
                 borderWidth="1px"
                 borderColor="rgba(15, 23, 42, 0.08)"
+                boxShadow="0 14px 36px rgba(15, 23, 42, 0.06)"
               >
                 <Stack gap={3}>
+                  <HStack gap={2} flexWrap="wrap">
+                    <Badge colorPalette="blue" variant="subtle" borderRadius="full" px={3} py={1}>
+                      Persona active
+                    </Badge>
+                    <Badge variant="outline" borderRadius="full" px={3} py={1}>
+                      Entretien en cours
+                    </Badge>
+                  </HStack>
                   <Stack gap={1}>
                     <Heading as="h2" size="lg" color={{ base: "blue.700", _dark: "blue.200" }}>
                       {agentDisplayName ?? "Entretien"}
@@ -767,13 +786,13 @@ export function InterviewSidebar({
                       <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
                         Reponses
                       </Text>
-                      <Text fontWeight="700">{stats.answeredQuestions}</Text>
+                      <Text fontWeight="700" fontSize="lg">{stats.answeredQuestions}</Text>
                     </Box>
                     <Box flex="1">
                       <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
                         Tokens
                       </Text>
-                      <Text fontWeight="700">
+                      <Text fontWeight="700" fontSize="sm">
                         {stats.inputTokens} → {stats.outputTokens}
                       </Text>
                     </Box>
@@ -788,7 +807,15 @@ export function InterviewSidebar({
               ) : null}
             </Stack>
 
-            <Stack gap={3} flex={1} minHeight={0} overflow="hidden">
+            <Stack
+              gap={3}
+              flex={1}
+              minHeight={0}
+              overflow="hidden"
+              paddingTop={1}
+              borderTop="1px solid"
+              borderTopColor="rgba(15, 23, 42, 0.06)"
+            >
               <HStack justify="space-between" align="center">
                 <Heading as="h3" size="sm">
                   Conversations
@@ -811,7 +838,14 @@ export function InterviewSidebar({
                 </Tooltip.Root>
               </HStack>
 
-              <Stack gap={3} flex={1} minHeight={0} overflowY="auto" paddingRight={1}>
+              <Stack
+                gap={4}
+                flex={1}
+                minHeight={0}
+                overflowY="auto"
+                paddingRight={1}
+                paddingBottom={3}
+              >
                 {historyError ? (
                   <Text fontSize="sm" color="red.600">
                     {historyError}
