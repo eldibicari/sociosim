@@ -181,6 +181,9 @@ Finitions visuelles :
   - la reponse du persona se construit petit a petit
   - un curseur discret indique qu'il est encore en train de repondre
   - le backend de streaming reste inchange, seul le ressenti front est ameliore
+- gestion plus robuste des erreurs de stream ajoutee :
+  - les erreurs SSE du chat sont maintenant rendues cote UI
+  - le cas `session not found` affiche un message clair au lieu d'un silence trompeur
 
 ## Regle de travail
 

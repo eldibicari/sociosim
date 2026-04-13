@@ -36,6 +36,7 @@ All notable changes to this project will be documented in this file.
 - **Interview Analysis Complete Page:** Add a dedicated `/interview/[id]/analysis` page and a shared analysis renderer so the chat keeps a short feedback panel while full pedagogical analysis lives on its own page.
 - **Interview Analysis PDF Export:** Add a dedicated pedagogical PDF export for complete interview analysis, separate from the transcript export.
 - **Interview Streaming UX:** Make persona replies render progressively with a live cursor so the SSE chat feels closer to a real AI typing experience.
+- **Interview Chat Resilience:** Surface SSE chat errors in the UI and show a clear recovery message when the ADK session is no longer available.
 - **Interview Sidebar Focus Mode:** Add a conversation-focus toggle that collapses the persona summary card and frees more vertical space for chat history browsing.
 - **Interview Sidebar:** Add a per-chat actions menu (`...`) with rename, pin, and delete actions, plus a more scrollable history layout with clearer current/pinned/recent sections.
 - **Interview UI Polish:** Refine the interview sidebar cards, persona summary card, empty-state suggestions, and collapsible feedback panel for a cleaner demo-ready experience.

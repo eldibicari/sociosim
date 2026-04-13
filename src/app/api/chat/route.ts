@@ -241,10 +241,15 @@ function handleStreamingResponse(
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         console.error("[/api/chat] Stream error:", errorMessage, error);
+        const isMissingSession =
+          errorMessage.includes("404") &&
+          (errorMessage.toLowerCase().includes("session not found") ||
+            errorMessage.toLowerCase().includes("failed to get session"));
 
         try {
           const errorEvent = `data: ${JSON.stringify({
             type: "error",
+            code: isMissingSession ? "session_not_found" : "stream_error",
             error: errorMessage,
           })}\n\n`;
           controller.enqueue(encoder.encode(errorEvent));

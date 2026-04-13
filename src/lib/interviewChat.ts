@@ -28,6 +28,18 @@ function splitTextForTyping(text: string) {
   return pieces && pieces.length > 0 ? pieces : [text];
 }
 
+function getFriendlyInterviewErrorMessage(code?: string, fallback?: string) {
+  if (code === "session_not_found") {
+    return "La session du chat n'existe plus cote agent. Rechargez la page ou relancez un nouvel entretien pour reprendre proprement.";
+  }
+
+  if (fallback) {
+    return `Erreur: ${fallback}`;
+  }
+
+  return "Erreur: le chat a rencontre un probleme inattendu.";
+}
+
 export async function sendInterviewMessage({
   message,
   userId,
@@ -163,6 +175,15 @@ export async function sendInterviewMessage({
                 .join("");
 
               enqueueAssistantChunk(textChunk);
+            } else if (data.type === "error") {
+              if (typingTimer) {
+                clearTimeout(typingTimer);
+                typingTimer = null;
+              }
+              typingQueue.length = 0;
+              assistantText = getFriendlyInterviewErrorMessage(data.code, data.error);
+              assistantMessageStarted = true;
+              upsertAssistantMessage(assistantText, false);
             } else if (data.type === "done") {
               console.log("[Interview SSE] done event:", data);
               // Stream finished, token info available but not displayed yet
