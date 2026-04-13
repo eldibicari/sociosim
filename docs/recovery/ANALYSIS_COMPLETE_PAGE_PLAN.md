@@ -203,6 +203,11 @@ La page dediee permet naturellement un futur export :
 - exemples
 - recommandations
 
+Statut actuel :
+- route PDF d'analyse en place
+- export declenche depuis la page `Analyse complete`
+- transcript et analyse restent bien separes
+
 Il faut donc penser l'analyse complete comme un contenu exportable des le depart.
 
 ## Lien avec Google Docs

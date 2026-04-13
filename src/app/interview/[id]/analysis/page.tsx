@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { ArrowLeft, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { use, useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { useInterviewAnalysis } from "@/hooks/useInterviewAnalysis";
@@ -37,6 +37,7 @@ export default function InterviewAnalysisPage({ params }: { params: Promise<{ id
   const router = useRouter();
   const { id: interviewId } = use(params);
   const { user, isLoading: isAuthLoading } = useAuthUser();
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const { interviewSummary, summaryError } = useInterviewSummary({ interviewId });
   const { analysis, analysisError, isAnalysisLoading } = useInterviewAnalysis({
     interviewId,
@@ -78,6 +79,29 @@ export default function InterviewAnalysisPage({ params }: { params: Promise<{ id
   const dateDisplay = interviewSummary ? formatInterviewDate(interviewSummary.startedAt) : null;
   const qualityLabel = analysis ? getQualityLabel(analysis.material_quality) : null;
   const qualityPalette = analysis ? getQualityPalette(analysis.material_quality) : null;
+
+  const handleExportAnalysisPdf = async () => {
+    if (!interviewId || !interviewSummary || !user) return;
+    setIsExportingPdf(true);
+    try {
+      const response = await fetch(`/api/interviews/analysis/export?interviewId=${interviewId}`);
+      if (!response.ok) {
+        throw new Error("Analysis export failed");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const safeAgentName = interviewSummary.agentName.replace(/\s+/g, "-").toLowerCase();
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      const fileName = `analyse-entretien-${safeAgentName}-${dateStamp}.pdf`;
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = fileName;
+      anchor.click();
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   return (
     <Box minHeight="100vh" backgroundColor="bg.surface">
@@ -133,9 +157,15 @@ export default function InterviewAnalysisPage({ params }: { params: Promise<{ id
               {dateDisplay ? (
                 <Text fontSize="sm" color="fg.muted">{dateDisplay}</Text>
               ) : null}
-              <Button disabled variant="outline" justifyContent="start">
+              <Button
+                variant="outline"
+                justifyContent="start"
+                onClick={handleExportAnalysisPdf}
+                loading={isExportingPdf}
+                disabled={!interviewSummary || !analysis || !user}
+              >
                 <FileText size={16} />
-                Export PDF d&apos;analyse bientot
+                Exporter l&apos;analyse en PDF
               </Button>
             </Stack>
           </HStack>

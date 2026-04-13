@@ -173,6 +173,10 @@ Finitions visuelles :
   - route dediee a la lecture pedagogique complete
   - lien depuis le bloc `Retour sur l'entretien`
   - base propre pour un futur export PDF d'analyse
+- export PDF d'analyse ajoute :
+  - document pedagogique separe du transcript
+  - bouton d'export depuis la page `Analyse complete`
+  - base preparee pour un futur export Google Docs d'analyse
 
 ## Regle de travail
 

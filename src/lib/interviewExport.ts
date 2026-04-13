@@ -18,6 +18,9 @@ export type InterviewExportData = {
   primarySessionId: string;
   messages: InterviewExportMessage[];
   promptMarkdown: string | null;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalTokens: number;
 };
 
 export class InterviewExportError extends Error {
@@ -106,6 +109,15 @@ export async function fetchInterviewExportData(
     .limit(1)
     .maybeSingle();
 
+  const { data: usage } = await supabase
+    .from("interview_usage")
+    .select("total_input_tokens, total_output_tokens")
+    .eq("interview_id", interviewId)
+    .maybeSingle();
+
+  const totalInputTokens = usage?.total_input_tokens ?? 0;
+  const totalOutputTokens = usage?.total_output_tokens ?? 0;
+
   return {
     interviewId,
     agentId: interview.agent_id,
@@ -117,5 +129,8 @@ export async function fetchInterviewExportData(
     primarySessionId,
     messages: messages ?? [],
     promptMarkdown: prompt?.system_prompt ?? null,
+    totalInputTokens,
+    totalOutputTokens,
+    totalTokens: totalInputTokens + totalOutputTokens,
   };
 }
