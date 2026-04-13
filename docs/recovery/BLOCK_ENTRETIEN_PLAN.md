@@ -130,7 +130,7 @@ Cette etape pourra demander du backend et peut-etre une evolution du schema.
   - polish visuel de la sidebar
   - verifier le ressenti du bloc `Retour sur l'entretien`
   - afficher la V2 de l'analyse / feedback avec ses indicateurs cles
-  - preparer la V3 d'analyse pedagogique de type retour de prof
+  - brancher la V3 d'analyse pedagogique de type retour de prof
   - decider plus tard si rename/pin doivent devenir persistants en base
 
 ### Etape 4
@@ -152,6 +152,12 @@ Finitions visuelles :
   - lecture du vrai materiau etudiant cote persona
   - metrics plus claires
   - score simple volume / profondeur / concret / ouverture
+- schema V3 prepare :
+  - conduite d'entretien
+  - lecture du materiau
+  - couverture des themes
+  - exemples concrets
+  - alertes pedagogiques
 
 ## Regle de travail
 

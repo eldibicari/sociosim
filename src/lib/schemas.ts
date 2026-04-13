@@ -105,6 +105,60 @@ export const InterviewAnalysisScoreBreakdownSchema = z.object({
 });
 export type InterviewAnalysisScoreBreakdown = z.infer<typeof InterviewAnalysisScoreBreakdownSchema>;
 
+export const ThemeCoverageStatusSchema = z.enum(["non_aborde", "partiel", "couvert"]);
+export type ThemeCoverageStatus = z.infer<typeof ThemeCoverageStatusSchema>;
+
+export const InterviewAlertSeveritySchema = z.enum(["info", "warning", "blocking"]);
+export type InterviewAlertSeverity = z.infer<typeof InterviewAlertSeveritySchema>;
+
+export const InterviewAnalysisConductSchema = z.object({
+  question_style: z.string(),
+  follow_up_quality: z.string(),
+  noise_detected: z.boolean(),
+  repeated_question_signals: z.number().int().nonnegative(),
+  weak_message_signals: z.number().int().nonnegative(),
+  teacher_comment: z.string(),
+});
+export type InterviewAnalysisConduct = z.infer<typeof InterviewAnalysisConductSchema>;
+
+export const InterviewAnalysisMaterialReadingSchema = z.object({
+  density: z.string(),
+  concrete_level: z.string(),
+  contrasts_detected: z.array(z.string()),
+  teacher_comment: z.string(),
+});
+export type InterviewAnalysisMaterialReading = z.infer<typeof InterviewAnalysisMaterialReadingSchema>;
+
+export const InterviewAnalysisThemeCoverageItemSchema = z.object({
+  theme: z.string(),
+  coverage_status: ThemeCoverageStatusSchema,
+  evidence: z.array(z.string()),
+});
+export type InterviewAnalysisThemeCoverageItem = z.infer<typeof InterviewAnalysisThemeCoverageItemSchema>;
+
+export const InterviewAnalysisThemeCoverageSchema = z.object({
+  themes_covered: z.array(z.string()),
+  themes_partial: z.array(z.string()),
+  themes_missing: z.array(z.string()),
+  items: z.array(InterviewAnalysisThemeCoverageItemSchema),
+});
+export type InterviewAnalysisThemeCoverage = z.infer<typeof InterviewAnalysisThemeCoverageSchema>;
+
+export const InterviewAnalysisExamplesSchema = z.object({
+  good_questions: z.array(z.string()),
+  weak_questions: z.array(z.string()),
+  strong_verbatims: z.array(z.string()),
+  weak_material_examples: z.array(z.string()),
+});
+export type InterviewAnalysisExamples = z.infer<typeof InterviewAnalysisExamplesSchema>;
+
+export const InterviewAnalysisAlertSchema = z.object({
+  severity: InterviewAlertSeveritySchema,
+  type: z.string(),
+  message: z.string(),
+});
+export type InterviewAnalysisAlert = z.infer<typeof InterviewAnalysisAlertSchema>;
+
 export const InterviewAnalysisSchema = z.object({
   material_quality: MaterialQualitySchema,
   summary_line: z.string(),
@@ -117,6 +171,11 @@ export const InterviewAnalysisSchema = z.object({
   metrics: InterviewAnalysisMetricsSchema,
   score_breakdown: InterviewAnalysisScoreBreakdownSchema,
   signals: InterviewAnalysisSignalsSchema,
+  interview_conduct: InterviewAnalysisConductSchema.optional(),
+  material_reading: InterviewAnalysisMaterialReadingSchema.optional(),
+  theme_coverage: InterviewAnalysisThemeCoverageSchema.optional(),
+  examples: InterviewAnalysisExamplesSchema.optional(),
+  alerts: z.array(InterviewAnalysisAlertSchema).optional(),
 });
 export type InterviewAnalysis = z.infer<typeof InterviewAnalysisSchema>;
 
