@@ -23,6 +23,11 @@ type SendInterviewMessageArgs = {
   setInterviewStats: Dispatch<SetStateAction<InterviewStats>>;
 };
 
+function splitTextForTyping(text: string) {
+  const pieces = text.match(/\S+\s*|\n+/g);
+  return pieces && pieces.length > 0 ? pieces : [text];
+}
+
 export async function sendInterviewMessage({
   message,
   userId,
@@ -31,6 +36,70 @@ export async function sendInterviewMessage({
   setIsStreaming,
   setInterviewStats,
 }: SendInterviewMessageArgs) {
+  const assistantMessageId = generateUuid();
+  let assistantText = "";
+  let assistantMessageStarted = false;
+  const typingQueue: string[] = [];
+  let typingTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const upsertAssistantMessage = (text: string, isAssistantStreaming: boolean) => {
+    setMessages((prev) => {
+      const existing = prev.findIndex((current) => current.id === assistantMessageId);
+      if (existing >= 0) {
+        const updated = [...prev];
+        updated[existing] = {
+          ...updated[existing],
+          text,
+          isStreaming: isAssistantStreaming,
+        };
+        return updated;
+      }
+
+      return [
+        ...prev,
+        {
+          id: assistantMessageId,
+          role: "assistant" as const,
+          text,
+          isStreaming: isAssistantStreaming,
+          timestamp: new Date().toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        } as UIMessage,
+      ];
+    });
+  };
+
+  const flushTypingQueue = () => {
+    if (typingQueue.length === 0) {
+      typingTimer = null;
+      return;
+    }
+
+    const batchSize = typingQueue.length > 10 ? 3 : 1;
+    const nextChunk = typingQueue.splice(0, batchSize).join("");
+    assistantText += nextChunk;
+    upsertAssistantMessage(assistantText, true);
+
+    typingTimer = setTimeout(flushTypingQueue, 24);
+  };
+
+  const enqueueAssistantChunk = (textChunk: string) => {
+    if (!textChunk) return;
+    assistantMessageStarted = true;
+    typingQueue.push(...splitTextForTyping(textChunk));
+    if (typingTimer === null) {
+      flushTypingQueue();
+    }
+  };
+
+  const waitForTypingQueueToDrain = async () => {
+    while (typingQueue.length > 0 || typingTimer !== null) {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+  };
+
   // Add user message to display
   const userMessage: UIMessage = {
     id: generateUuid(),
@@ -72,9 +141,6 @@ export async function sendInterviewMessage({
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-    const assistantMessageId = generateUuid();
-    let assistantText = "";
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -92,34 +158,11 @@ export async function sendInterviewMessage({
             const data = JSON.parse(line.slice(6));
 
             if (data.type === "message" && data.event?.content?.parts) {
-              // Append to assistant message
               const textChunk = data.event.content.parts
                 .map((part: { text?: string }) => part.text || "")
                 .join("");
 
-              assistantText += textChunk;
-
-              // Update or create assistant message
-              setMessages((prev) => {
-                const existing = prev.findIndex((m) => m.id === assistantMessageId);
-                if (existing >= 0) {
-                  const updated = [...prev];
-                  updated[existing].text = assistantText;
-                  return updated;
-                }
-                return [
-                  ...prev,
-                  {
-                    id: assistantMessageId,
-                    role: "assistant" as const,
-                    text: assistantText,
-                    timestamp: new Date().toLocaleTimeString("fr-FR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }),
-                  } as UIMessage,
-                ];
-              });
+              enqueueAssistantChunk(textChunk);
             } else if (data.type === "done") {
               console.log("[Interview SSE] done event:", data);
               // Stream finished, token info available but not displayed yet
@@ -166,6 +209,10 @@ export async function sendInterviewMessage({
       } as UIMessage,
     ]);
   } finally {
+    await waitForTypingQueueToDrain();
+    if (assistantMessageStarted) {
+      upsertAssistantMessage(assistantText, false);
+    }
     setIsStreaming(false);
   }
 }

@@ -6,6 +6,7 @@ interface ChatMessageProps {
   userName?: string;
   agentName?: string;
   timestamp?: string;
+  isStreaming?: boolean;
 }
 
 /**
@@ -14,7 +15,14 @@ interface ChatMessageProps {
  * - User messages: right-aligned with icon
  * - Assistant messages: left-aligned with icon
  */
-export function ChatMessage({ role, text, userName, agentName, timestamp }: ChatMessageProps) {
+export function ChatMessage({
+  role,
+  text,
+  userName,
+  agentName,
+  timestamp,
+  isStreaming = false,
+}: ChatMessageProps) {
   const isUser = role === "user";
   const bubbleBg = isUser
     ? { base: "blue.100", _dark: "blue.900" }
@@ -40,26 +48,28 @@ export function ChatMessage({ role, text, userName, agentName, timestamp }: Chat
         </Avatar.Root>
       )}
 
-      <Box
-        maxWidth={isUser ? "50%" : "70%"}
-        width="fit-content"
-        wordBreak="break-word"
-      >
-        <Box
-          padding={3}
-          borderRadius="md"
-          backgroundColor={bubbleBg}
-          color={bubbleColor}
-        >
+      <Box maxWidth={isUser ? "50%" : "70%"} width="fit-content" wordBreak="break-word">
+        <Box padding={3} borderRadius="md" backgroundColor={bubbleBg} color={bubbleColor}>
           <Text fontSize="sm" whiteSpace="pre-wrap">
             {text}
+            {!isUser && isStreaming ? (
+              <Box
+                as="span"
+                display="inline-block"
+                marginLeft={1}
+                animation="pulse 1s infinite"
+                opacity={0.8}
+              >
+                |
+              </Box>
+            ) : null}
           </Text>
         </Box>
-        {timestamp && (
+        {timestamp ? (
           <Text fontSize="xs" color={timestampColor} marginTop={1}>
             {timestamp}
           </Text>
-        )}
+        ) : null}
       </Box>
 
       {isUser && (

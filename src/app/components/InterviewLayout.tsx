@@ -213,6 +213,7 @@ export function InterviewLayout({
                     key={msg.id}
                     role={msg.role}
                     text={msg.text}
+                    isStreaming={msg.isStreaming}
                     userName={userName}
                     agentName={agentNameForMessages}
                     timestamp={msg.timestamp}

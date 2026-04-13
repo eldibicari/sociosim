@@ -177,6 +177,10 @@ Finitions visuelles :
   - document pedagogique separe du transcript
   - bouton d'export depuis la page `Analyse complete`
   - base preparee pour un futur export Google Docs d'analyse
+- rendu progressif des reponses ajoute :
+  - la reponse du persona se construit petit a petit
+  - un curseur discret indique qu'il est encore en train de repondre
+  - le backend de streaming reste inchange, seul le ressenti front est ameliore
 
 ## Regle de travail
 
