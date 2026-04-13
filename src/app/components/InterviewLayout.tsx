@@ -472,6 +472,258 @@ export function InterviewLayout({
                               <Text color="fg.muted">{analysis.coaching_tip}</Text>
                             </Stack>
                           </Box>
+
+                          {analysis.interview_conduct ? (
+                            <Box
+                              padding={4}
+                              borderRadius="xl"
+                              backgroundColor="bg.surface"
+                              borderWidth="1px"
+                              borderColor="border.muted"
+                            >
+                              <Stack gap={3}>
+                                <Text fontWeight="600">Lecture de la conduite d&apos;entretien</Text>
+                                <HStack gap={3} flexWrap="wrap">
+                                  <Badge variant="subtle" colorPalette="blue" borderRadius="full" px={3} py={1}>
+                                    Questions : {analysis.interview_conduct.question_style}
+                                  </Badge>
+                                  <Badge variant="subtle" colorPalette="purple" borderRadius="full" px={3} py={1}>
+                                    Relances : {analysis.interview_conduct.follow_up_quality}
+                                  </Badge>
+                                  {analysis.interview_conduct.noise_detected ? (
+                                    <Badge variant="subtle" colorPalette="red" borderRadius="full" px={3} py={1}>
+                                      Bruit detecte
+                                    </Badge>
+                                  ) : null}
+                                </HStack>
+                                <Text color="fg.muted">{analysis.interview_conduct.teacher_comment}</Text>
+                                <HStack gap={4} flexWrap="wrap">
+                                  <Text fontSize="sm" color="fg.muted">
+                                    Messages faibles : {analysis.interview_conduct.weak_message_signals}
+                                  </Text>
+                                  <Text fontSize="sm" color="fg.muted">
+                                    Repetitions : {analysis.interview_conduct.repeated_question_signals}
+                                  </Text>
+                                </HStack>
+                              </Stack>
+                            </Box>
+                          ) : null}
+
+                          {analysis.material_reading ? (
+                            <Box
+                              padding={4}
+                              borderRadius="xl"
+                              backgroundColor="bg.surface"
+                              borderWidth="1px"
+                              borderColor="border.muted"
+                            >
+                              <Stack gap={3}>
+                                <Text fontWeight="600">Lecture du materiau obtenu</Text>
+                                <HStack gap={3} flexWrap="wrap">
+                                  <Badge variant="subtle" colorPalette="green" borderRadius="full" px={3} py={1}>
+                                    Densite : {analysis.material_reading.density}
+                                  </Badge>
+                                  <Badge variant="subtle" colorPalette="orange" borderRadius="full" px={3} py={1}>
+                                    Concret : {analysis.material_reading.concrete_level}
+                                  </Badge>
+                                </HStack>
+                                <Text color="fg.muted">{analysis.material_reading.teacher_comment}</Text>
+                                {analysis.material_reading.contrasts_detected.length > 0 ? (
+                                  <Stack gap={1}>
+                                    <Text fontSize="sm" fontWeight="600">
+                                      Tensions ou contrastes reperes
+                                    </Text>
+                                    {analysis.material_reading.contrasts_detected.map((item) => (
+                                      <Text key={item} fontSize="sm" color="fg.muted">
+                                        - {item}
+                                      </Text>
+                                    ))}
+                                  </Stack>
+                                ) : null}
+                              </Stack>
+                            </Box>
+                          ) : null}
+
+                          {analysis.alerts && analysis.alerts.length > 0 ? (
+                            <Box
+                              padding={4}
+                              borderRadius="xl"
+                              backgroundColor={{ base: "red.50", _dark: "bg.surface" }}
+                              borderWidth="1px"
+                              borderColor={{ base: "red.100", _dark: "border.muted" }}
+                            >
+                              <Stack gap={2}>
+                                <Text fontWeight="600">Alertes pedagogiques</Text>
+                                {analysis.alerts.map((alert) => (
+                                  <HStack key={`${alert.type}-${alert.message}`} align="start" gap={3}>
+                                    <Badge
+                                      colorPalette={alert.severity === "blocking" ? "red" : alert.severity === "warning" ? "orange" : "blue"}
+                                      variant="subtle"
+                                      borderRadius="full"
+                                      px={3}
+                                      py={1}
+                                      mt={0.5}
+                                    >
+                                      {alert.severity === "blocking"
+                                        ? "Bloquant"
+                                        : alert.severity === "warning"
+                                          ? "Attention"
+                                          : "Info"}
+                                    </Badge>
+                                    <Text color="fg.muted" flex="1">
+                                      {alert.message}
+                                    </Text>
+                                  </HStack>
+                                ))}
+                              </Stack>
+                            </Box>
+                          ) : null}
+
+                          {analysis.theme_coverage ? (
+                            <Box
+                              padding={4}
+                              borderRadius="xl"
+                              backgroundColor="bg.surface"
+                              borderWidth="1px"
+                              borderColor="border.muted"
+                            >
+                              <Stack gap={3}>
+                                <Text fontWeight="600">Couverture des themes</Text>
+                                <Stack gap={3} direction={{ base: "column", md: "row" }} align="stretch">
+                                  <Box flex={1}>
+                                    <Text fontSize="sm" fontWeight="600" mb={2}>
+                                      Couverts
+                                    </Text>
+                                    {analysis.theme_coverage.themes_covered.length > 0 ? (
+                                      analysis.theme_coverage.themes_covered.map((item) => (
+                                        <Text key={item} fontSize="sm" color="fg.muted">
+                                          - {item}
+                                        </Text>
+                                      ))
+                                    ) : (
+                                      <Text fontSize="sm" color="fg.muted">
+                                        Aucun theme encore vraiment couvert.
+                                      </Text>
+                                    )}
+                                  </Box>
+                                  <Box flex={1}>
+                                    <Text fontSize="sm" fontWeight="600" mb={2}>
+                                      Partiels
+                                    </Text>
+                                    {analysis.theme_coverage.themes_partial.length > 0 ? (
+                                      analysis.theme_coverage.themes_partial.map((item) => (
+                                        <Text key={item} fontSize="sm" color="fg.muted">
+                                          - {item}
+                                        </Text>
+                                      ))
+                                    ) : (
+                                      <Text fontSize="sm" color="fg.muted">
+                                        Aucun theme seulement partiel.
+                                      </Text>
+                                    )}
+                                  </Box>
+                                  <Box flex={1}>
+                                    <Text fontSize="sm" fontWeight="600" mb={2}>
+                                      A explorer
+                                    </Text>
+                                    {analysis.theme_coverage.themes_missing.length > 0 ? (
+                                      analysis.theme_coverage.themes_missing.map((item) => (
+                                        <Text key={item} fontSize="sm" color="fg.muted">
+                                          - {item}
+                                        </Text>
+                                      ))
+                                    ) : (
+                                      <Text fontSize="sm" color="fg.muted">
+                                        Rien de majeur ne manque.
+                                      </Text>
+                                    )}
+                                  </Box>
+                                </Stack>
+                              </Stack>
+                            </Box>
+                          ) : null}
+
+                          {analysis.examples ? (
+                            <Box
+                              padding={4}
+                              borderRadius="xl"
+                              backgroundColor="bg.surface"
+                              borderWidth="1px"
+                              borderColor="border.muted"
+                            >
+                              <Stack gap={3}>
+                                <Text fontWeight="600">Exemples tires de l&apos;entretien</Text>
+                                <Stack gap={3} direction={{ base: "column", md: "row" }} align="stretch">
+                                  <Box flex={1} minWidth={0}>
+                                    <Text fontSize="sm" fontWeight="600" mb={2}>
+                                      Questions utiles
+                                    </Text>
+                                    {analysis.examples.good_questions.length > 0 ? (
+                                      analysis.examples.good_questions.map((item) => (
+                                        <Text key={item} fontSize="sm" color="fg.muted">
+                                          - {item}
+                                        </Text>
+                                      ))
+                                    ) : (
+                                      <Text fontSize="sm" color="fg.muted">
+                                        Pas encore d&apos;exemple fort de question ouverte.
+                                      </Text>
+                                    )}
+                                  </Box>
+                                  <Box flex={1} minWidth={0}>
+                                    <Text fontSize="sm" fontWeight="600" mb={2}>
+                                      Questions faibles
+                                    </Text>
+                                    {analysis.examples.weak_questions.length > 0 ? (
+                                      analysis.examples.weak_questions.map((item) => (
+                                        <Text key={item} fontSize="sm" color="fg.muted">
+                                          - {item}
+                                        </Text>
+                                      ))
+                                    ) : (
+                                      <Text fontSize="sm" color="fg.muted">
+                                        Pas de question faible reperee.
+                                      </Text>
+                                    )}
+                                  </Box>
+                                </Stack>
+                                <Stack gap={3} direction={{ base: "column", md: "row" }} align="stretch">
+                                  <Box flex={1} minWidth={0}>
+                                    <Text fontSize="sm" fontWeight="600" mb={2}>
+                                      Verbatims forts
+                                    </Text>
+                                    {analysis.examples.strong_verbatims.length > 0 ? (
+                                      analysis.examples.strong_verbatims.map((item) => (
+                                        <Text key={item} fontSize="sm" color="fg.muted">
+                                          - {item}
+                                        </Text>
+                                      ))
+                                    ) : (
+                                      <Text fontSize="sm" color="fg.muted">
+                                        Pas encore de verbatim vraiment fort.
+                                      </Text>
+                                    )}
+                                  </Box>
+                                  <Box flex={1} minWidth={0}>
+                                    <Text fontSize="sm" fontWeight="600" mb={2}>
+                                      Materiau encore faible
+                                    </Text>
+                                    {analysis.examples.weak_material_examples.length > 0 ? (
+                                      analysis.examples.weak_material_examples.map((item) => (
+                                        <Text key={item} fontSize="sm" color="fg.muted">
+                                          - {item}
+                                        </Text>
+                                      ))
+                                    ) : (
+                                      <Text fontSize="sm" color="fg.muted">
+                                        Rien de faible de ce type n&apos;a ete repere.
+                                      </Text>
+                                    )}
+                                  </Box>
+                                </Stack>
+                              </Stack>
+                            </Box>
+                          ) : null}
                         </Stack>
                       ) : null}
                     </Box>

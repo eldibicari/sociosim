@@ -131,6 +131,7 @@ Cette etape pourra demander du backend et peut-etre une evolution du schema.
   - verifier le ressenti du bloc `Retour sur l'entretien`
   - afficher la V2 de l'analyse / feedback avec ses indicateurs cles
   - brancher la V3 d'analyse pedagogique de type retour de prof
+  - preparer le passage vers une page `Analyse complete`
   - decider plus tard si rename/pin doivent devenir persistants en base
 
 ### Etape 4
@@ -162,6 +163,12 @@ Finitions visuelles :
   - detection du bruit et des messages tests
   - lecture de la qualite des questions et relances
   - premiers exemples concrets tires du chat
+- affichage V3 branche dans `Retour sur l'entretien` :
+  - conduite d'entretien
+  - lecture du materiau
+  - couverture de themes
+  - exemples tires du chat
+  - alertes pedagogiques
 
 ## Regle de travail
 

@@ -32,6 +32,7 @@ All notable changes to this project will be documented in this file.
 - **Interview Analysis V3 Schema:** Prepare optional pedagogical sections for interview conduct, material reading, theme coverage, concrete examples, and alerts without breaking the current V2 response.
 - **Interview Analysis V3 Logic:** Start enriching analysis with interviewer-conduct signals, noise/test-message detection, first theme coverage hints, concrete examples, and pedagogical alerts.
 - **Interview Feedback Panel:** Redesign `Retour sur l'entretien` with clearer badges, key metrics, pedagogical reading blocks, and a concrete coaching tip for the next interview move.
+- **Interview Feedback V3 Sections:** Display pedagogical sections for interview conduct, material reading, theme coverage, chat-derived examples, and alerts inside the interview feedback panel.
 - **Interview Sidebar Focus Mode:** Add a conversation-focus toggle that collapses the persona summary card and frees more vertical space for chat history browsing.
 - **Interview Sidebar:** Add a per-chat actions menu (`...`) with rename, pin, and delete actions, plus a more scrollable history layout with clearer current/pinned/recent sections.
 - **Interview UI Polish:** Refine the interview sidebar cards, persona summary card, empty-state suggestions, and collapsible feedback panel for a cleaner demo-ready experience.
