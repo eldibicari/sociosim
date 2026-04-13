@@ -129,7 +129,8 @@ Cette etape pourra demander du backend et peut-etre une evolution du schema.
   - verifier si le mode focus suffit ou s'il faut un second niveau de zoom sidebar
   - polish visuel de la sidebar
   - verifier le ressenti du bloc `Retour sur l'entretien`
-  - faire evoluer l'analyse / feedback vers une V2 plus claire et plus chiffre
+  - afficher la V2 de l'analyse / feedback avec ses indicateurs cles
+  - preparer la V3 d'analyse pedagogique de type retour de prof
   - decider plus tard si rename/pin doivent devenir persistants en base
 
 ### Etape 4
@@ -147,6 +148,10 @@ Finitions visuelles :
 - zone conversations mieux separee visuellement
 - etat vide du centre plus presentable
 - bloc `Retour sur l'entretien` plus discret et plus lisible
+- backend V2 d'analyse en place :
+  - lecture du vrai materiau etudiant cote persona
+  - metrics plus claires
+  - score simple volume / profondeur / concret / ouverture
 
 ## Regle de travail
 

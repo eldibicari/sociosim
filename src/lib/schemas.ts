@@ -69,25 +69,53 @@ export const InterviewUsageSchema = z.object({
 export type InterviewUsage = z.infer<typeof InterviewUsageSchema>;
 
 export const InterviewAnalysisSignalsSchema = z.object({
-  user_message_count: z.number().int().nonnegative(),
-  assistant_message_count: z.number().int().nonnegative(),
-  total_user_words: z.number().int().nonnegative(),
-  average_user_words: z.number().int().nonnegative(),
-  long_user_answers: z.number().int().nonnegative(),
-  short_user_answers: z.number().int().nonnegative(),
+  interviewer_message_count: z.number().int().nonnegative(),
+  student_message_count: z.number().int().nonnegative(),
+  total_student_words: z.number().int().nonnegative(),
+  average_student_words: z.number().int().nonnegative(),
+  long_student_answers: z.number().int().nonnegative(),
+  short_student_answers: z.number().int().nonnegative(),
   concrete_example_signals: z.number().int().nonnegative(),
+  open_question_signals: z.number().int().nonnegative(),
+  open_question_ratio_percent: z.number().int().nonnegative(),
   total_input_tokens: z.number().int().nonnegative(),
   total_output_tokens: z.number().int().nonnegative(),
+  total_tokens: z.number().int().nonnegative(),
 });
 export type InterviewAnalysisSignals = z.infer<typeof InterviewAnalysisSignalsSchema>;
 
+export const InterviewAnalysisMetricsSchema = z.object({
+  student_messages: z.number().int().nonnegative(),
+  student_words: z.number().int().nonnegative(),
+  avg_words_per_answer: z.number().int().nonnegative(),
+  long_answers: z.number().int().nonnegative(),
+  concrete_examples: z.number().int().nonnegative(),
+  open_question_ratio_percent: z.number().int().nonnegative(),
+  total_tokens: z.number().int().nonnegative(),
+});
+export type InterviewAnalysisMetrics = z.infer<typeof InterviewAnalysisMetricsSchema>;
+
+export const InterviewAnalysisScoreBreakdownSchema = z.object({
+  volume_score: z.number().int().min(0).max(3),
+  depth_score: z.number().int().min(0).max(3),
+  concrete_score: z.number().int().min(0).max(3),
+  openness_score: z.number().int().min(0).max(3),
+  total_score: z.number().int().min(0).max(12),
+  max_score: z.literal(12),
+});
+export type InterviewAnalysisScoreBreakdown = z.infer<typeof InterviewAnalysisScoreBreakdownSchema>;
+
 export const InterviewAnalysisSchema = z.object({
   material_quality: MaterialQualitySchema,
+  summary_line: z.string(),
   feedback_title: z.string(),
   feedback_text: z.string(),
   strengths: z.array(z.string()),
   limits: z.array(z.string()),
   next_steps: z.array(z.string()),
+  coaching_tip: z.string(),
+  metrics: InterviewAnalysisMetricsSchema,
+  score_breakdown: InterviewAnalysisScoreBreakdownSchema,
   signals: InterviewAnalysisSignalsSchema,
 });
 export type InterviewAnalysis = z.infer<typeof InterviewAnalysisSchema>;

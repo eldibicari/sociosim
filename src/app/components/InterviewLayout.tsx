@@ -117,6 +117,12 @@ export function InterviewLayout({
       : analysis?.material_quality === "partiel"
         ? "orange"
         : "red";
+  const scorePalette =
+    analysis?.material_quality === "exploitable"
+      ? "green"
+      : analysis?.material_quality === "partiel"
+        ? "orange"
+        : "blue";
 
   return (
     <Box
@@ -262,6 +268,9 @@ export function InterviewLayout({
                   <Collapsible.Content>
                     <Box
                       padding={5}
+                      maxHeight={{ base: "42vh", lg: "38vh" }}
+                      overflowY="auto"
+                      paddingRight={4}
                       borderRadius="2xl"
                       borderWidth="1px"
                       borderColor="border.muted"
@@ -274,36 +283,195 @@ export function InterviewLayout({
                         <Text color="red.600">{analysisError}</Text>
                       ) : analysis ? (
                         <Stack gap={4}>
-                          <Stack gap={1}>
-                            <Text fontWeight="600">{analysis.feedback_title}</Text>
+                          <Stack gap={2}>
+                            <HStack gap={3} flexWrap="wrap">
+                              <Badge colorPalette={qualityPalette} variant="solid" px={3} py={1} borderRadius="full">
+                                {qualityLabel}
+                              </Badge>
+                              <Badge colorPalette={scorePalette} variant="subtle" px={3} py={1} borderRadius="full">
+                                Score {analysis.score_breakdown.total_score}/{analysis.score_breakdown.max_score}
+                              </Badge>
+                            </HStack>
+                            <Text fontWeight="700" fontSize="lg">
+                              {analysis.feedback_title}
+                            </Text>
+                            <Text color="fg.default" fontWeight="500">
+                              {analysis.summary_line}
+                            </Text>
                             <Text color="fg.muted">{analysis.feedback_text}</Text>
                           </Stack>
-                          <Stack gap={3} direction={{ base: "column", md: "row" }} align="stretch">
-                            <Stack gap={2} flex={1} minWidth={0}>
-                              <Text fontWeight="600">Points forts</Text>
-                              {analysis.strengths.map((item) => (
-                                <Text key={item} fontSize="sm" color="fg.muted">
-                                  • {item}
+
+                          <Stack gap={2}>
+                            <Text fontWeight="600">Indicateurs cles</Text>
+                            <HStack gap={3} flexWrap="wrap" align="stretch">
+                              <Box
+                                flex="1"
+                                minWidth={{ base: "calc(50% - 0.5rem)", md: "150px" }}
+                                padding={3}
+                                borderRadius="xl"
+                                backgroundColor="bg.surface"
+                                borderWidth="1px"
+                                borderColor="border.muted"
+                              >
+                                <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
+                                  Messages etudiant
                                 </Text>
-                              ))}
-                            </Stack>
-                            <Stack gap={2} flex={1} minWidth={0}>
-                              <Text fontWeight="600">Limites</Text>
-                              {analysis.limits.map((item) => (
-                                <Text key={item} fontSize="sm" color="fg.muted">
-                                  • {item}
+                                <Text fontSize="lg" fontWeight="700">
+                                  {analysis.metrics.student_messages}
                                 </Text>
-                              ))}
-                            </Stack>
-                            <Stack gap={2} flex={1} minWidth={0}>
-                              <Text fontWeight="600">Prochaines etapes</Text>
-                              {analysis.next_steps.map((item) => (
-                                <Text key={item} fontSize="sm" color="fg.muted">
-                                  • {item}
+                              </Box>
+                              <Box
+                                flex="1"
+                                minWidth={{ base: "calc(50% - 0.5rem)", md: "150px" }}
+                                padding={3}
+                                borderRadius="xl"
+                                backgroundColor="bg.surface"
+                                borderWidth="1px"
+                                borderColor="border.muted"
+                              >
+                                <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
+                                  Mots produits
                                 </Text>
-                              ))}
-                            </Stack>
+                                <Text fontSize="lg" fontWeight="700">
+                                  {analysis.metrics.student_words}
+                                </Text>
+                              </Box>
+                              <Box
+                                flex="1"
+                                minWidth={{ base: "calc(50% - 0.5rem)", md: "150px" }}
+                                padding={3}
+                                borderRadius="xl"
+                                backgroundColor="bg.surface"
+                                borderWidth="1px"
+                                borderColor="border.muted"
+                              >
+                                <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
+                                  Reponses longues
+                                </Text>
+                                <Text fontSize="lg" fontWeight="700">
+                                  {analysis.metrics.long_answers}
+                                </Text>
+                              </Box>
+                              <Box
+                                flex="1"
+                                minWidth={{ base: "calc(50% - 0.5rem)", md: "150px" }}
+                                padding={3}
+                                borderRadius="xl"
+                                backgroundColor="bg.surface"
+                                borderWidth="1px"
+                                borderColor="border.muted"
+                              >
+                                <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
+                                  Exemples concrets
+                                </Text>
+                                <Text fontSize="lg" fontWeight="700">
+                                  {analysis.metrics.concrete_examples}
+                                </Text>
+                              </Box>
+                              <Box
+                                flex="1"
+                                minWidth={{ base: "calc(50% - 0.5rem)", md: "150px" }}
+                                padding={3}
+                                borderRadius="xl"
+                                backgroundColor="bg.surface"
+                                borderWidth="1px"
+                                borderColor="border.muted"
+                              >
+                                <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
+                                  Questions ouvertes
+                                </Text>
+                                <Text fontSize="lg" fontWeight="700">
+                                  {analysis.metrics.open_question_ratio_percent}%
+                                </Text>
+                              </Box>
+                              <Box
+                                flex="1"
+                                minWidth={{ base: "calc(50% - 0.5rem)", md: "150px" }}
+                                padding={3}
+                                borderRadius="xl"
+                                backgroundColor="bg.surface"
+                                borderWidth="1px"
+                                borderColor="border.muted"
+                              >
+                                <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
+                                  Tokens totaux
+                                </Text>
+                                <Text fontSize="lg" fontWeight="700">
+                                  {analysis.metrics.total_tokens}
+                                </Text>
+                              </Box>
+                            </HStack>
                           </Stack>
+
+                          <Stack gap={3} direction={{ base: "column", md: "row" }} align="stretch">
+                            <Box
+                              flex={1}
+                              minWidth={0}
+                              padding={4}
+                              borderRadius="xl"
+                              backgroundColor="bg.surface"
+                              borderWidth="1px"
+                              borderColor="border.muted"
+                            >
+                              <Stack gap={2}>
+                                <Text fontWeight="600">Ce qui est deja bien</Text>
+                                {analysis.strengths.map((item) => (
+                                  <Text key={item} fontSize="sm" color="fg.muted">
+                                    • {item}
+                                  </Text>
+                                ))}
+                              </Stack>
+                            </Box>
+                            <Box
+                              flex={1}
+                              minWidth={0}
+                              padding={4}
+                              borderRadius="xl"
+                              backgroundColor="bg.surface"
+                              borderWidth="1px"
+                              borderColor="border.muted"
+                            >
+                              <Stack gap={2}>
+                                <Text fontWeight="600">Ce qui manque encore</Text>
+                                {analysis.limits.map((item) => (
+                                  <Text key={item} fontSize="sm" color="fg.muted">
+                                    • {item}
+                                  </Text>
+                                ))}
+                              </Stack>
+                            </Box>
+                            <Box
+                              flex={1}
+                              minWidth={0}
+                              padding={4}
+                              borderRadius="xl"
+                              backgroundColor="bg.surface"
+                              borderWidth="1px"
+                              borderColor="border.muted"
+                            >
+                              <Stack gap={2}>
+                                <Text fontWeight="600">Comment ameliorer</Text>
+                                {analysis.next_steps.map((item) => (
+                                  <Text key={item} fontSize="sm" color="fg.muted">
+                                    • {item}
+                                  </Text>
+                                ))}
+                              </Stack>
+                            </Box>
+                          </Stack>
+
+                          <Box
+                            padding={4}
+                            borderRadius="xl"
+                            backgroundColor={{ base: "blue.50", _dark: "bg.surface" }}
+                            borderWidth="1px"
+                            borderColor={{ base: "blue.100", _dark: "border.muted" }}
+                          >
+                            <Stack gap={2}>
+                              <Text fontWeight="600">Prochain geste utile</Text>
+                              <Text color="fg.muted">{analysis.coaching_tip}</Text>
+                            </Stack>
+                          </Box>
                         </Stack>
                       ) : null}
                     </Box>
