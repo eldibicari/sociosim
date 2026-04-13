@@ -7,6 +7,8 @@ interface MessageInputProps {
   isLoading?: boolean;
   placeholder?: string;
   containerProps?: BoxProps;
+  value?: string;
+  onValueChange?: (value: string) => void;
 }
 
 /**
@@ -21,14 +23,24 @@ export function MessageInput({
   isLoading = false,
   placeholder = "Posez votre question...",
   containerProps = {},
+  value,
+  onValueChange,
 }: MessageInputProps) {
-  const [message, setMessage] = useState("");
+  const [internalMessage, setInternalMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const message = value ?? internalMessage;
+
+  const updateMessage = (nextValue: string) => {
+    if (value === undefined) {
+      setInternalMessage(nextValue);
+    }
+    onValueChange?.(nextValue);
+  };
 
   const handleSendMessage = () => {
     if (message.trim()) {
       onSendMessage(message.trim());
-      setMessage("");
+      updateMessage("");
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
         textareaRef.current.focus();
@@ -46,7 +58,7 @@ export function MessageInput({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const nextValue = e.target.value;
-    setMessage(nextValue);
+    updateMessage(nextValue);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       const nextHeight = Math.min(textareaRef.current.scrollHeight, 128);

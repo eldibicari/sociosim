@@ -10,6 +10,7 @@ import { UIMessage } from "@/types/ui";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { useInterviewSummary } from "@/hooks/useInterviewSummary";
 import { useInterviewExports } from "@/hooks/useInterviewExports";
+import { useInterviewAnalysis } from "@/hooks/useInterviewAnalysis";
 import { sendInterviewMessage } from "@/lib/interviewChat";
 import { formatAgentName, formatInterviewDate } from "@/lib/interviewFormat";
 
@@ -119,6 +120,11 @@ export default function ResumeInterviewPage({ params }: { params: Promise<{ id: 
 
   const showAssistantSkeleton =
     isStreaming && messages.length > 0 && messages[messages.length - 1]?.role !== "assistant";
+  const { analysis, analysisError, isAnalysisLoading } = useInterviewAnalysis({
+    interviewId,
+    enabled: messages.length > 0 && !isStreaming,
+    refreshKey: interviewStats.answeredQuestions,
+  });
 
   const agentDisplayName = interviewSummary
     ? formatAgentName(interviewSummary.agentName)
@@ -287,6 +293,9 @@ export default function ResumeInterviewPage({ params }: { params: Promise<{ id: 
       agentNameForMessages={
         interviewSummary ? formatAgentName(interviewSummary.agentName) : undefined
       }
+      analysis={analysis}
+      analysisError={analysisError}
+      isAnalysisLoading={isAnalysisLoading}
     />
   );
 }

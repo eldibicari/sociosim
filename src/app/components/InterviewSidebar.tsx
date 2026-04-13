@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Badge,
   Box,
   ButtonGroup,
   Heading,
@@ -13,26 +14,63 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import {
+  ArrowRight,
+  BookOpenText,
   ChevronsLeft,
+  CirclePlus,
   FileDown,
   FileText,
   Menu,
   X,
-  ArrowRight,
-  CirclePlus,
-  BookOpenText,
 } from "lucide-react";
 import { marked } from "marked";
-import { useEffect, useState } from "react";
 import { useBreakpointValue } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import NextLink from "next/link";
+import { useEffect, useState } from "react";
 
 type InterviewStats = {
   answeredQuestions: number;
   inputTokens: number;
   outputTokens: number;
 };
+
+type HistoryItem = {
+  id: string;
+  title: string;
+  agentName: string;
+  date: string;
+  qaCount: number;
+  agentId?: string | null;
+};
+
+type HistoryMessage = {
+  role?: string;
+  content?: string;
+  created_at?: string;
+};
+
+function buildHistoryTitle(messages: HistoryMessage[] | undefined, fallbackAgentName: string) {
+  if (!messages || messages.length === 0) {
+    return fallbackAgentName;
+  }
+
+  const firstUserMessage = [...messages]
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at ?? 0).getTime();
+      const dateB = new Date(b.created_at ?? 0).getTime();
+      return dateA - dateB;
+    })
+    .find((message) => message.role === "user" && message.content?.trim());
+
+  const content = firstUserMessage?.content?.trim();
+  if (!content) {
+    return fallbackAgentName;
+  }
+
+  const normalized = content.replace(/\s+/g, " ");
+  return normalized.length > 64 ? `${normalized.slice(0, 61)}...` : normalized;
+}
 
 type InterviewSidebarProps = {
   agentDisplayName?: string;
@@ -72,16 +110,9 @@ export function InterviewSidebar({
   const [introHtml, setIntroHtml] = useState<string>("");
   const [introPreview, setIntroPreview] = useState<string>("");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const [historyItems, setHistoryItems] = useState<
-    Array<{
-      id: string;
-      agentName: string;
-      date: string;
-      qaCount: number;
-      agentId?: string | null;
-    }>
-  >([]);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [historyAgentId, setHistoryAgentId] = useState<string | null>(null);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
@@ -92,6 +123,7 @@ export function InterviewSidebar({
   useEffect(() => {
     if (isCompact) {
       setIsCollapsed(true);
+      setIsExpanded(false);
     } else {
       setIsCollapsed(false);
     }
@@ -120,7 +152,7 @@ export function InterviewSidebar({
                 updated_at?: string;
                 started_at?: string;
                 agents?: { agent_name?: string };
-                messages?: Array<{ role?: string }>;
+                messages?: Array<{ role?: string; content?: string; created_at?: string }>;
               }>;
             }
           | null;
@@ -141,6 +173,7 @@ export function InterviewSidebar({
           .map((item) => {
             const rawName = item.agents?.agent_name ?? "Agent";
             const agentName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+            const title = buildHistoryTitle(item.messages, agentName);
             const dateValue = item.updated_at ?? item.started_at ?? "";
             const dateLabel = dateValue
               ? new Date(dateValue).toLocaleDateString("fr-FR", {
@@ -152,6 +185,7 @@ export function InterviewSidebar({
             const qaCount = (item.messages || []).filter((msg) => msg.role === "assistant").length;
             return {
               id: item.id,
+              title,
               agentName,
               date: dateLabel,
               qaCount,
@@ -160,8 +194,7 @@ export function InterviewSidebar({
           });
         if (isMounted) {
           setHistoryItems(formatted);
-          const agentId = formatted[0]?.agentId ?? null;
-          setHistoryAgentId(agentId);
+          setHistoryAgentId(formatted[0]?.agentId ?? null);
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
@@ -193,15 +226,12 @@ export function InterviewSidebar({
           const lines = markdown.split(/\r?\n/);
           const firstLineIndex = lines.findIndex((line) => line.trim().length > 0);
           const previewLine = firstLineIndex >= 0 ? lines[firstLineIndex].trim() : "";
-          const remainingLines =
-            firstLineIndex >= 0 ? lines.slice(firstLineIndex + 1) : [];
+          const remainingLines = firstLineIndex >= 0 ? lines.slice(firstLineIndex + 1) : [];
           if (remainingLines[0]?.trim() === "") {
             remainingLines.shift();
           }
           const remainingMarkdown = remainingLines.join("\n");
-          const parsed = remainingMarkdown.trim()
-            ? await marked.parse(remainingMarkdown)
-            : "";
+          const parsed = remainingMarkdown.trim() ? await marked.parse(remainingMarkdown) : "";
           setIntroPreview(previewLine);
           setIntroHtml(parsed);
         }
@@ -263,6 +293,16 @@ export function InterviewSidebar({
     }
   };
 
+  const currentHistoryItem = historyItems.find((item) => item.id === currentInterviewId) ?? null;
+  const recentHistoryItems = historyItems.filter((item) => item.id !== currentInterviewId);
+  const sidebarWidth = isCompact
+    ? "min(85vw, 360px)"
+    : isCollapsed
+      ? "56px"
+      : isExpanded
+        ? "380px"
+        : "320px";
+
   return (
     <>
       {isCompact && isCollapsed ? (
@@ -284,9 +324,7 @@ export function InterviewSidebar({
             </IconButton>
           </Tooltip.Trigger>
           <Tooltip.Positioner>
-            <Tooltip.Content px={3} py={2}>
-              Ouvrir le panneau
-            </Tooltip.Content>
+            <Tooltip.Content px={3} py={2}>Ouvrir le panneau</Tooltip.Content>
           </Tooltip.Positioner>
         </Tooltip.Root>
       ) : null}
@@ -299,355 +337,426 @@ export function InterviewSidebar({
           onClick={() => setIsCollapsed(true)}
         />
       ) : null}
+
       <Box
-        width={
-          isCompact
-            ? "min(85vw, 320px)"
-            : isCollapsed
-              ? "56px"
-              : "280px"
+        width={sidebarWidth}
+        minWidth={sidebarWidth}
+        borderBottom={{ base: "1px solid", lg: "none" }}
+        borderRight={{ base: "none", lg: "1px solid" }}
+        borderRightColor={{ base: "transparent", lg: "rgba(15, 23, 42, 0.08)" }}
+        backgroundColor="bg.subtle"
+        padding={isCompact ? 4 : isCollapsed ? 2 : 4}
+        position={isCompact ? "fixed" : "sticky"}
+        top={0}
+        left={isCompact ? 0 : "auto"}
+        height={isCompact ? "100dvh" : "100%"}
+        alignSelf={{ base: "stretch", lg: "flex-start" }}
+        zIndex={25}
+        overflow="hidden"
+        transition={isCompact ? "transform 0.2s ease" : "width 0.2s ease, padding 0.2s ease"}
+        transform={
+          isCompact ? (isCollapsed ? "translateX(-100%)" : "translateX(0)") : "translateX(0)"
         }
-        minWidth={
-          isCompact
-            ? "min(85vw, 320px)"
-            : isCollapsed
-              ? "56px"
-              : "280px"
-        }
-      borderBottom={{ base: "1px solid", lg: "none" }}
-      borderRight={{ base: "none", lg: "1px solid" }}
-      borderRightColor={{ base: "transparent", lg: "rgba(15, 23, 42, 0.08)" }}
-      backgroundColor="bg.subtle"
-      padding={isCompact ? 4 : isCollapsed ? 2 : 4}
-      position={isCompact ? "fixed" : "sticky"}
-      top={0}
-      left={isCompact ? 0 : "auto"}
-      height={isCompact ? "100dvh" : "100%"}
-      alignSelf={{ base: "stretch", lg: "flex-start" }}
-      zIndex={25}
-      overflow="hidden"
-      transition={isCompact ? "transform 0.2s ease" : "width 0.2s ease, padding 0.2s ease"}
-      transform={
-        isCompact
-          ? isCollapsed
-            ? "translateX(-100%)"
-            : "translateX(0)"
-          : "translateX(0)"
-      }
-    >
-      {!isCompact && isCollapsed ? (
-        <Tooltip.Root openDelay={150}>
-          <Tooltip.Trigger asChild>
-            <IconButton
-              aria-label="Ouvrir le panneau"
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsCollapsed(false)}
-              position="absolute"
-              top={2}
-              right={2}
-              borderRadius="full"
-            >
-              <Menu size={16} />
-            </IconButton>
-          </Tooltip.Trigger>
-          <Tooltip.Positioner>
-            <Tooltip.Content px={3} py={2}>
-              Ouvrir le panneau
-            </Tooltip.Content>
-          </Tooltip.Positioner>
-        </Tooltip.Root>
-      ) : null}
-      {error ? (
-        <Heading as="h1" size="lg" color="red.600">
-          Erreur: {error}
-        </Heading>
-      ) : (
-        <Stack
-          gap={4}
-          opacity={isCollapsed ? 0 : 1}
-          pointerEvents={isCollapsed ? "none" : "auto"}
-          transition="opacity 0.2s ease"
-        >
-          <Stack gap={2}>
-            <HStack justify="space-between" align="center">
-              <HStack gap={1}>
-                <Tooltip.Root openDelay={150}>
-                  <Tooltip.Trigger asChild>
-                    <IconButton
-                      aria-label="Commencer un nouvel entretien"
-                      size="sm"
-                      variant="outline"
-                      rounded="full"
-                      colorPalette="blue"
-                      backgroundColor="blue.400"
-                      color="white"
-                      borderColor="blue.400"
-                      _hover={{ backgroundColor: "blue.500" }}
-                      onClick={handleNewInterview}
-                      loading={isCreatingSession}
-                      disabled={isCreatingSession}
-                    >
-                      {isCreatingSession ? "Création..." : <CirclePlus size={18} />}
-                    </IconButton>
-                  </Tooltip.Trigger>
-                  <Tooltip.Positioner>
-                    <Tooltip.Content px={3} py={2}>
-                      Commencer un nouvel entretien
-                    </Tooltip.Content>
-                  </Tooltip.Positioner>
-                </Tooltip.Root>
-                <Tooltip.Root openDelay={150}>
-                  <Tooltip.Trigger asChild>
-                    <IconButton
-                      aria-label="Aide pour l'entretien"
-                      size="sm"
-                      variant="outline"
-                      rounded="full"
-                      onClick={() => setIsHelpOpen(true)}
-                    >
-                      <BookOpenText size={18} />
-                    </IconButton>
-                  </Tooltip.Trigger>
-                  <Tooltip.Positioner>
-                    <Tooltip.Content px={3} py={2}>
-                      Aide pour l&apos;entretien
-                    </Tooltip.Content>
-                  </Tooltip.Positioner>
-                </Tooltip.Root>
-                <ButtonGroup size="sm" variant="outline" marginLeft={2}>
+      >
+        {!isCompact && isCollapsed ? (
+          <Tooltip.Root openDelay={150}>
+            <Tooltip.Trigger asChild>
+              <IconButton
+                aria-label="Ouvrir le panneau"
+                size="sm"
+                variant="ghost"
+                onClick={() => setIsCollapsed(false)}
+                position="absolute"
+                top={2}
+                right={2}
+                borderRadius="full"
+              >
+                <Menu size={16} />
+              </IconButton>
+            </Tooltip.Trigger>
+            <Tooltip.Positioner>
+              <Tooltip.Content px={3} py={2}>Ouvrir le panneau</Tooltip.Content>
+            </Tooltip.Positioner>
+          </Tooltip.Root>
+        ) : null}
+
+        {error ? (
+          <Heading as="h1" size="lg" color="red.600">
+            Erreur: {error}
+          </Heading>
+        ) : (
+          <Stack
+            gap={4}
+            opacity={isCollapsed ? 0 : 1}
+            pointerEvents={isCollapsed ? "none" : "auto"}
+            transition="opacity 0.2s ease"
+          >
+            <Stack gap={2}>
+              <HStack justify="space-between" align="center">
+                <HStack gap={1}>
                   <Tooltip.Root openDelay={150}>
                     <Tooltip.Trigger asChild>
                       <IconButton
-                        aria-label="Exporter en PDF"
+                        aria-label="Commencer un nouvel entretien"
+                        size="sm"
+                        variant="outline"
                         rounded="full"
-                        onClick={onExportPdf}
-                        loading={isExportingPdf}
-                        disabled={disableExport}
+                        colorPalette="blue"
+                        backgroundColor="blue.400"
+                        color="white"
+                        borderColor="blue.400"
+                        _hover={{ backgroundColor: "blue.500" }}
+                        onClick={handleNewInterview}
+                        loading={isCreatingSession}
+                        disabled={isCreatingSession}
                       >
-                        <FileDown size={18} />
+                        {isCreatingSession ? "Création..." : <CirclePlus size={18} />}
                       </IconButton>
                     </Tooltip.Trigger>
                     <Tooltip.Positioner>
-                      <Tooltip.Content px={3} py={2}>
-                        Exporter en PDF
-                      </Tooltip.Content>
+                      <Tooltip.Content px={3} py={2}>Commencer un nouvel entretien</Tooltip.Content>
                     </Tooltip.Positioner>
                   </Tooltip.Root>
-                  {onExportGoogleDocs ? (
-                    <Tooltip.Root openDelay={150}>
+                  <Tooltip.Root openDelay={150}>
                     <Tooltip.Trigger asChild>
                       <IconButton
-                        aria-label="Exporter vers Google docs"
+                        aria-label="Aide pour l'entretien"
+                        size="sm"
+                        variant="outline"
                         rounded="full"
-                        onClick={onExportGoogleDocs}
-                        loading={isExportingGoogleDocs}
-                        disabled={disableExport}
+                        onClick={() => setIsHelpOpen(true)}
                       >
-                        <FileText size={18} />
+                        <BookOpenText size={18} />
                       </IconButton>
+                    </Tooltip.Trigger>
+                    <Tooltip.Positioner>
+                      <Tooltip.Content px={3} py={2}>Aide pour l'entretien</Tooltip.Content>
+                    </Tooltip.Positioner>
+                  </Tooltip.Root>
+                  <ButtonGroup size="sm" variant="outline" marginLeft={2}>
+                    <Tooltip.Root openDelay={150}>
+                      <Tooltip.Trigger asChild>
+                        <IconButton
+                          aria-label="Exporter en PDF"
+                          rounded="full"
+                          onClick={onExportPdf}
+                          loading={isExportingPdf}
+                          disabled={disableExport}
+                        >
+                          <FileDown size={18} />
+                        </IconButton>
+                      </Tooltip.Trigger>
+                      <Tooltip.Positioner>
+                        <Tooltip.Content px={3} py={2}>Exporter en PDF</Tooltip.Content>
+                      </Tooltip.Positioner>
+                    </Tooltip.Root>
+                    {onExportGoogleDocs ? (
+                      <Tooltip.Root openDelay={150}>
+                        <Tooltip.Trigger asChild>
+                          <IconButton
+                            aria-label="Exporter vers Google docs"
+                            rounded="full"
+                            onClick={onExportGoogleDocs}
+                            loading={isExportingGoogleDocs}
+                            disabled={disableExport}
+                          >
+                            <FileText size={18} />
+                          </IconButton>
+                        </Tooltip.Trigger>
+                        <Tooltip.Positioner>
+                          <Tooltip.Content px={3} py={2}>Exporter vers Google docs</Tooltip.Content>
+                        </Tooltip.Positioner>
+                      </Tooltip.Root>
+                    ) : null}
+                  </ButtonGroup>
+                </HStack>
+
+                <HStack gap={1}>
+                  {!isCompact ? (
+                    <Tooltip.Root openDelay={150}>
+                      <Tooltip.Trigger asChild>
+                        <IconButton
+                          aria-label={isExpanded ? "Réduire la largeur" : "Agrandir le panneau"}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setIsExpanded((prev) => !prev)}
+                          borderRadius="full"
+                        >
+                          <ArrowRight
+                            size={16}
+                            style={{
+                              transform: isExpanded ? "rotate(180deg)" : "none",
+                              transition: "transform 0.2s ease",
+                            }}
+                          />
+                        </IconButton>
                       </Tooltip.Trigger>
                       <Tooltip.Positioner>
                         <Tooltip.Content px={3} py={2}>
-                          Exporter vers Google docs
+                          {isExpanded ? "Réduire la largeur" : "Agrandir le panneau"}
                         </Tooltip.Content>
                       </Tooltip.Positioner>
                     </Tooltip.Root>
                   ) : null}
-                </ButtonGroup>
+                  <Tooltip.Root openDelay={150}>
+                    <Tooltip.Trigger asChild>
+                      <IconButton
+                        aria-label="Réduire le panneau"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setIsCollapsed(true)}
+                        borderRadius="full"
+                      >
+                        <ChevronsLeft size={16} />
+                      </IconButton>
+                    </Tooltip.Trigger>
+                    <Tooltip.Positioner>
+                      <Tooltip.Content px={3} py={2}>Réduire le panneau</Tooltip.Content>
+                    </Tooltip.Positioner>
+                  </Tooltip.Root>
+                </HStack>
               </HStack>
-              <Tooltip.Root openDelay={150}>
-                <Tooltip.Trigger asChild>
-                  <IconButton
-                    aria-label="Réduire le panneau"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setIsCollapsed(true)}
-                    borderRadius="full"
-                  >
-                    <ChevronsLeft size={16} />
-                  </IconButton>
-                </Tooltip.Trigger>
-                <Tooltip.Positioner>
-                  <Tooltip.Content px={3} py={2}>
-                    Réduire le panneau
-                  </Tooltip.Content>
-                </Tooltip.Positioner>
-              </Tooltip.Root>
-            </HStack>
-            <Heading as="h2" size="lg" color={{ base: "blue.700", _dark: "blue.200" }}>
-              {agentDisplayName ?? "Chargement de l'entretien..."}
-            </Heading>
-            {agentDescription ? (
-              <Text fontSize="xs" color="fg.muted" lineHeight="1.4">
-                {agentDescription}
-              </Text>
-            ) : null}
-            {agentDisplayName && userName && dateDisplay ? (
-              <>
-                <Text fontSize="sm">par {userName}</Text>
-                <Text fontSize="sm">le {dateDisplay}</Text>
-              </>
-            ) : (
-              <>
-                <Text fontSize="sm">par ...</Text>
-                <Text fontSize="sm">le ...</Text>
-              </>
-            )}
-            {newInterviewError ? (
-              <Text fontSize="sm" color="red.600">
-                {newInterviewError}
-              </Text>
-            ) : null}
-          </Stack>
-          <Stack gap={1}>
-            <Text fontSize="sm">
-              {stats.answeredQuestions} {stats.answeredQuestions === 1 ? "réponse" : "réponses"}
-            </Text>
-            <Text fontSize="sm">
-              Tokens : {stats.inputTokens} → {stats.outputTokens}
-            </Text>
-          </Stack>
-          <Box
-            height="1px"
-            backgroundColor={{ base: "rgba(226, 232, 240, 0.6)", _dark: "rgba(31, 41, 55, 0.6)" }}
-          />
-          <Stack gap={2}>
-            <HStack justify="space-between" align="center">
-              <Heading as="h3" size="sm">
-                Historique
+
+              <Heading as="h2" size="lg" color={{ base: "blue.700", _dark: "blue.200" }}>
+                {agentDisplayName ?? "Chargement de l'entretien..."}
               </Heading>
-              <Tooltip.Root openDelay={150}>
-                <Tooltip.Trigger asChild>
-                  <IconButton
-                    aria-label="Voir plus"
-                    size="xs"
-                    variant="ghost"
-                    onClick={() => router.push(`/interviews${historyAgentId ? `?agent=${historyAgentId}` : ""}`)}
-                    borderRadius="full"
-                  >
-                    <ArrowRight size={14} />
-                  </IconButton>
-                </Tooltip.Trigger>
-                <Tooltip.Positioner>
-                  <Tooltip.Content px={3} py={2}>
-                    Voir plus
-                  </Tooltip.Content>
-                </Tooltip.Positioner>
-              </Tooltip.Root>
-            </HStack>
-            {historyError ? (
-              <Text fontSize="sm" color="red.600">
-                {historyError}
+              {agentDescription ? (
+                <Text fontSize="xs" color="fg.muted" lineHeight="1.4">
+                  {agentDescription}
+                </Text>
+              ) : null}
+              {agentDisplayName && userName && dateDisplay ? (
+                <>
+                  <Text fontSize="sm">par {userName}</Text>
+                  <Text fontSize="sm">le {dateDisplay}</Text>
+                </>
+              ) : (
+                <>
+                  <Text fontSize="sm">par ...</Text>
+                  <Text fontSize="sm">le ...</Text>
+                </>
+              )}
+              {newInterviewError ? (
+                <Text fontSize="sm" color="red.600">
+                  {newInterviewError}
+                </Text>
+              ) : null}
+            </Stack>
+
+            <Stack gap={1}>
+              <Text fontSize="sm">
+                {stats.answeredQuestions} {stats.answeredQuestions === 1 ? "réponse" : "réponses"}
               </Text>
-            ) : historyItems.length === 0 ? (
-              <Text fontSize="sm" color="fg.muted">
-                Aucun entretien précédent.
+              <Text fontSize="sm">
+                Tokens : {stats.inputTokens} → {stats.outputTokens}
               </Text>
-            ) : (
-              <Stack gap={1}>
-                {historyItems.map((item) => {
-                  const isCurrent = item.id === currentInterviewId;
-                  return (
-                    <Link
-                      key={item.id}
-                      as={NextLink}
-                      href={`/interview/${item.id}`}
-                      display="block"
-                      paddingInline={2}
-                      paddingY={1}
-                      borderRadius="md"
-                      backgroundColor={isCurrent ? "cyan.50" : "transparent"}
-                      paddingInlineStart={2}
-                      fontWeight={isCurrent ? "medium" : "normal"}
-                      color={isCurrent ? "cyan.900" : "fg.muted"}
-                      _hover={{
-                        textDecoration: "none",
-                        backgroundColor: isCurrent ? "cyan.100" : "bg.muted",
-                      }}
-                    >
-                      <Text fontSize="sm">
-                        {item.agentName} - {item.date} · {item.qaCount}q.
-                      </Text>
-                    </Link>
-                  );
-                })}
-              </Stack>
-            )}
-          </Stack>
-        </Stack>
-      )}
-    </Box>
-    <>
-      <Box
-        position="fixed"
-        inset={0}
-        backgroundColor="rgba(15, 23, 42, 0.2)"
-        zIndex={40}
-        onClick={() => setIsHelpOpen(false)}
-        opacity={isHelpOpen ? 1 : 0}
-        pointerEvents={isHelpOpen ? "auto" : "none"}
-        transition="opacity 0.2s ease"
-      />
-      <Box
-        position="fixed"
-        top={0}
-        right={0}
-        height="100dvh"
-        width={{ base: "100%", sm: "min(92vw, 520px)" }}
-        backgroundColor="bg.surface"
-        borderLeft="1px solid"
-        borderLeftColor="border.muted"
-        zIndex={45}
-        padding={6}
-        overflowY="auto"
-        transform={isHelpOpen ? "translateX(0)" : "translateX(100%)"}
-        transition="transform 0.25s ease"
-        pointerEvents={isHelpOpen ? "auto" : "none"}
-      >
-        <HStack justify="space-between" align="center" marginBottom={4}>
-          <Heading as="h3" size="md">
-            Guide d&apos;entretien
-          </Heading>
-          <Tooltip.Root openDelay={150}>
-            <Tooltip.Trigger asChild>
-              <IconButton
-                aria-label="Fermer"
-                size="sm"
-                variant="ghost"
-                onClick={() => setIsHelpOpen(false)}
-                borderRadius="full"
-              >
-                <X size={16} />
-              </IconButton>
-            </Tooltip.Trigger>
-            <Tooltip.Positioner>
-              <Tooltip.Content px={3} py={2}>
-                Fermer
-              </Tooltip.Content>
-            </Tooltip.Positioner>
-          </Tooltip.Root>
-        </HStack>
-        <VStack align="stretch" gap={3}>
-          {introPreview ? <Text fontWeight="600">{introPreview}</Text> : null}
-          {introHtml ? (
+            </Stack>
+
             <Box
-              css={{
-                "& h2": { marginTop: "1.5rem", fontWeight: "600", color: "fg.default" },
-                "& h3": { marginTop: "1rem", fontWeight: "600", color: "fg.default" },
-                "& ul": { paddingLeft: "1.25rem", marginTop: "0.75rem" },
-                "& li": { marginBottom: "0.5rem" },
-                "& p": { marginBottom: "0.75rem" },
-                "& strong": { color: "fg.default" },
-              }}
-              dangerouslySetInnerHTML={{ __html: introHtml }}
+              height="1px"
+              backgroundColor={{ base: "rgba(226, 232, 240, 0.6)", _dark: "rgba(31, 41, 55, 0.6)" }}
             />
-          ) : (
-            <Text color="fg.muted">Chargement du guide d&apos;entretien...</Text>
-          )}
-        </VStack>
+
+            <Stack gap={2}>
+              <HStack justify="space-between" align="center">
+                <Heading as="h3" size="sm">
+                  Historique
+                </Heading>
+                <Tooltip.Root openDelay={150}>
+                  <Tooltip.Trigger asChild>
+                    <IconButton
+                      aria-label="Voir plus"
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => router.push(`/interviews${historyAgentId ? `?agent=${historyAgentId}` : ""}`)}
+                      borderRadius="full"
+                    >
+                      <ArrowRight size={14} />
+                    </IconButton>
+                  </Tooltip.Trigger>
+                  <Tooltip.Positioner>
+                    <Tooltip.Content px={3} py={2}>Voir plus</Tooltip.Content>
+                  </Tooltip.Positioner>
+                </Tooltip.Root>
+              </HStack>
+
+              {historyError ? (
+                <Text fontSize="sm" color="red.600">
+                  {historyError}
+                </Text>
+              ) : historyItems.length === 0 ? (
+                <Text fontSize="sm" color="fg.muted">
+                  Aucun entretien précédent.
+                </Text>
+              ) : (
+                <Stack gap={3}>
+                  {currentHistoryItem ? (
+                    <Stack gap={2}>
+                      <Text
+                        fontSize="xs"
+                        fontWeight="700"
+                        color="fg.muted"
+                        textTransform="uppercase"
+                        letterSpacing="0.08em"
+                      >
+                        Chat en cours
+                      </Text>
+                      <Link
+                        as={NextLink}
+                        href={`/interview/${currentHistoryItem.id}`}
+                        display="block"
+                        padding={3}
+                        borderRadius="xl"
+                        backgroundColor="cyan.50"
+                        borderWidth="1px"
+                        borderColor="cyan.200"
+                        color="cyan.900"
+                        _hover={{
+                          textDecoration: "none",
+                          backgroundColor: "cyan.100",
+                        }}
+                      >
+                        <Stack gap={2}>
+                          <HStack justify="space-between" align="start">
+                          <Text fontSize="sm" fontWeight="700" lineClamp={2}>
+                              {currentHistoryItem.title}
+                            </Text>
+                            <Badge colorPalette="cyan" variant="subtle" borderRadius="full">
+                              Actuel
+                            </Badge>
+                          </HStack>
+                          <Text fontSize="xs" color="cyan.800">{currentHistoryItem.agentName}</Text>
+                          <Text fontSize="xs" color="cyan.800">
+                            {currentHistoryItem.date} · {currentHistoryItem.qaCount} réponses
+                          </Text>
+                        </Stack>
+                      </Link>
+                    </Stack>
+                  ) : null}
+
+                  <Stack gap={2}>
+                    <Text
+                      fontSize="xs"
+                      fontWeight="700"
+                      color="fg.muted"
+                      textTransform="uppercase"
+                      letterSpacing="0.08em"
+                    >
+                      Récents
+                    </Text>
+                    {recentHistoryItems.length === 0 ? (
+                      <Text fontSize="sm" color="fg.muted">
+                        Aucun autre chat récent.
+                      </Text>
+                    ) : (
+                      <Stack gap={2}>
+                        {recentHistoryItems.map((item) => (
+                          <Link
+                            key={item.id}
+                            as={NextLink}
+                            href={`/interview/${item.id}`}
+                            display="block"
+                            padding={3}
+                            borderRadius="xl"
+                            backgroundColor="transparent"
+                            borderWidth="1px"
+                            borderColor="rgba(15, 23, 42, 0.08)"
+                            _hover={{
+                              textDecoration: "none",
+                              backgroundColor: "bg.muted",
+                            }}
+                          >
+                            <Stack gap={1}>
+                              <Text fontSize="sm" fontWeight="600" color="fg.default" lineClamp={2}>
+                                {item.title}
+                              </Text>
+                              <Text fontSize="xs" color="fg.muted">
+                                {item.agentName}
+                              </Text>
+                              <Text fontSize="xs" color="fg.muted">
+                                {item.date} · {item.qaCount} réponses
+                              </Text>
+                            </Stack>
+                          </Link>
+                        ))}
+                      </Stack>
+                    )}
+                  </Stack>
+                </Stack>
+              )}
+            </Stack>
+          </Stack>
+        )}
       </Box>
-    </>
+
+      <>
+        <Box
+          position="fixed"
+          inset={0}
+          backgroundColor="rgba(15, 23, 42, 0.2)"
+          zIndex={40}
+          onClick={() => setIsHelpOpen(false)}
+          opacity={isHelpOpen ? 1 : 0}
+          pointerEvents={isHelpOpen ? "auto" : "none"}
+          transition="opacity 0.2s ease"
+        />
+        <Box
+          position="fixed"
+          top={0}
+          right={0}
+          height="100dvh"
+          width={{ base: "100%", sm: "min(92vw, 520px)" }}
+          backgroundColor="bg.surface"
+          borderLeft="1px solid"
+          borderLeftColor="border.muted"
+          zIndex={45}
+          padding={6}
+          overflowY="auto"
+          transform={isHelpOpen ? "translateX(0)" : "translateX(100%)"}
+          transition="transform 0.25s ease"
+          pointerEvents={isHelpOpen ? "auto" : "none"}
+        >
+          <HStack justify="space-between" align="center" marginBottom={4}>
+            <Heading as="h3" size="md">
+              Guide d&apos;entretien
+            </Heading>
+            <Tooltip.Root openDelay={150}>
+              <Tooltip.Trigger asChild>
+                <IconButton
+                  aria-label="Fermer"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsHelpOpen(false)}
+                  borderRadius="full"
+                >
+                  <X size={16} />
+                </IconButton>
+              </Tooltip.Trigger>
+              <Tooltip.Positioner>
+                <Tooltip.Content px={3} py={2}>Fermer</Tooltip.Content>
+              </Tooltip.Positioner>
+            </Tooltip.Root>
+          </HStack>
+          <VStack align="stretch" gap={3}>
+            {introPreview ? <Text fontWeight="600">{introPreview}</Text> : null}
+            {introHtml ? (
+              <Box
+                css={{
+                  "& h2": { marginTop: "1.5rem", fontWeight: "600", color: "fg.default" },
+                  "& h3": { marginTop: "1rem", fontWeight: "600", color: "fg.default" },
+                  "& ul": { paddingLeft: "1.25rem", marginTop: "0.75rem" },
+                  "& li": { marginBottom: "0.5rem" },
+                  "& p": { marginBottom: "0.75rem" },
+                  "& strong": { color: "fg.default" },
+                }}
+                dangerouslySetInnerHTML={{ __html: introHtml }}
+              />
+            ) : (
+              <Text color="fg.muted">Chargement du guide d&apos;entretien...</Text>
+            )}
+          </VStack>
+        </Box>
+      </>
     </>
   );
 }
