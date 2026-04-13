@@ -121,9 +121,15 @@ Cette etape pourra demander du backend et peut-etre une evolution du schema.
   - renommage local du titre
   - epinglage local
   - scroll complet de l'historique
+- mode `focus conversations` ajoute :
+  - replie le bloc infos persona/stats
+  - libere plus de hauteur pour l'historique
+  - reste simple, sans drag-resize fragile
 - reste a consolider dans le bloc entretien :
+  - verifier si le mode focus suffit ou s'il faut un second niveau de zoom sidebar
   - polish visuel de la sidebar
   - verifier le ressenti du bloc `Retour sur l'entretien`
+  - faire evoluer l'analyse / feedback vers une V2 plus claire et plus chiffre
   - decider plus tard si rename/pin doivent devenir persistants en base
 
 ### Etape 4

@@ -251,6 +251,7 @@ export function InterviewSidebar({
   const [introPreview, setIntroPreview] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isConversationFocus, setIsConversationFocus] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [historyAgentId, setHistoryAgentId] = useState<string | null>(null);
@@ -715,6 +716,26 @@ export function InterviewSidebar({
                 </HStack>
               </HStack>
 
+              {isConversationFocus ? (
+                <HStack
+                  justify="space-between"
+                  align="center"
+                  paddingX={3}
+                  paddingY={2}
+                  borderRadius="2xl"
+                  backgroundColor="rgba(59, 130, 246, 0.08)"
+                  borderWidth="1px"
+                  borderColor="rgba(59, 130, 246, 0.16)"
+                >
+                  <Text fontSize="sm" fontWeight="600" color={{ base: "blue.700", _dark: "blue.200" }}>
+                    Mode focus conversations actif
+                  </Text>
+                  <Button size="xs" variant="ghost" borderRadius="full" onClick={() => setIsConversationFocus(false)}>
+                    Voir infos
+                  </Button>
+                </HStack>
+              ) : (
+                <>
               <Box
                 padding={4}
                 borderRadius="3xl"
@@ -805,6 +826,8 @@ export function InterviewSidebar({
                   {newInterviewError}
                 </Text>
               ) : null}
+                </>
+              )}
             </Stack>
 
             <Stack
@@ -820,22 +843,34 @@ export function InterviewSidebar({
                 <Heading as="h3" size="sm">
                   Conversations
                 </Heading>
-                <Tooltip.Root openDelay={150}>
-                  <Tooltip.Trigger asChild>
-                    <IconButton
-                      aria-label="Voir tous les entretiens"
-                      size="xs"
+                <HStack gap={1}>
+                  {!isConversationFocus ? (
+                    <Button
+                      size="2xs"
                       variant="ghost"
                       borderRadius="full"
-                      onClick={() => router.push(`/interviews${historyAgentId ? `?agent=${historyAgentId}` : ""}`)}
+                      onClick={() => setIsConversationFocus(true)}
                     >
-                      <ArrowRight size={14} />
-                    </IconButton>
-                  </Tooltip.Trigger>
-                  <Tooltip.Positioner>
-                    <Tooltip.Content px={3} py={2}>Voir tout</Tooltip.Content>
-                  </Tooltip.Positioner>
-                </Tooltip.Root>
+                      Focus chats
+                    </Button>
+                  ) : null}
+                  <Tooltip.Root openDelay={150}>
+                    <Tooltip.Trigger asChild>
+                      <IconButton
+                        aria-label="Voir tous les entretiens"
+                        size="xs"
+                        variant="ghost"
+                        borderRadius="full"
+                        onClick={() => router.push(`/interviews${historyAgentId ? `?agent=${historyAgentId}` : ""}`)}
+                      >
+                        <ArrowRight size={14} />
+                      </IconButton>
+                    </Tooltip.Trigger>
+                    <Tooltip.Positioner>
+                      <Tooltip.Content px={3} py={2}>Voir tout</Tooltip.Content>
+                    </Tooltip.Positioner>
+                  </Tooltip.Root>
+                </HStack>
               </HStack>
 
               <Stack

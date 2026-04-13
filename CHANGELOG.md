@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 - **Agent Policy Module:** Centralize all agent visibility, toggle, and interview-start rules in `src/lib/agentPolicy.ts`, replacing duplicated `isAdminLike()` checks across 3 API routes.
 
 ### Changed
+- **Interview Sidebar Focus Mode:** Add a conversation-focus toggle that collapses the persona summary card and frees more vertical space for chat history browsing.
 - **Interview Sidebar:** Add a per-chat actions menu (`...`) with rename, pin, and delete actions, plus a more scrollable history layout with clearer current/pinned/recent sections.
 - **Interview UI Polish:** Refine the interview sidebar cards, persona summary card, empty-state suggestions, and collapsible feedback panel for a cleaner demo-ready experience.
 - **Interviews Route:** Rename `/dashboard` to `/interviews`.
