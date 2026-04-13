@@ -169,6 +169,10 @@ Finitions visuelles :
   - couverture de themes
   - exemples tires du chat
   - alertes pedagogiques
+- page `Analyse complete` creee :
+  - route dediee a la lecture pedagogique complete
+  - lien depuis le bloc `Retour sur l'entretien`
+  - base propre pour un futur export PDF d'analyse
 
 ## Regle de travail
 
