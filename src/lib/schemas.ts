@@ -18,6 +18,9 @@ export type InterviewStatus = z.infer<typeof InterviewStatusSchema>;
 export const MessageRoleSchema = z.enum(["user", "assistant"]);
 export type MessageRole = z.infer<typeof MessageRoleSchema>;
 
+export const MaterialQualitySchema = z.enum(["insuffisant", "partiel", "exploitable"]);
+export type MaterialQuality = z.infer<typeof MaterialQualitySchema>;
+
 // ============================================================================
 // TABLE SCHEMAS
 // ============================================================================
@@ -64,6 +67,30 @@ export const InterviewUsageSchema = z.object({
   updated_at: z.string().datetime({ offset: true }),
 });
 export type InterviewUsage = z.infer<typeof InterviewUsageSchema>;
+
+export const InterviewAnalysisSignalsSchema = z.object({
+  user_message_count: z.number().int().nonnegative(),
+  assistant_message_count: z.number().int().nonnegative(),
+  total_user_words: z.number().int().nonnegative(),
+  average_user_words: z.number().int().nonnegative(),
+  long_user_answers: z.number().int().nonnegative(),
+  short_user_answers: z.number().int().nonnegative(),
+  concrete_example_signals: z.number().int().nonnegative(),
+  total_input_tokens: z.number().int().nonnegative(),
+  total_output_tokens: z.number().int().nonnegative(),
+});
+export type InterviewAnalysisSignals = z.infer<typeof InterviewAnalysisSignalsSchema>;
+
+export const InterviewAnalysisSchema = z.object({
+  material_quality: MaterialQualitySchema,
+  feedback_title: z.string(),
+  feedback_text: z.string(),
+  strengths: z.array(z.string()),
+  limits: z.array(z.string()),
+  next_steps: z.array(z.string()),
+  signals: InterviewAnalysisSignalsSchema,
+});
+export type InterviewAnalysis = z.infer<typeof InterviewAnalysisSchema>;
 
 export const UserInterviewSessionSchema = z.object({
   id: z.string().uuid(),

@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Test Coverage:** Add comprehensive test suite for main interview page (`/interview`) with 16 tests covering authentication, session creation, agent loading, and chat interaction.
+- **Interview Analysis V1:** Add `/api/interviews/analysis` with heuristic material-quality feedback (`insuffisant` / `partiel` / `exploitable`) based on interview messages and token usage.
 - **Google Docs Export:** Add OAuth flow and export pipeline to create interview documents in Google Docs.
 - **Auth Flow Tests:** Add tests for registration, login, password reset, and logout with invalid input coverage.
 - **Guide Page:** Add `/guide-entretien` rendered from `public/docs/guide_entretien.md` and link it in the header.
