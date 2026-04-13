@@ -101,4 +101,23 @@ describe("analyzeInterviewMessages", () => {
     expect(analysis.score_breakdown.total_score).toBeGreaterThanOrEqual(8);
     expect(analysis.summary_line).toContain("Base deja exploitable");
   });
+
+  it("detects noisy interviewer messages and exposes pedagogical alerts", () => {
+    const analysis = analyzeInterviewMessages(
+      [
+        makeMessage("1", "user", "test"),
+        makeMessage("2", "assistant", "Oui."),
+        makeMessage("3", "user", "eee jfhfjdfn"),
+        makeMessage("4", "assistant", "Je ne comprends pas bien la question."),
+        makeMessage("5", "user", "Tu utilises souvent ChatGPT ?"),
+        makeMessage("6", "assistant", "Oui, parfois, surtout quand je dois aller vite."),
+      ],
+      { totalInputTokens: 200, totalOutputTokens: 180 }
+    );
+
+    expect(analysis.interview_conduct?.noise_detected).toBe(true);
+    expect(analysis.interview_conduct?.weak_message_signals).toBeGreaterThanOrEqual(2);
+    expect(analysis.alerts?.some((alert) => alert.type === "noise_detected")).toBe(true);
+    expect(analysis.examples?.weak_questions.length).toBeGreaterThan(0);
+  });
 });

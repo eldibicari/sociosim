@@ -158,6 +158,10 @@ Finitions visuelles :
   - couverture des themes
   - exemples concrets
   - alertes pedagogiques
+- logique V3 en cours de mise en place :
+  - detection du bruit et des messages tests
+  - lecture de la qualite des questions et relances
+  - premiers exemples concrets tires du chat
 
 ## Regle de travail
 

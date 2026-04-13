@@ -21,6 +21,8 @@ const CONCRETE_PATTERNS = [
   /\bpour un expose\b/i,
   /\bdans ce cours\b/i,
   /\bla derniere fois\b/i,
+  /\bavant\b/i,
+  /\bapres\b/i,
 ];
 
 const OPEN_QUESTION_PATTERNS = [
@@ -34,6 +36,38 @@ const OPEN_QUESTION_PATTERNS = [
   /\bdecrire\b/i,
   /\braconte\b/i,
   /\braconter\b/i,
+  /\bexplique\b/i,
+  /\bexpliquez\b/i,
+];
+
+const FOLLOW_UP_PATTERNS = [
+  /\bpeux-tu preciser\b/i,
+  /\bpouvez-vous preciser\b/i,
+  /\bplus precisement\b/i,
+  /\bqu'est-ce qui\b/i,
+  /\bet ensuite\b/i,
+  /\bet apres\b/i,
+  /\bqu'est-ce que tu veux dire\b/i,
+  /\bsi je comprends bien\b/i,
+];
+
+const NOISE_PATTERNS = [
+  /^test+$/i,
+  /^ok+$/i,
+  /^bonjour+$/i,
+  /^salut+$/i,
+  /^ca va$/i,
+  /^[a-z]{1,4}$/i,
+  /^[a-z\s]{0,12}$/i,
+  /^[a-z]{2,}\s[a-z]{2,}$/i,
+];
+
+const THEME_KEYWORDS = [
+  { theme: "usages concrets de l'IA", patterns: [/\bchatgpt\b/i, /\bia\b/i, /\butilis/i, /\boutil\b/i] },
+  { theme: "rapport au travail universitaire", patterns: [/\bcours\b/i, /\bexpose\b/i, /\bdissertation\b/i, /\bmemoire\b/i] },
+  { theme: "rapport aux enseignants", patterns: [/\benseignant\b/i, /\bprof\b/i, /\bprofesseur\b/i] },
+  { theme: "doutes et hesitations", patterns: [/\bdoute\b/i, /\bhesit/i, /\bpeur\b/i, /\bmefian/i] },
+  { theme: "variations selon les situations", patterns: [/\bselon\b/i, /\bquand\b/i, /\bdans certains cas\b/i, /\bca depend\b/i] },
 ];
 
 function countWords(text: string) {
@@ -51,6 +85,20 @@ function toPercent(count: number, total: number) {
   return total === 0 ? 0 : Math.round((count / total) * 100);
 }
 
+function normalizeText(text: string) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function truncate(text: string, length = 140) {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  return normalized.length > length ? `${normalized.slice(0, length - 3)}...` : normalized;
+}
+
 function detectConcreteExampleSignals(messages: Message[]) {
   return messages.reduce((count, message) => {
     const hasSignal = CONCRETE_PATTERNS.some((pattern) => pattern.test(message.content));
@@ -65,6 +113,43 @@ function detectOpenQuestionSignals(messages: Message[]) {
       normalized.includes("?") || OPEN_QUESTION_PATTERNS.some((pattern) => pattern.test(normalized));
     return hasSignal ? count + 1 : count;
   }, 0);
+}
+
+function detectFollowUpSignals(messages: Message[]) {
+  return messages.reduce((count, message) => {
+    const normalized = message.content.trim();
+    const hasSignal = FOLLOW_UP_PATTERNS.some((pattern) => pattern.test(normalized));
+    return hasSignal ? count + 1 : count;
+  }, 0);
+}
+
+function detectWeakMessageSignals(messages: Message[]) {
+  return messages.reduce((count, message) => {
+    const normalized = normalizeText(message.content);
+    const words = countWords(normalized);
+    const looksLikeNoise =
+      words <= 2 ||
+      NOISE_PATTERNS.some((pattern) => pattern.test(normalized)) ||
+      /^[a-z]+$/.test(normalized.replace(/\s/g, "")) && normalized.length <= 8;
+    return looksLikeNoise ? count + 1 : count;
+  }, 0);
+}
+
+function detectRepeatedQuestionSignals(messages: Message[]) {
+  const seen = new Set<string>();
+  let repeated = 0;
+
+  for (const message of messages) {
+    const normalized = normalizeText(message.content).replace(/[?.!]/g, "");
+    if (!normalized || normalized.length < 12) continue;
+    if (seen.has(normalized)) {
+      repeated += 1;
+    } else {
+      seen.add(normalized);
+    }
+  }
+
+  return repeated;
 }
 
 function scoreVolume(studentMessageCount: number, totalStudentWords: number, totalTokens: number) {
@@ -146,7 +231,7 @@ function buildSummaryLine(quality: MaterialQuality, signals: Signals) {
   return `${prefix} : ${signals.student_message_count} reponses etudiantes, ${signals.total_student_words} mots, ${signals.concrete_example_signals} exemple(s) concret(s).`;
 }
 
-function buildStrengths(quality: MaterialQuality, signals: Signals, scores: ScoreBreakdown): string[] {
+function buildStrengths(quality: MaterialQuality, scores: ScoreBreakdown): string[] {
   const strengths: string[] = [];
 
   if (scores.volume_score >= 1) {
@@ -173,7 +258,7 @@ function buildStrengths(quality: MaterialQuality, signals: Signals, scores: Scor
   return strengths.slice(0, 3);
 }
 
-function buildLimits(quality: MaterialQuality, signals: Signals, scores: ScoreBreakdown): string[] {
+function buildLimits(quality: MaterialQuality, scores: ScoreBreakdown): string[] {
   const limits: string[] = [];
 
   if (scores.volume_score <= 1) {
@@ -277,6 +362,182 @@ function buildFeedback(
   };
 }
 
+function describeQuestionStyle(openQuestionRatioPercent: number, weakMessageSignals: number, interviewerCount: number) {
+  if (interviewerCount === 0) return "non evalue";
+  if (weakMessageSignals >= Math.max(2, Math.floor(interviewerCount / 2))) return "trop fragile";
+  if (openQuestionRatioPercent >= 70) return "plutot ouvert";
+  if (openQuestionRatioPercent >= 45) return "mixte";
+  return "encore trop ferme";
+}
+
+function describeFollowUpQuality(followUpSignals: number, repeatedQuestionSignals: number, interviewerCount: number) {
+  if (interviewerCount <= 1) return "encore insuffisante";
+  if (followUpSignals >= 2 && repeatedQuestionSignals === 0) return "plutot bonne";
+  if (followUpSignals >= 1) return "correcte mais inegale";
+  if (repeatedQuestionSignals >= 1) return "trop repetitive";
+  return "encore insuffisante";
+}
+
+function buildConductTeacherComment(
+  questionStyle: string,
+  followUpQuality: string,
+  noiseDetected: boolean
+) {
+  if (noiseDetected) {
+    return "Plusieurs messages ressemblent a des tests ou a du bruit, ce qui empeche une lecture pedagogique fiable de la conduite d'entretien.";
+  }
+
+  if (questionStyle === "plutot ouvert" && followUpQuality === "plutot bonne") {
+    return "Les questions ouvrent bien l'echange et les relances permettent deja de creuser le point de vue du persona.";
+  }
+
+  if (questionStyle === "encore trop ferme") {
+    return "Les questions restent encore trop generales ou trop fermees. Il faut davantage inviter le persona a raconter une situation precise.";
+  }
+
+  if (followUpQuality === "trop repetitive") {
+    return "Les relances manquent de varietes et risquent de refaire demander la meme chose sans reel approfondissement.";
+  }
+
+  return "La conduite d'entretien est engagee, mais les relances doivent encore mieux aider le persona a passer d'un discours general a un recit situe.";
+}
+
+function buildMaterialReading(
+  quality: MaterialQuality,
+  scores: ScoreBreakdown,
+  studentMessages: Message[]
+): InterviewAnalysis["material_reading"] {
+  const normalizedContent = studentMessages.map((message) => normalizeText(message.content));
+  const contrastsDetected: string[] = [];
+
+  const hasGainOfTime = normalizedContent.some((text) => text.includes("gagner du temps"));
+  const hasCriticalDistance = normalizedContent.some(
+    (text) => text.includes("distance critique") || text.includes("verifier") || text.includes("croiser")
+  );
+  if (hasGainOfTime && hasCriticalDistance) {
+    contrastsDetected.push("gain de temps vs distance critique");
+  }
+
+  const hasConfidence = normalizedContent.some((text) => text.includes("aide") || text.includes("utile"));
+  const hasDoubt = normalizedContent.some((text) => text.includes("doute") || text.includes("hesit") || text.includes("peur"));
+  if (hasConfidence && hasDoubt) {
+    contrastsDetected.push("utilite percue vs hesitations");
+  }
+
+  const density =
+    quality === "exploitable" ? "bonne" : quality === "partiel" ? "moyenne" : "faible";
+  const concreteLevel =
+    scores.concrete_score >= 2 ? "bon" : scores.concrete_score === 1 ? "encore limite" : "trop faible";
+
+  const teacherComment =
+    quality === "exploitable"
+      ? "Le persona fournit deja des passages mobilisables, avec des pratiques, des situations et au moins quelques tensions analytiques interessantes."
+      : quality === "partiel"
+        ? "Le materiau devient utile, mais il reste inegal : certains passages sont concrets, d'autres encore trop generaux."
+        : "Le materiau reste trop pauvre pour une analyse solide : il manque surtout des situations precises et des reponses plus developpees.";
+
+  return {
+    density,
+    concrete_level: concreteLevel,
+    contrasts_detected: contrastsDetected,
+    teacher_comment: teacherComment,
+  };
+}
+
+function buildThemeCoverage(studentMessages: Message[]): InterviewAnalysis["theme_coverage"] {
+  const items = THEME_KEYWORDS.map(({ theme, patterns }) => {
+    const evidence = studentMessages
+      .filter((message) => patterns.some((pattern) => pattern.test(message.content)))
+      .slice(0, 2)
+      .map((message) => truncate(message.content, 110));
+
+    return {
+      theme,
+      coverage_status:
+        evidence.length >= 2 ? "couvert" : evidence.length === 1 ? "partiel" : "non_aborde",
+      evidence,
+    } as const;
+  });
+
+  return {
+    themes_covered: items.filter((item) => item.coverage_status === "couvert").map((item) => item.theme),
+    themes_partial: items.filter((item) => item.coverage_status === "partiel").map((item) => item.theme),
+    themes_missing: items.filter((item) => item.coverage_status === "non_aborde").map((item) => item.theme),
+    items: items.map((item) => ({
+      theme: item.theme,
+      coverage_status: item.coverage_status,
+      evidence: item.evidence,
+    })),
+  };
+}
+
+function buildExamples(interviewerMessages: Message[], studentMessages: Message[]): InterviewAnalysis["examples"] {
+  const goodQuestions = interviewerMessages
+    .filter((message) => OPEN_QUESTION_PATTERNS.some((pattern) => pattern.test(message.content)) && countWords(message.content) >= 5)
+    .slice(0, 2)
+    .map((message) => truncate(message.content, 120));
+
+  const weakQuestions = interviewerMessages
+    .filter((message) => {
+      const normalized = normalizeText(message.content);
+      return countWords(normalized) <= 4 || NOISE_PATTERNS.some((pattern) => pattern.test(normalized));
+    })
+    .slice(0, 2)
+    .map((message) => truncate(message.content, 120));
+
+  const strongVerbatims = studentMessages
+    .filter((message) => countWords(message.content) >= 20 && CONCRETE_PATTERNS.some((pattern) => pattern.test(message.content)))
+    .slice(0, 2)
+    .map((message) => truncate(message.content, 160));
+
+  const weakMaterialExamples = studentMessages
+    .filter((message) => countWords(message.content) < 10)
+    .slice(0, 2)
+    .map((message) => truncate(message.content, 120));
+
+  return {
+    good_questions: goodQuestions,
+    weak_questions: weakQuestions,
+    strong_verbatims: strongVerbatims,
+    weak_material_examples: weakMaterialExamples,
+  };
+}
+
+function buildAlerts(
+  weakMessageSignals: number,
+  repeatedQuestionSignals: number,
+  studentMessages: Message[]
+): InterviewAnalysis["alerts"] {
+  const alerts: NonNullable<InterviewAnalysis["alerts"]> = [];
+  const emptyStudentMaterial = studentMessages.length === 0;
+
+  if (emptyStudentMaterial) {
+    alerts.push({
+      severity: "blocking",
+      type: "no_student_material",
+      message: "Le persona n'a pas encore produit de materiau exploitable.",
+    });
+  }
+
+  if (weakMessageSignals >= 2) {
+    alerts.push({
+      severity: weakMessageSignals >= 3 ? "blocking" : "warning",
+      type: "noise_detected",
+      message: "Plusieurs messages ressemblent a des tests, a du bruit, ou a des questions trop faibles.",
+    });
+  }
+
+  if (repeatedQuestionSignals >= 1) {
+    alerts.push({
+      severity: "warning",
+      type: "repetition",
+      message: "Certaines questions se repetent sans reel approfondissement.",
+    });
+  }
+
+  return alerts;
+}
+
 export function analyzeInterviewMessages(messages: Message[], usage: UsageTotals): InterviewAnalysis {
   const interviewerMessages = messages.filter((message) => message.role === "user");
   const studentMessages = messages.filter((message) => message.role === "assistant");
@@ -287,6 +548,9 @@ export function analyzeInterviewMessages(messages: Message[], usage: UsageTotals
   const shortStudentAnswers = studentWordCounts.filter((count) => count > 0 && count < 8).length;
   const concreteExampleSignals = detectConcreteExampleSignals(studentMessages);
   const openQuestionSignals = detectOpenQuestionSignals(interviewerMessages);
+  const followUpSignals = detectFollowUpSignals(interviewerMessages);
+  const weakMessageSignals = detectWeakMessageSignals(interviewerMessages);
+  const repeatedQuestionSignals = detectRepeatedQuestionSignals(interviewerMessages);
   const totalTokens = usage.totalInputTokens + usage.totalOutputTokens;
   const openQuestionRatioPercent = toPercent(openQuestionSignals, interviewerMessages.length);
 
@@ -322,14 +586,25 @@ export function analyzeInterviewMessages(messages: Message[], usage: UsageTotals
   };
 
   const feedback = buildFeedback(materialQuality, signals, scoreBreakdown);
+  const questionStyle = describeQuestionStyle(
+    openQuestionRatioPercent,
+    weakMessageSignals,
+    interviewerMessages.length
+  );
+  const followUpQuality = describeFollowUpQuality(
+    followUpSignals,
+    repeatedQuestionSignals,
+    interviewerMessages.length
+  );
+  const alerts = buildAlerts(weakMessageSignals, repeatedQuestionSignals, studentMessages);
 
   return {
     material_quality: materialQuality,
     summary_line: feedback.summary_line,
     feedback_title: feedback.feedback_title,
     feedback_text: feedback.feedback_text,
-    strengths: buildStrengths(materialQuality, signals, scoreBreakdown),
-    limits: buildLimits(materialQuality, signals, scoreBreakdown),
+    strengths: buildStrengths(materialQuality, scoreBreakdown),
+    limits: buildLimits(materialQuality, scoreBreakdown),
     next_steps: buildNextSteps(materialQuality, scoreBreakdown),
     coaching_tip: feedback.coaching_tip,
     metrics: {
@@ -343,5 +618,17 @@ export function analyzeInterviewMessages(messages: Message[], usage: UsageTotals
     },
     score_breakdown: scoreBreakdown,
     signals,
+    interview_conduct: {
+      question_style: questionStyle,
+      follow_up_quality: followUpQuality,
+      noise_detected: weakMessageSignals >= 2,
+      repeated_question_signals: repeatedQuestionSignals,
+      weak_message_signals: weakMessageSignals,
+      teacher_comment: buildConductTeacherComment(questionStyle, followUpQuality, weakMessageSignals >= 2),
+    },
+    material_reading: buildMaterialReading(materialQuality, scoreBreakdown, studentMessages),
+    theme_coverage: buildThemeCoverage(studentMessages),
+    examples: buildExamples(interviewerMessages, studentMessages),
+    alerts,
   };
 }
