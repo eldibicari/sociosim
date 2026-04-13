@@ -111,6 +111,16 @@ Actions sur les chats :
 
 Cette etape pourra demander du backend et peut-etre une evolution du schema.
 
+### Avancement actuel
+
+- etape 1 faite : largeur plus utile + meilleure hierarchie de sidebar
+- etape 2 faite : titres automatiques derives du premier message utilisateur
+- etape 3 commencee : suppression simple des chats depuis la sidebar
+- restent a faire dans l'etape 3 :
+  - renommage
+  - epinglage
+  - eventuellement un vrai menu d'actions
+
 ### Etape 4
 
 Finitions visuelles :

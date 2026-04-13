@@ -92,6 +92,40 @@ export async function getInterviewById(id: string): Promise<Interview | null> {
 }
 
 /**
+ * Delete an interview owned by a given user, along with its linked sessions.
+ * Sessions deletion cascades to messages and user_interview_session rows.
+ */
+export async function deleteInterviewForUser(interviewId: string, userId: string): Promise<boolean> {
+  const supabase = createServiceSupabaseClient();
+
+  const { data: links, error: linkError } = await supabase
+    .from("user_interview_session")
+    .select("session_id")
+    .eq("interview_id", interviewId)
+    .eq("user_id", userId);
+
+  throwIfError(linkError, "Failed to verify interview ownership");
+
+  if (!links || links.length === 0) {
+    return false;
+  }
+
+  const sessionIds = Array.from(
+    new Set(links.map((link) => link.session_id).filter((id): id is string => Boolean(id)))
+  );
+
+  if (sessionIds.length > 0) {
+    const { error: sessionDeleteError } = await supabase.from("sessions").delete().in("id", sessionIds);
+    throwIfError(sessionDeleteError, "Failed to delete linked sessions");
+  }
+
+  const { error: interviewDeleteError } = await supabase.from("interviews").delete().eq("id", interviewId);
+  throwIfError(interviewDeleteError, "Failed to delete interview");
+
+  return true;
+}
+
+/**
  * Get interview with usage data attached.
  */
 export async function getInterviewWithUsage(

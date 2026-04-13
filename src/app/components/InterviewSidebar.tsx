@@ -21,6 +21,7 @@ import {
   FileDown,
   FileText,
   Menu,
+  Trash2,
   X,
 } from "lucide-react";
 import { marked } from "marked";
@@ -107,8 +108,8 @@ export function InterviewSidebar({
   isExportingGoogleDocs = false,
   disableExport = false,
 }: InterviewSidebarProps) {
-  const [introHtml, setIntroHtml] = useState<string>("");
-  const [introPreview, setIntroPreview] = useState<string>("");
+  const [introHtml, setIntroHtml] = useState("");
+  const [introPreview, setIntroPreview] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -116,6 +117,7 @@ export function InterviewSidebar({
   const [historyAgentId, setHistoryAgentId] = useState<string | null>(null);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [newInterviewError, setNewInterviewError] = useState<string | null>(null);
   const isCompact = useBreakpointValue({ base: true, lg: false }) ?? false;
   const router = useRouter();
@@ -139,11 +141,13 @@ export function InterviewSidebar({
         const response = await fetch(`/api/user/interviews?userId=${historyUserId}`, {
           cache: "no-store",
         });
+
         if (!response.ok) {
           const payload = await response.json().catch(() => null);
           const message = payload?.error ?? "Impossible de charger l'historique.";
           throw new Error(message);
         }
+
         const payload = (await response.json().catch(() => null)) as
           | {
               interviews?: Array<{
@@ -156,6 +160,7 @@ export function InterviewSidebar({
               }>;
             }
           | null;
+
         const interviews = payload?.interviews ?? [];
         const formatted = interviews
           .filter((item) => {
@@ -183,6 +188,7 @@ export function InterviewSidebar({
                 })
               : "";
             const qaCount = (item.messages || []).filter((msg) => msg.role === "assistant").length;
+
             return {
               id: item.id,
               title,
@@ -192,12 +198,13 @@ export function InterviewSidebar({
               agentId: item.agent_id ?? null,
             };
           });
+
         if (isMounted) {
           setHistoryItems(formatted);
           setHistoryAgentId(formatted[0]?.agentId ?? null);
         }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Unknown error";
+      } catch (loadError) {
+        const message = loadError instanceof Error ? loadError.message : "Unknown error";
         console.error("[Interview] Failed to load history:", message);
         if (isMounted) {
           setHistoryError(message);
@@ -221,23 +228,25 @@ export function InterviewSidebar({
         if (!response.ok) {
           throw new Error("Failed to load interview guide");
         }
+
         const markdown = await response.text();
-        if (isMounted) {
-          const lines = markdown.split(/\r?\n/);
-          const firstLineIndex = lines.findIndex((line) => line.trim().length > 0);
-          const previewLine = firstLineIndex >= 0 ? lines[firstLineIndex].trim() : "";
-          const remainingLines = firstLineIndex >= 0 ? lines.slice(firstLineIndex + 1) : [];
-          if (remainingLines[0]?.trim() === "") {
-            remainingLines.shift();
-          }
-          const remainingMarkdown = remainingLines.join("\n");
-          const parsed = remainingMarkdown.trim() ? await marked.parse(remainingMarkdown) : "";
-          setIntroPreview(previewLine);
-          setIntroHtml(parsed);
+        if (!isMounted) return;
+
+        const lines = markdown.split(/\r?\n/);
+        const firstLineIndex = lines.findIndex((line) => line.trim().length > 0);
+        const previewLine = firstLineIndex >= 0 ? lines[firstLineIndex].trim() : "";
+        const remainingLines = firstLineIndex >= 0 ? lines.slice(firstLineIndex + 1) : [];
+        if (remainingLines[0]?.trim() === "") {
+          remainingLines.shift();
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        console.error("[Interview] Failed to load guide:", errorMessage);
+
+        const remainingMarkdown = remainingLines.join("\n");
+        const parsed = remainingMarkdown.trim() ? await marked.parse(remainingMarkdown) : "";
+        setIntroPreview(previewLine);
+        setIntroHtml(parsed);
+      } catch (loadError) {
+        const message = loadError instanceof Error ? loadError.message : "Unknown error";
+        console.error("[Interview] Failed to load guide:", message);
         if (isMounted) {
           setIntroPreview("");
           setIntroHtml("");
@@ -265,6 +274,7 @@ export function InterviewSidebar({
     try {
       setIsCreatingSession(true);
       setNewInterviewError(null);
+
       const response = await fetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -284,12 +294,46 @@ export function InterviewSidebar({
       router.push(
         `/interview?interviewId=${data.interviewId}&sessionId=${data.sessionId}&adkSessionId=${data.adkSessionId}`
       );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+    } catch (createError) {
+      const message = createError instanceof Error ? createError.message : "Unknown error";
       console.error("[InterviewSidebar] Failed to start new interview:", message);
       setNewInterviewError(message);
     } finally {
       setIsCreatingSession(false);
+    }
+  };
+
+  const handleDeleteInterview = async (interviewId: string) => {
+    const confirmed = window.confirm("Supprimer ce chat et son historique ?");
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setPendingDeleteId(interviewId);
+      setHistoryError(null);
+
+      const response = await fetch(`/api/interviews/${interviewId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        const message = payload?.error ?? "Impossible de supprimer ce chat.";
+        throw new Error(message);
+      }
+
+      setHistoryItems((items) => items.filter((item) => item.id !== interviewId));
+
+      if (currentInterviewId === interviewId) {
+        router.push("/interviews");
+      }
+    } catch (deleteError) {
+      const message = deleteError instanceof Error ? deleteError.message : "Unknown error";
+      console.error("[InterviewSidebar] Failed to delete interview:", message);
+      setHistoryError(message);
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
@@ -328,6 +372,7 @@ export function InterviewSidebar({
           </Tooltip.Positioner>
         </Tooltip.Root>
       ) : null}
+
       {isCompact && !isCollapsed ? (
         <Box
           position="fixed"
@@ -354,9 +399,7 @@ export function InterviewSidebar({
         zIndex={25}
         overflow="hidden"
         transition={isCompact ? "transform 0.2s ease" : "width 0.2s ease, padding 0.2s ease"}
-        transform={
-          isCompact ? (isCollapsed ? "translateX(-100%)" : "translateX(0)") : "translateX(0)"
-        }
+        transform={isCompact ? (isCollapsed ? "translateX(-100%)" : "translateX(0)") : "translateX(0)"}
       >
         {!isCompact && isCollapsed ? (
           <Tooltip.Root openDelay={150}>
@@ -417,6 +460,7 @@ export function InterviewSidebar({
                       <Tooltip.Content px={3} py={2}>Commencer un nouvel entretien</Tooltip.Content>
                     </Tooltip.Positioner>
                   </Tooltip.Root>
+
                   <Tooltip.Root openDelay={150}>
                     <Tooltip.Trigger asChild>
                       <IconButton
@@ -433,6 +477,7 @@ export function InterviewSidebar({
                       <Tooltip.Content px={3} py={2}>Aide pour l'entretien</Tooltip.Content>
                     </Tooltip.Positioner>
                   </Tooltip.Root>
+
                   <ButtonGroup size="sm" variant="outline" marginLeft={2}>
                     <Tooltip.Root openDelay={150}>
                       <Tooltip.Trigger asChild>
@@ -450,6 +495,7 @@ export function InterviewSidebar({
                         <Tooltip.Content px={3} py={2}>Exporter en PDF</Tooltip.Content>
                       </Tooltip.Positioner>
                     </Tooltip.Root>
+
                     {onExportGoogleDocs ? (
                       <Tooltip.Root openDelay={150}>
                         <Tooltip.Trigger asChild>
@@ -498,6 +544,7 @@ export function InterviewSidebar({
                       </Tooltip.Positioner>
                     </Tooltip.Root>
                   ) : null}
+
                   <Tooltip.Root openDelay={150}>
                     <Tooltip.Trigger asChild>
                       <IconButton
@@ -520,11 +567,13 @@ export function InterviewSidebar({
               <Heading as="h2" size="lg" color={{ base: "blue.700", _dark: "blue.200" }}>
                 {agentDisplayName ?? "Chargement de l'entretien..."}
               </Heading>
+
               {agentDescription ? (
                 <Text fontSize="xs" color="fg.muted" lineHeight="1.4">
                   {agentDescription}
                 </Text>
               ) : null}
+
               {agentDisplayName && userName && dateDisplay ? (
                 <>
                   <Text fontSize="sm">par {userName}</Text>
@@ -536,6 +585,7 @@ export function InterviewSidebar({
                   <Text fontSize="sm">le ...</Text>
                 </>
               )}
+
               {newInterviewError ? (
                 <Text fontSize="sm" color="red.600">
                   {newInterviewError}
@@ -601,36 +651,61 @@ export function InterviewSidebar({
                       >
                         Chat en cours
                       </Text>
-                      <Link
-                        as={NextLink}
-                        href={`/interview/${currentHistoryItem.id}`}
-                        display="block"
+
+                      <Box
                         padding={3}
                         borderRadius="xl"
                         backgroundColor="cyan.50"
                         borderWidth="1px"
                         borderColor="cyan.200"
                         color="cyan.900"
-                        _hover={{
-                          textDecoration: "none",
-                          backgroundColor: "cyan.100",
-                        }}
                       >
                         <Stack gap={2}>
-                          <HStack justify="space-between" align="start">
-                          <Text fontSize="sm" fontWeight="700" lineClamp={2}>
-                              {currentHistoryItem.title}
-                            </Text>
-                            <Badge colorPalette="cyan" variant="subtle" borderRadius="full">
-                              Actuel
-                            </Badge>
+                          <HStack justify="space-between" align="start" gap={2}>
+                            <Link
+                              as={NextLink}
+                              href={`/interview/${currentHistoryItem.id}`}
+                              flex="1"
+                              minWidth={0}
+                              _hover={{ textDecoration: "none" }}
+                            >
+                              <Text fontSize="sm" fontWeight="700" lineClamp={2}>
+                                {currentHistoryItem.title}
+                              </Text>
+                            </Link>
+
+                            <HStack gap={2} align="start">
+                              <Badge colorPalette="cyan" variant="subtle" borderRadius="full">
+                                Actuel
+                              </Badge>
+                              <Tooltip.Root openDelay={150}>
+                                <Tooltip.Trigger asChild>
+                                  <IconButton
+                                    aria-label={`Supprimer le chat ${currentHistoryItem.title}`}
+                                    size="2xs"
+                                    variant="ghost"
+                                    color="cyan.900"
+                                    onClick={() => handleDeleteInterview(currentHistoryItem.id)}
+                                    loading={pendingDeleteId === currentHistoryItem.id}
+                                  >
+                                    <Trash2 size={14} />
+                                  </IconButton>
+                                </Tooltip.Trigger>
+                                <Tooltip.Positioner>
+                                  <Tooltip.Content px={3} py={2}>Supprimer</Tooltip.Content>
+                                </Tooltip.Positioner>
+                              </Tooltip.Root>
+                            </HStack>
                           </HStack>
-                          <Text fontSize="xs" color="cyan.800">{currentHistoryItem.agentName}</Text>
+
+                          <Text fontSize="xs" color="cyan.800">
+                            {currentHistoryItem.agentName}
+                          </Text>
                           <Text fontSize="xs" color="cyan.800">
                             {currentHistoryItem.date} · {currentHistoryItem.qaCount} réponses
                           </Text>
                         </Stack>
-                      </Link>
+                      </Box>
                     </Stack>
                   ) : null}
 
@@ -644,6 +719,7 @@ export function InterviewSidebar({
                     >
                       Récents
                     </Text>
+
                     {recentHistoryItems.length === 0 ? (
                       <Text fontSize="sm" color="fg.muted">
                         Aucun autre chat récent.
@@ -651,33 +727,54 @@ export function InterviewSidebar({
                     ) : (
                       <Stack gap={2}>
                         {recentHistoryItems.map((item) => (
-                          <Link
+                          <Box
                             key={item.id}
-                            as={NextLink}
-                            href={`/interview/${item.id}`}
-                            display="block"
                             padding={3}
                             borderRadius="xl"
                             backgroundColor="transparent"
                             borderWidth="1px"
                             borderColor="rgba(15, 23, 42, 0.08)"
-                            _hover={{
-                              textDecoration: "none",
-                              backgroundColor: "bg.muted",
-                            }}
+                            _hover={{ backgroundColor: "bg.muted" }}
                           >
-                            <Stack gap={1}>
-                              <Text fontSize="sm" fontWeight="600" color="fg.default" lineClamp={2}>
-                                {item.title}
-                              </Text>
-                              <Text fontSize="xs" color="fg.muted">
-                                {item.agentName}
-                              </Text>
-                              <Text fontSize="xs" color="fg.muted">
-                                {item.date} · {item.qaCount} réponses
-                              </Text>
-                            </Stack>
-                          </Link>
+                            <HStack justify="space-between" align="start" gap={3}>
+                              <Link
+                                as={NextLink}
+                                href={`/interview/${item.id}`}
+                                flex="1"
+                                minWidth={0}
+                                _hover={{ textDecoration: "none" }}
+                              >
+                                <Stack gap={1}>
+                                  <Text fontSize="sm" fontWeight="600" color="fg.default" lineClamp={2}>
+                                    {item.title}
+                                  </Text>
+                                  <Text fontSize="xs" color="fg.muted">
+                                    {item.agentName}
+                                  </Text>
+                                  <Text fontSize="xs" color="fg.muted">
+                                    {item.date} · {item.qaCount} réponses
+                                  </Text>
+                                </Stack>
+                              </Link>
+
+                              <Tooltip.Root openDelay={150}>
+                                <Tooltip.Trigger asChild>
+                                  <IconButton
+                                    aria-label={`Supprimer le chat ${item.title}`}
+                                    size="2xs"
+                                    variant="ghost"
+                                    onClick={() => handleDeleteInterview(item.id)}
+                                    loading={pendingDeleteId === item.id}
+                                  >
+                                    <Trash2 size={14} />
+                                  </IconButton>
+                                </Tooltip.Trigger>
+                                <Tooltip.Positioner>
+                                  <Tooltip.Content px={3} py={2}>Supprimer</Tooltip.Content>
+                                </Tooltip.Positioner>
+                              </Tooltip.Root>
+                            </HStack>
+                          </Box>
                         ))}
                       </Stack>
                     )}
@@ -737,6 +834,7 @@ export function InterviewSidebar({
               </Tooltip.Positioner>
             </Tooltip.Root>
           </HStack>
+
           <VStack align="stretch" gap={3}>
             {introPreview ? <Text fontWeight="600">{introPreview}</Text> : null}
             {introHtml ? (
