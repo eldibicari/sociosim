@@ -1,30 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { interviews } from "@/lib/data";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 /**
  * GET /api/user/interviews?userId=...
- * Returns the interviews (with usage + messages) for a given user.
+ * Returns interviews for the authenticated user, or another user only if admin.
  */
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    console.log("[/api/user/interviews GET] Received userId:", userId);
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Missing 'userId' query parameter" },
-        { status: 400 }
-      );
+    const { user } = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { searchParams } = new URL(req.url);
+    const requestedUserId = searchParams.get("userId");
+
+    console.log("[/api/user/interviews GET] Received userId:", requestedUserId);
 
     const supabase = createServiceSupabaseClient();
     const { data: userRecord, error: userError } = await supabase
       .from("users")
       .select("role")
-      .eq("id", userId)
+      .eq("id", user.id)
       .maybeSingle();
 
     if (userError) {
@@ -34,15 +33,16 @@ export async function GET(req: NextRequest) {
     }
 
     const isAdmin = userRecord?.role === "admin";
+    const targetUserId = isAdmin && requestedUserId ? requestedUserId : user.id;
     console.log(
       "[/api/user/interviews GET] Fetching interviews for:",
       isAdmin ? "admin" : "user",
-      userId
+      targetUserId
     );
 
     const userInterviews = isAdmin
       ? await interviews.getAllInterviewsWithMessages()
-      : await interviews.getUserInterviewsWithMessages(userId);
+      : await interviews.getUserInterviewsWithMessages(targetUserId);
 
     console.log(
       "[/api/user/interviews GET] Successfully loaded",

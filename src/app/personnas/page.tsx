@@ -77,7 +77,7 @@ function AgentGrid({
 
 export default function PersonnasPage() {
   const router = useRouter();
-  const { user, isLoading: isAuthLoading, user_admin } = useAuthUser();
+  const { user, isLoading: isAuthLoading, user_admin, refreshUser } = useAuthUser();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
@@ -97,7 +97,7 @@ export default function PersonnasPage() {
       try {
         const [agentsResult, interviewsResult] = await Promise.allSettled([
           fetch("/api/agents?template=false"),
-          fetch(`/api/user/interviews?userId=${user.id}`),
+          fetch("/api/user/interviews"),
         ]);
 
         if (agentsResult.status === "fulfilled") {
@@ -106,6 +106,9 @@ export default function PersonnasPage() {
             const data = await response.json().catch(() => ({}));
             const message = data.error || "Impossible de charger les agents";
             console.error("Error fetching agents:", message);
+            if (response.status === 401) {
+              await refreshUser();
+            }
             setError(message);
           } else {
             const data = await response.json();
@@ -133,6 +136,9 @@ export default function PersonnasPage() {
             setInteractedAgents(Array.from(agentIds));
           } else {
             console.error("Error fetching interviews for history:", response.statusText);
+            if (response.status === 401) {
+              await refreshUser();
+            }
           }
         } else {
           console.error("Error fetching interviews for history:", interviewsResult.reason);
@@ -146,7 +152,7 @@ export default function PersonnasPage() {
     };
 
     loadData();
-  }, [isAuthLoading, user, router]);
+  }, [isAuthLoading, user, router, refreshUser]);
 
   const handleSelectAgent = async (agentId: string) => {
     try {

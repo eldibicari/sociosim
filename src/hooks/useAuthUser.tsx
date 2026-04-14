@@ -24,8 +24,8 @@ async function fetchUserRole(userId: string): Promise<UserRole | null> {
   try {
     const response = await withTimeout(
       "fetchUserRole",
-      fetch(`/api/user/role?userId=${userId}`),
-      5000
+      fetch("/api/user/role"),
+      10000
     );
     const payload = (await response.json().catch(() => null)) as { role?: UserRole; error?: string } | null;
     if (!response.ok) {

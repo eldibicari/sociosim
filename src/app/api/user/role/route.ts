@@ -1,28 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 /**
- * GET /api/user/role?userId=...
- * Returns the role for a given user id.
+ * GET /api/user/role
+ * Returns the role for the authenticated user.
  */
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Missing 'userId' query parameter" },
-        { status: 400 }
-      );
+    const { user } = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createServiceSupabaseClient();
     const { data, error } = await supabase
       .from("users")
       .select("role")
-      .eq("id", userId)
-      .single();
+      .eq("id", user.id)
+      .maybeSingle();
 
     if (error) {
       console.error("[/api/user/role GET] Error:", error.message);

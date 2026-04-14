@@ -90,3 +90,4 @@ This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) 
 - **Deprecated:** Soon-to-be removed features
 - **Removed:** Removed features
 - **Security:** Security improvements and fixes
+- fix auth recovery edge cases on personnas by deriving role and history from authenticated server user
