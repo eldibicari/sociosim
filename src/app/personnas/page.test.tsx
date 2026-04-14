@@ -29,7 +29,7 @@ const mockAgents = [
   {
     id: "agent-theo",
     agent_name: "theo",
-    description: "M2 Math. App. et Socio Quantitative\\nPassionné de technologie",
+    description: "M2 Math. App. et Socio Quantitative\\nPassionne de technologie",
     has_published_prompt: true,
     active: true,
     is_public: true,
@@ -40,7 +40,7 @@ const mockAgents = [
   {
     id: "agent-jade",
     agent_name: "jade",
-    description: "M2 Sociologie et études de genre\\nTechno sceptique",
+    description: "M2 Sociologie et etudes de genre\\nTechno sceptique",
     has_published_prompt: false,
     active: false,
     is_public: true,
@@ -99,7 +99,8 @@ describe("PersonnasPage", () => {
     const interviewButtons = screen.getAllByRole("button", { name: /Commencer un entretien/i });
     expect(interviewButtons).toHaveLength(3);
     expect(interviewButtons.filter((button) => !button.hasAttribute("disabled"))).toHaveLength(2);
-    expect(screen.getAllByRole("button", { name: /Activer|Désactiver/i })).toHaveLength(3);
+    expect(screen.getAllByRole("button", { name: /Voir la fiche/i })).toHaveLength(3);
+    expect(screen.getAllByRole("button", { name: /Activer|Desactiver/i })).toHaveLength(3);
   });
 
   it("shows Historique only for agents with previous interviews", async () => {
@@ -144,7 +145,20 @@ describe("PersonnasPage", () => {
     expect(mockRouter.push).toHaveBeenCalledWith("/interviews?agent=agent-oriane");
   });
 
-  it("creates a new interview when Nouvel entretien is clicked", async () => {
+  it("navigates to persona fiche from the card", async () => {
+    const user = userEvent.setup();
+
+    renderWithChakra(<PersonnasPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText("Chargement des personnas...")).not.toBeInTheDocument();
+    });
+
+    await user.click(screen.getAllByRole("button", { name: /Voir la fiche/i })[0]);
+    expect(mockRouter.push).toHaveBeenCalledWith("/personnas/agent-oriane");
+  });
+
+  it("creates a new interview when Commencer un entretien is clicked", async () => {
     const user = userEvent.setup();
     const mockFetch = vi.fn().mockImplementation((input: RequestInfo) => {
       if (input === "/api/agents?template=false") {

@@ -95,5 +95,6 @@ A chaque nouvelle session :
 
 ## Sous-etape recommandee pour la prochaine reprise
 
-- valider visuellement la nouvelle page liste `personnas`
-- puis faire evoluer les cartes vers la logique de fiche persona
+- valider visuellement la fiche persona V1
+- puis choisir la prochaine sous-etape du bloc `personnas`
+- probablement historique detaille ou renforcement de la grille / du prompt associe

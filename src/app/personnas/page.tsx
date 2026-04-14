@@ -63,6 +63,7 @@ function AgentGrid({
   onSelectAgent,
   onToggleAgent,
   onNavigateHistory,
+  onNavigateFiche,
   onNavigatePrompt,
 }: {
   agents: Agent[];
@@ -73,6 +74,7 @@ function AgentGrid({
   onSelectAgent: (agentId: string) => void;
   onToggleAgent: (agent: Agent) => void;
   onNavigateHistory: (agentId: string) => void;
+  onNavigateFiche: (agentId: string) => void;
   onNavigatePrompt: (agentId: string) => void;
 }) {
   if (agents.length === 0) return null;
@@ -90,6 +92,7 @@ function AgentGrid({
           onSelectAgent={onSelectAgent}
           onToggleAgent={onToggleAgent}
           onNavigateHistory={onNavigateHistory}
+          onNavigateFiche={onNavigateFiche}
           onNavigatePrompt={onNavigatePrompt}
         />
       ))}
@@ -277,6 +280,10 @@ export default function PersonnasPage() {
     router.push(`/interviews?agent=${encodeURIComponent(agentId)}`);
   };
 
+  const handleNavigateFiche = (agentId: string) => {
+    router.push(`/personnas/${encodeURIComponent(agentId)}`);
+  };
+
   const handleNavigatePrompt = (agentId: string) => {
     router.push(`/personnas/${agentId}/edit`);
   };
@@ -350,6 +357,7 @@ export default function PersonnasPage() {
     onSelectAgent: handleSelectAgent,
     onToggleAgent: handleToggleAgent,
     onNavigateHistory: handleNavigateHistory,
+    onNavigateFiche: handleNavigateFiche,
     onNavigatePrompt: handleNavigatePrompt,
   };
 

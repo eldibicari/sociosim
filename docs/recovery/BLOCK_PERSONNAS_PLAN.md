@@ -99,6 +99,7 @@ Etat :
 - filtres pills ajoutes
 - hierarchie de page refaite
 - cartes mieux preparees pour la suite
+- validation visuelle faite
 
 ### Etape 3
 
@@ -107,6 +108,12 @@ Cartes personna :
 - badges d'etat
 - historique plus lisible
 - CTA entretien plus clair
+- bouton `Voir la fiche` ajoute
+
+Etat :
+- en cours avance
+- les cartes pointent maintenant vers une fiche persona V1
+- la fiche relie deja entree entretien, prompt et historique
 
 ### Etape 4
 
@@ -126,13 +133,13 @@ Finitions :
 ## Recommandation immediate
 
 La prochaine sous-etape la plus rentable est :
-- tester visuellement la nouvelle page liste `personnas`
-- puis attaquer la logique detaillee des cartes et le lien vers la future fiche
+- tester visuellement la fiche persona V1
+- puis enrichir ce qui manque le plus entre historique detaille, grille associee et creation / edition
 
 Pourquoi :
-- elle est visible tout de suite
-- elle est directement dans le parcours principal
-- elle semble la plus eloignee des captures sur le plan UX
+- la liste a deja retrouve un bon niveau
+- la fiche persona devient maintenant le vrai noyau du bloc
+- c'est elle qui doit relier entretien, prompt et historique
 
 ## Cadrage complementaire deja retenu
 

@@ -20,6 +20,7 @@ interface AgentCardProps {
   onSelectAgent: (agentId: string) => void;
   onToggleAgent: (agent: Agent) => void;
   onNavigateHistory: (agentId: string) => void;
+  onNavigateFiche: (agentId: string) => void;
   onNavigatePrompt: (agentId: string) => void;
 }
 
@@ -32,6 +33,7 @@ export function AgentCard({
   onSelectAgent,
   onToggleAgent,
   onNavigateHistory,
+  onNavigateFiche,
   onNavigatePrompt,
 }: AgentCardProps) {
   const title =
@@ -142,6 +144,14 @@ export function AgentCard({
           </Button>
 
           <HStack gap={2} flexWrap="wrap" justifyContent="flex-start">
+            <Button
+              variant="subtle"
+              size="xs"
+              paddingInline={3}
+              onClick={() => onNavigateFiche(agent.id)}
+            >
+              Voir la fiche
+            </Button>
             {hasInteracted && (
               <Button
                 onClick={() => onNavigateHistory(agent.id)}

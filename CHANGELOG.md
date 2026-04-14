@@ -29,6 +29,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - **Personnas List UX:** Rework `/personnas` with a stronger pedagogical page intro, visible search, filter pills, clearer grouped sections, and richer cards with more explicit interview/history/prompt actions.
+- **Persona Fiche V1:** Add a first `/personnas/[id]` persona sheet that connects interview start, prompt visibility, pedagogical interview guidance, posture tips, and persona-specific history from a single page.
 - **Interview Analysis V2:** Rework interview analysis to evaluate the persona's answers as the real student material, add clearer metrics, a simple score breakdown, and a more pedagogical summary/coaching structure.
 - **Interview Analysis V3 Schema:** Prepare optional pedagogical sections for interview conduct, material reading, theme coverage, concrete examples, and alerts without breaking the current V2 response.
 - **Interview Analysis V3 Logic:** Start enriching analysis with interviewer-conduct signals, noise/test-message detection, first theme coverage hints, concrete examples, and pedagogical alerts.
