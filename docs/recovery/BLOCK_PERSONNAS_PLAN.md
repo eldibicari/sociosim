@@ -125,3 +125,14 @@ Pourquoi :
 - elle est visible tout de suite
 - elle est directement dans le parcours principal
 - elle semble la plus eloignee des captures sur le plan UX
+
+## Cadrage complementaire deja retenu
+
+La logique de la future fiche persona est maintenant posee dans :
+- `docs/recovery/PERSONA_FICHE_PLAN.md`
+
+Elements cles retenus :
+- ne pas fusionner grille d'entretien et prompt
+- les regrouper dans une meme fiche persona
+- garder `Historique` comme action principale par persona
+- faire de la fiche persona un vrai point d'entree pedagogique

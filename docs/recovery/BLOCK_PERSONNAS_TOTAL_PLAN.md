@@ -20,6 +20,10 @@ But :
 Resultat attendu :
 - on sait exactement ce que doit contenir une carte et une fiche persona
 
+Etat :
+- cadrage global pose
+- cadrage precis de la fiche persona documente dans `PERSONA_FICHE_PLAN.md`
+
 ## Etape 2. Refaire la page liste `personnas`
 
 Contenu :
@@ -127,8 +131,9 @@ Le bloc sera assez fini quand on aura :
 ## Recommandation pour la prochaine reprise
 
 Commencer par :
-- cadrage precis de la fiche persona
-- puis refonte de la page liste `personnas`
+- refonte de la page liste `personnas`
+- puis adaptation des cartes vers la logique de fiche persona
 
 Pourquoi :
-- ce sont les deux briques qui organisent tout le reste
+- la fiche persona est maintenant cadree
+- la liste devient la prochaine brique la plus rentable
