@@ -95,5 +95,5 @@ A chaque nouvelle session :
 
 ## Sous-etape recommandee pour la prochaine reprise
 
-- refonte de la page liste `personnas`
-- puis adaptation des cartes pour pointer vers la future fiche persona
+- valider visuellement la nouvelle page liste `personnas`
+- puis faire evoluer les cartes vers la logique de fiche persona

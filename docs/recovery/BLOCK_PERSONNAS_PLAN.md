@@ -93,6 +93,13 @@ Liste personnas :
 - ajouter filtres visibles
 - mieux structurer les groupes
 
+Etat :
+- en cours avance
+- recherche visible ajoutee
+- filtres pills ajoutes
+- hierarchie de page refaite
+- cartes mieux preparees pour la suite
+
 ### Etape 3
 
 Cartes personna :
@@ -119,7 +126,8 @@ Finitions :
 ## Recommandation immediate
 
 La prochaine sous-etape la plus rentable est :
-- commencer par la page liste `personnas`
+- tester visuellement la nouvelle page liste `personnas`
+- puis attaquer la logique detaillee des cartes et le lien vers la future fiche
 
 Pourquoi :
 - elle est visible tout de suite

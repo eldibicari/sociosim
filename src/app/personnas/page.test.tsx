@@ -96,9 +96,9 @@ describe("PersonnasPage", () => {
     expect(screen.getByText("Oriane")).toBeInTheDocument();
     expect(screen.getByText("Theo")).toBeInTheDocument();
     expect(screen.getByText("Jade")).toBeInTheDocument();
-    const interviewButtons = screen.getAllByLabelText(/Commencer un nouvel entretien/i);
-    expect(interviewButtons).toHaveLength(2);
-    expect(interviewButtons.some((button) => button.hasAttribute("disabled"))).toBe(false);
+    const interviewButtons = screen.getAllByRole("button", { name: /Commencer un entretien/i });
+    expect(interviewButtons).toHaveLength(3);
+    expect(interviewButtons.filter((button) => !button.hasAttribute("disabled"))).toHaveLength(2);
     expect(screen.getAllByRole("button", { name: /Activer|Désactiver/i })).toHaveLength(3);
   });
 
@@ -119,7 +119,7 @@ describe("PersonnasPage", () => {
       expect(screen.queryByText("Chargement des personnas...")).not.toBeInTheDocument();
     });
 
-    expect(screen.getAllByRole("button", { name: /Historique/i })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /^Historique$/i })).toHaveLength(1);
   });
 
   it("navigates to dashboard with agent filter on Historique click", async () => {
@@ -140,7 +140,7 @@ describe("PersonnasPage", () => {
       expect(screen.queryByText("Chargement des personnas...")).not.toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole("button", { name: /Historique/i }));
+    await user.click(screen.getByRole("button", { name: /^Historique$/i }));
     expect(mockRouter.push).toHaveBeenCalledWith("/interviews?agent=agent-oriane");
   });
 
@@ -173,7 +173,7 @@ describe("PersonnasPage", () => {
       expect(screen.queryByText("Chargement des personnas...")).not.toBeInTheDocument();
     });
 
-    await user.click(screen.getAllByLabelText(/Commencer un nouvel entretien/i)[0]);
+    await user.click(screen.getAllByRole("button", { name: /Commencer un entretien/i })[0]);
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(

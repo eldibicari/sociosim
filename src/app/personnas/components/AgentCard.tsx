@@ -1,14 +1,15 @@
 "use client";
 
 import {
+  Badge,
   Button,
   Text,
   VStack,
   HStack,
   Card,
+  Box,
 } from "@chakra-ui/react";
 import { type Agent } from "@/lib/agents";
-import NewInterviewButton from "@/app/components/NewInterviewButton";
 
 interface AgentCardProps {
   agent: Agent;
@@ -33,78 +34,153 @@ export function AgentCard({
   onNavigateHistory,
   onNavigatePrompt,
 }: AgentCardProps) {
+  const title =
+    agent.agent_name.charAt(0).toUpperCase() + agent.agent_name.slice(1);
+
   return (
-    <Card.Root backgroundColor={agent.active ? undefined : "bg.muted"}>
-      <Card.Body display="flex" flexDirection="column" alignItems="stretch" gap={2} py={2} px={4}>
-        <VStack gap={2} alignItems="flex-start">
-          <HStack width="100%" justifyContent="space-between" alignItems="flex-start">
-            <VStack gap={0} alignItems="flex-start">
-              <Text fontWeight="semibold" fontSize="md" color={agent.active ? "blue.600" : "fg.subtle"}>
-                {agent.agent_name.charAt(0).toUpperCase() + agent.agent_name.slice(1)}
-              </Text>
-              {agent.creator_name && (
-                <Text fontSize="xs" color="fg.subtle">
-                  {agent.creator_name}
+    <Card.Root
+      backgroundColor={agent.active ? "white" : "bg.muted"}
+      borderWidth="1px"
+      borderColor={agent.active ? "border.subtle" : "border.muted"}
+      borderRadius="2xl"
+      overflow="hidden"
+      boxShadow={agent.active ? "sm" : "none"}
+    >
+      <Card.Body
+        display="flex"
+        flexDirection="column"
+        alignItems="stretch"
+        gap={4}
+        py={5}
+        px={5}
+      >
+        <VStack gap={3} alignItems="flex-start">
+          <VStack gap={2} alignItems="flex-start" width="100%">
+            <HStack width="100%" justifyContent="space-between" alignItems="flex-start" gap={3}>
+              <VStack gap={1} alignItems="flex-start">
+                <Text
+                  fontWeight="semibold"
+                  fontSize="2xl"
+                  lineHeight="1"
+                  color={agent.active ? "blue.800" : "fg.subtle"}
+                >
+                  {title}
                 </Text>
-              )}
-            </VStack>
-            {agent.active && (
-              <NewInterviewButton
-                onClick={() => onSelectAgent(agent.id)}
-                loading={isCreatingSession}
-                disabled={isCreatingSession || agent.has_published_prompt === false}
-              />
+                {agent.creator_name && (
+                  <Text fontSize="sm" color="fg.subtle">
+                    {agent.creator_name}
+                  </Text>
+                )}
+              </VStack>
+              <Badge
+                colorPalette={agent.active ? "green" : "gray"}
+                variant="subtle"
+                borderRadius="full"
+                px={3}
+                py={1}
+                fontSize="xs"
+              >
+                {agent.active ? "Pret pour entretien" : "Inactif"}
+              </Badge>
+            </HStack>
+
+            <Text
+              fontSize="lg"
+              color="fg.default"
+              textAlign="left"
+              lineHeight="1.45"
+              whiteSpace="pre-line"
+              minHeight="5.5rem"
+            >
+              {(agent.description || "").replace(/\\n/g, "\n")}
+            </Text>
+          </VStack>
+
+          <HStack gap={2} flexWrap="wrap">
+            {agent.active ? (
+              <Badge colorPalette="green" variant="subtle" borderRadius="full" px={3}>
+                Actif
+              </Badge>
+            ) : (
+              <Badge colorPalette="gray" variant="subtle" borderRadius="full" px={3}>
+                Inactif
+              </Badge>
+            )}
+            <Badge
+              colorPalette={agent.has_published_prompt === false ? "orange" : "blue"}
+              variant="subtle"
+              borderRadius="full"
+              px={3}
+            >
+              {agent.has_published_prompt === false ? "Prompt a publier" : "Prompt publie"}
+            </Badge>
+            {hasInteracted && (
+              <Badge colorPalette="purple" variant="subtle" borderRadius="full" px={3}>
+                Deja utilise
+              </Badge>
+            )}
+            {agent.is_public && (
+              <Badge colorPalette="teal" variant="subtle" borderRadius="full" px={3}>
+                Public
+              </Badge>
             )}
           </HStack>
-          <Text
-            fontSize="sm"
-            color="fg.muted"
-            textAlign="left"
-            lineHeight="1.4"
-            whiteSpace="pre-line"
-          >
-            {(agent.description || "").replace(/\\n/g, "\n")}
-          </Text>
         </VStack>
-        <HStack gap={3} flexWrap="wrap" justifyContent="flex-start">
-          {agent.active && agent.has_published_prompt === false && (
-            <Text fontSize="xs" color="fg.muted">
-              (N&apos;a pas de prompt publi&eacute;)
-            </Text>
-          )}
-          {agent.active && hasInteracted && (
+
+        <Box borderTopWidth="1px" borderTopColor="border.subtle" />
+
+        <VStack gap={3} alignItems="stretch">
+          <Button
+            onClick={() => onSelectAgent(agent.id)}
+            colorPalette="blue"
+            variant="solid"
+            size="sm"
+            disabled={isCreatingSession || !agent.active || agent.has_published_prompt === false}
+            loading={isCreatingSession}
+          >
+            Commencer un entretien
+          </Button>
+
+          <HStack gap={2} flexWrap="wrap" justifyContent="flex-start">
+            {hasInteracted && (
+              <Button
+                onClick={() => onNavigateHistory(agent.id)}
+                variant="subtle"
+                size="xs"
+                paddingInline={3}
+              >
+                Historique
+              </Button>
+            )}
             <Button
-              onClick={() => onNavigateHistory(agent.id)}
               variant="subtle"
               size="xs"
-              paddingInline={2}
+              paddingInline={3}
+              onClick={() => onNavigatePrompt(agent.id)}
             >
-              Historique
+              Modifier prompt
             </Button>
+            {userAdmin && (
+              <Button
+                variant={agent.active ? "outline" : "subtle"}
+                colorPalette={agent.active ? "red" : "green"}
+                size="xs"
+                paddingInline={3}
+                onClick={() => onToggleAgent(agent)}
+                loading={togglingAgentId === agent.id}
+                disabled={togglingAgentId === agent.id}
+              >
+                {agent.active ? "Desactiver" : "Activer"}
+              </Button>
+            )}
+          </HStack>
+
+          {agent.active && agent.has_published_prompt === false && (
+            <Text fontSize="xs" color="fg.muted">
+              Ce personna ne peut pas encore etre utilise tant que son prompt n&apos;est pas publie.
+            </Text>
           )}
-          <Button
-            variant="subtle"
-            size="xs"
-            paddingInline={2}
-            onClick={() => onNavigatePrompt(agent.id)}
-            disabled={!agent.active}
-          >
-            Prompt
-          </Button>
-          {userAdmin && (
-            <Button
-              variant={agent.active ? "outline" : "subtle"}
-              colorPalette={agent.active ? "red" : undefined}
-              size="xs"
-              paddingInline={2}
-              onClick={() => onToggleAgent(agent)}
-              loading={togglingAgentId === agent.id}
-              disabled={togglingAgentId === agent.id}
-            >
-              {agent.active ? "D\u00e9sactiver" : "Activer"}
-            </Button>
-          )}
-        </HStack>
+        </VStack>
       </Card.Body>
     </Card.Root>
   );

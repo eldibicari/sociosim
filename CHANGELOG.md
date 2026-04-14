@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 - **Agent Policy Module:** Centralize all agent visibility, toggle, and interview-start rules in `src/lib/agentPolicy.ts`, replacing duplicated `isAdminLike()` checks across 3 API routes.
 
 ### Changed
+- **Personnas List UX:** Rework `/personnas` with a stronger pedagogical page intro, visible search, filter pills, clearer grouped sections, and richer cards with more explicit interview/history/prompt actions.
 - **Interview Analysis V2:** Rework interview analysis to evaluate the persona's answers as the real student material, add clearer metrics, a simple score breakdown, and a more pedagogical summary/coaching structure.
 - **Interview Analysis V3 Schema:** Prepare optional pedagogical sections for interview conduct, material reading, theme coverage, concrete examples, and alerts without breaking the current V2 response.
 - **Interview Analysis V3 Logic:** Start enriching analysis with interviewer-conduct signals, noise/test-message detection, first theme coverage hints, concrete examples, and pedagogical alerts.
