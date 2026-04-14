@@ -10,6 +10,7 @@ export interface AgentRecord {
   id: string;
   agent_name: string;
   description: string | null;
+  interview_guide: string | null;
   active: boolean;
   is_template: boolean;
   is_public: boolean;
@@ -30,7 +31,7 @@ export async function getAgents(): Promise<AgentRecord[]> {
 
   const { data, error } = await supabase
     .from("agents")
-    .select("id, agent_name, description, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
+    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
     .order("agent_name");
 
   throwIfError(error, "Failed to load agents");
@@ -45,6 +46,7 @@ export async function getAgents(): Promise<AgentRecord[]> {
     id: agent.id,
     agent_name: agent.agent_name,
     description: agent.description,
+    interview_guide: agent.interview_guide ?? null,
     active: agent.active,
     is_template: agent.is_template,
     is_public: agent.is_public,
@@ -65,7 +67,7 @@ export async function getAgentsWithPromptStatus(
   let query = supabase
     .from("agents")
     .select(
-      "id, agent_name, description, active, is_template, is_public, created_by, agent_prompts(published), users!agents_created_by_fkey(name, role)"
+      "id, agent_name, description, interview_guide, active, is_template, is_public, created_by, agent_prompts(published), users!agents_created_by_fkey(name, role)"
     )
     .order("agent_name");
 
@@ -90,6 +92,7 @@ export async function getAgentsWithPromptStatus(
     id: agent.id,
     agent_name: agent.agent_name,
     description: agent.description,
+    interview_guide: agent.interview_guide ?? null,
     active: agent.active,
     is_template: agent.is_template,
     is_public: agent.is_public,
@@ -111,7 +114,7 @@ export async function getPublishedAgents(
   let query = supabase
     .from("agents")
     .select(
-      "id, agent_name, description, active, is_template, is_public, created_by, agent_prompts!inner(published), users!agents_created_by_fkey(name, role)"
+      "id, agent_name, description, interview_guide, active, is_template, is_public, created_by, agent_prompts!inner(published), users!agents_created_by_fkey(name, role)"
     )
     .eq("agent_prompts.published", true)
     .order("agent_name");
@@ -136,6 +139,7 @@ export async function getPublishedAgents(
     id: agent.id,
     agent_name: agent.agent_name,
     description: agent.description,
+    interview_guide: agent.interview_guide ?? null,
     active: agent.active,
     is_template: agent.is_template,
     is_public: agent.is_public,
@@ -153,7 +157,7 @@ export async function getAgentByName(name: string): Promise<AgentRecord | null> 
 
   const { data, error } = await supabase
     .from("agents")
-    .select("id, agent_name, description, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
+    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
     .eq("agent_name", name)
     .maybeSingle();
 
@@ -166,6 +170,7 @@ export async function getAgentByName(name: string): Promise<AgentRecord | null> 
     id: row.id,
     agent_name: row.agent_name,
     description: row.description,
+    interview_guide: row.interview_guide ?? null,
     active: row.active,
     is_template: row.is_template,
     is_public: row.is_public,
@@ -183,7 +188,7 @@ export async function getAgentById(agentId: string): Promise<AgentRecord | null>
 
   const { data, error } = await supabase
     .from("agents")
-    .select("id, agent_name, description, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
+    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
     .eq("id", agentId)
     .maybeSingle();
 
@@ -196,6 +201,7 @@ export async function getAgentById(agentId: string): Promise<AgentRecord | null>
     id: row.id,
     agent_name: row.agent_name,
     description: row.description,
+    interview_guide: row.interview_guide ?? null,
     active: row.active,
     is_template: row.is_template,
     is_public: row.is_public,

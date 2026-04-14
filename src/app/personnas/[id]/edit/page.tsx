@@ -58,12 +58,13 @@ export default function EditAgentPromptPage() {
   const { user, isLoading: isAuthLoading } = useAuthUser();
   const [agentName, setAgentName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [interviewGuide, setInterviewGuide] = useState<string>("");
   const [promptOptions, setPromptOptions] = useState<PromptOption[]>([]);
   const [selectedPromptId, setSelectedPromptId] = useState<string>("");
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const basePromptRef = useRef("");
-  const baseAgentRef = useRef({ agentName: "", description: "" });
+  const baseAgentRef = useRef({ agentName: "", description: "", interviewGuide: "" });
   const [promptState, setPromptState] = useState<AgentPromptState>({
     systemPrompt: "",
     version: 0,
@@ -175,14 +176,27 @@ export default function EditAgentPromptPage() {
         }
 
         const payload = (await response.json().catch(() => null)) as
-          | { agent?: { agent_name?: string; description?: string | null }; prompts?: PromptOption[] }
+          | {
+              agent?: {
+                agent_name?: string;
+                description?: string | null;
+                interview_guide?: string | null;
+              };
+              prompts?: PromptOption[];
+            }
           | null;
         const prompts = (payload?.prompts || []) as PromptOption[];
         const nextAgentName = payload?.agent?.agent_name ?? "";
         const nextDescription = payload?.agent?.description ?? "";
+        const nextInterviewGuide = payload?.agent?.interview_guide ?? "";
         setAgentName(nextAgentName);
         setDescription(nextDescription);
-        baseAgentRef.current = { agentName: nextAgentName, description: nextDescription };
+        setInterviewGuide(nextInterviewGuide);
+        baseAgentRef.current = {
+          agentName: nextAgentName,
+          description: nextDescription,
+          interviewGuide: nextInterviewGuide,
+        };
         applyPromptList(prompts);
       } catch (loadError) {
         console.error("Error loading agent prompt:", loadError);
@@ -381,6 +395,7 @@ export default function EditAgentPromptPage() {
 
     const trimmedName = agentName.trim();
     const trimmedDescription = description.trim();
+    const trimmedInterviewGuide = interviewGuide.trim();
 
     if (!trimmedName) {
       setError("Le nom du personna est requis.");
@@ -404,6 +419,7 @@ export default function EditAgentPromptPage() {
           body: JSON.stringify({
             agent_name: trimmedName,
             description: trimmedDescription,
+            interview_guide: trimmedInterviewGuide,
           }),
         }),
         15000
@@ -416,7 +432,11 @@ export default function EditAgentPromptPage() {
         return;
       }
 
-      baseAgentRef.current = { agentName: trimmedName, description: trimmedDescription };
+      baseAgentRef.current = {
+        agentName: trimmedName,
+        description: trimmedDescription,
+        interviewGuide: trimmedInterviewGuide,
+      };
       toaster.create({
         title: "Personna mis à jour",
         description: "Les informations du personna ont été enregistrées.",
@@ -521,7 +541,8 @@ export default function EditAgentPromptPage() {
   const isSelectedPublished = selectedPrompt?.published ?? false;
   const isAgentDirty =
     agentName.trim() !== baseAgentRef.current.agentName ||
-    description.trim() !== baseAgentRef.current.description;
+    description.trim() !== baseAgentRef.current.description ||
+    interviewGuide.trim() !== baseAgentRef.current.interviewGuide;
 
   return (
     <Box width="full" height="100%">
@@ -560,6 +581,19 @@ export default function EditAgentPromptPage() {
                     placeholder="Étudiant curieux, négociateur expérimenté..."
                     paddingInlineStart={4}
                     resize="none"
+                  />
+                </Field.Root>
+
+                <Field.Root>
+                  <Field.Label fontSize="sm">Grille d&apos;entretien</Field.Label>
+                  <Textarea
+                    size="sm"
+                    rows={8}
+                    value={interviewGuide}
+                    onChange={(event) => setInterviewGuide(event.target.value)}
+                    placeholder="Themes, questions utiles, relances conseillees..."
+                    paddingInlineStart={4}
+                    resize="vertical"
                   />
                 </Field.Root>
 

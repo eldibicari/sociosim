@@ -17,7 +17,7 @@ describe("PATCH /api/agents/:id", () => {
   it("returns 400 when agent id is missing", async () => {
     const request = new NextRequest("http://localhost", {
       method: "PATCH",
-      body: JSON.stringify({ agent_name: "Eliot", description: "Desc" }),
+      body: JSON.stringify({ agent_name: "Eliot", description: "Desc", interview_guide: "" }),
       headers: { "Content-Type": "application/json" },
     });
 
@@ -53,14 +53,22 @@ describe("PATCH /api/agents/:id", () => {
 
     const request = new NextRequest("http://localhost", {
       method: "PATCH",
-      body: JSON.stringify({ agent_name: "Eliot", description: "Desc" }),
+      body: JSON.stringify({
+        agent_name: "Eliot",
+        description: "Desc",
+        interview_guide: "Guide",
+      }),
       headers: { "Content-Type": "application/json" },
     });
 
     const response = await PATCH(request, { params: Promise.resolve({ id: "agent-1" }) });
 
     expect(response.status).toBe(200);
-    expect(update).toHaveBeenCalledWith({ agent_name: "Eliot", description: "Desc" });
+    expect(update).toHaveBeenCalledWith({
+      agent_name: "Eliot",
+      description: "Desc",
+      interview_guide: "Guide",
+    });
     expect(eq).toHaveBeenCalledWith("id", "agent-1");
   });
 
@@ -75,7 +83,7 @@ describe("PATCH /api/agents/:id", () => {
 
     const request = new NextRequest("http://localhost", {
       method: "PATCH",
-      body: JSON.stringify({ agent_name: "Eliot", description: "Desc" }),
+      body: JSON.stringify({ agent_name: "Eliot", description: "Desc", interview_guide: "" }),
       headers: { "Content-Type": "application/json" },
     });
 

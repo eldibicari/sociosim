@@ -14,6 +14,8 @@ export async function PATCH(
     const body = await request.json().catch(() => null);
     const agentName = body?.agent_name?.trim();
     const description = body?.description?.trim();
+    const interviewGuide =
+      typeof body?.interview_guide === "string" ? body.interview_guide.trim() : "";
 
     if (!agentName || !description) {
       return NextResponse.json(
@@ -25,7 +27,11 @@ export async function PATCH(
     const supabase = createServiceSupabaseClient();
     const { error } = await supabase
       .from("agents")
-      .update({ agent_name: agentName, description })
+      .update({
+        agent_name: agentName,
+        description,
+        interview_guide: interviewGuide || null,
+      })
       .eq("id", agentId);
 
     if (error) {

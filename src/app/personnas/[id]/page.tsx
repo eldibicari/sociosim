@@ -22,6 +22,7 @@ import { type Agent } from "@/lib/agents";
 import { withTimeout } from "@/lib/withTimeout";
 import {
   type PersonaGuideSection,
+  parseStoredInterviewGuide,
   type PersonaHistoryItem,
   type PersonaPromptOption,
   buildPromptHighlights,
@@ -33,7 +34,7 @@ import {
 } from "../personaFiche";
 
 type PromptsPayload = {
-  agent?: Pick<Agent, "id" | "agent_name" | "description">;
+  agent?: Pick<Agent, "id" | "agent_name" | "description" | "interview_guide">;
   prompts?: PersonaPromptOption[];
 };
 
@@ -99,7 +100,9 @@ export default function PersonaFichePage() {
   const agentId = typeof params.id === "string" ? params.id : "";
   const { user, isLoading: isAuthLoading, refreshUser } = useAuthUser();
 
-  const [agent, setAgent] = useState<Pick<Agent, "id" | "agent_name" | "description"> | null>(
+  const [agent, setAgent] = useState<
+    Pick<Agent, "id" | "agent_name" | "description" | "interview_guide"> | null
+  >(
     null
   );
   const [prompts, setPrompts] = useState<PersonaPromptOption[]>([]);
@@ -178,7 +181,9 @@ export default function PersonaFichePage() {
 
   const primaryPrompt = useMemo(() => pickPrimaryPrompt(prompts), [prompts]);
   const promptText = primaryPrompt?.system_prompt ?? "";
+  const storedGuide = agent?.interview_guide ?? "";
   const promptHighlights = useMemo(() => buildPromptHighlights(promptText), [promptText]);
+  const storedGuideBlocks = useMemo(() => parseStoredInterviewGuide(storedGuide), [storedGuide]);
   const guideSections = useMemo<PersonaGuideSection[]>(
     () => (agent ? getPersonaInterviewGuide(agent, promptText) : []),
     [agent, promptText]
@@ -296,8 +301,10 @@ export default function PersonaFichePage() {
                   {title}
                 </Heading>
                 <Text color="fg.muted" fontSize="lg" lineHeight="1.7" maxWidth="3xl">
-                  {agent.description?.replace(/\\n/g, " ") ||
+                  <Box as="span" whiteSpace="pre-line">
+                  {agent.description?.replace(/\\n/g, "\n") ||
                     "Aucune description disponible pour ce persona."}
+                  </Box>
                 </Text>
               </VStack>
 
@@ -375,34 +382,75 @@ export default function PersonaFichePage() {
                 icon={<BookOpen size={18} />}
               >
                 <VStack alignItems="stretch" gap={5}>
-                  <Text color="fg.muted" fontSize="sm" lineHeight="1.7">
-                    Cette grille V1 reste pedagogique : elle aide l&apos;etudiant a
-                    structurer l&apos;entretien sans confondre la conduite de
-                    l&apos;entretien avec le prompt technique du persona.
-                  </Text>
-                  {guideSections.map((section) => (
-                    <Box
-                      key={section.title}
-                      borderWidth="1px"
-                      borderColor="border.subtle"
-                      borderRadius="2xl"
-                      p={4}
-                    >
-                      <VStack alignItems="stretch" gap={3}>
-                        <Heading size="sm">{section.title}</Heading>
-                        <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
-                          {section.objective}
-                        </Text>
-                        <VStack alignItems="stretch" gap={2}>
-                          {section.sampleQuestions.map((question) => (
-                            <Text key={question} fontSize="sm">
-                              - {question}
+                  {storedGuideBlocks.length > 0 ? (
+                    <>
+                      <Text color="fg.muted" fontSize="sm" lineHeight="1.7">
+                        Cette grille est rattachee a ce persona et peut etre modifiee dans l&apos;espace d&apos;edition. L&apos;etudiant s&apos;en sert avant et pendant l&apos;entretien pour personnaliser sa conduite.
+                      </Text>
+                      {storedGuideBlocks.map((section) => (
+                        <Box
+                          key={section.title}
+                          borderWidth="1px"
+                          borderColor="border.subtle"
+                          borderRadius="2xl"
+                          p={4}
+                        >
+                          <VStack alignItems="stretch" gap={3}>
+                            <Heading size="sm">{section.title}</Heading>
+                            <VStack alignItems="stretch" gap={2}>
+                              {section.lines.length > 0 ? (
+                                section.lines.map((line) => (
+                                  <Text key={line} fontSize="sm" color="fg.muted" lineHeight="1.7">
+                                    - {line}
+                                  </Text>
+                                ))
+                              ) : (
+                                <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
+                                  Theme renseigne sans sous-questions pour l&apos;instant.
+                                </Text>
+                              )}
+                            </VStack>
+                          </VStack>
+                        </Box>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <Text color="fg.muted" fontSize="sm" lineHeight="1.7">
+                        Aucune grille n&apos;a encore ete saisie pour ce persona. Cette version de secours est derivee du prompt pour aider l&apos;etudiant a demarrer.
+                      </Text>
+                      {guideSections.map((section) => (
+                        <Box
+                          key={section.title}
+                          borderWidth="1px"
+                          borderColor="border.subtle"
+                          borderRadius="2xl"
+                          p={4}
+                        >
+                          <VStack alignItems="stretch" gap={3}>
+                            <Heading size="sm">{section.title}</Heading>
+                            <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
+                              {section.objective}
                             </Text>
-                          ))}
-                        </VStack>
-                      </VStack>
-                    </Box>
-                  ))}
+                            <VStack alignItems="stretch" gap={2}>
+                              {section.sampleQuestions.map((question) => (
+                                <Text key={question} fontSize="sm">
+                                  - {question}
+                                </Text>
+                              ))}
+                            </VStack>
+                          </VStack>
+                        </Box>
+                      ))}
+                    </>
+                  )}
+                  <Button
+                    alignSelf="flex-start"
+                    variant="subtle"
+                    onClick={() => router.push(`/personnas/${agent.id}/edit`)}
+                  >
+                    Modifier la grille
+                  </Button>
                 </VStack>
               </SectionCard>
 

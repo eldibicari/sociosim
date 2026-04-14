@@ -109,6 +109,7 @@ CREATE TABLE public.agents (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     agent_name text NOT NULL,
     description text NOT NULL,
+    interview_guide text,
     created_at timestamp with time zone DEFAULT timezone('CET'::text, now()) NOT NULL,
     updated_at timestamp with time zone DEFAULT timezone('CET'::text, now()) NOT NULL,
     active boolean DEFAULT true NOT NULL,

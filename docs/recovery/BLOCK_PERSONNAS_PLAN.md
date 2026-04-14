@@ -128,6 +128,7 @@ Etat :
 - la creation est maintenant plus guidee et plus rassurante
 - la validation explique mieux ce qu'elle verifie
 - l'ecran d'edition retrouve le meme ton pedagogique
+- la grille d'entretien devient maintenant un vrai contenu editable du persona
 
 ### Etape 5
 

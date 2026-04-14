@@ -15,7 +15,7 @@ export async function GET(
 
     const { data: agentData, error: agentError } = await supabase
       .from("agents")
-      .select("id, agent_name, description")
+      .select("id, agent_name, description, interview_guide")
       .eq("id", agentId)
       .single();
 

@@ -69,6 +69,8 @@ Contenu :
 Important :
 - la grille doit etre pedagogique et lisible
 - elle n'est pas le prompt
+- elle doit etre modifiable dans l'espace persona
+- l'analyse de l'entretien sert ensuite a l'ameliorer, pas a la remplacer
 
 Resultat attendu :
 - l'etudiant dispose d'une vraie aide de conduite

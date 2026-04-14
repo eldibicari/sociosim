@@ -71,6 +71,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => null);
     const agentName = body?.agent_name?.trim();
     const description = body?.description?.trim();
+    const interviewGuide =
+      typeof body?.interview_guide === "string" ? body.interview_guide.trim() : "";
     const systemPrompt = body?.system_prompt?.trim();
 
     if (!agentName || !description || !systemPrompt) {
@@ -86,6 +88,7 @@ export async function POST(request: NextRequest) {
       .insert({
         agent_name: agentName,
         description,
+        interview_guide: interviewGuide || null,
         created_by: user.id,
       })
       .select("id")

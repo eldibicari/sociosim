@@ -30,6 +30,11 @@ export interface PersonaGuideSection {
   sampleQuestions: string[];
 }
 
+export interface PersonaGuideItem {
+  title: string;
+  lines: string[];
+}
+
 export interface PersonaPostureTip {
   title: string;
   body: string;
@@ -46,7 +51,7 @@ function compactWhitespace(value: string) {
 
 function truncate(value: string, maxLength: number) {
   if (value.length <= maxLength) return value;
-  return `${value.slice(0, maxLength - 1).trimEnd()}…`;
+  return `${value.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
 export function pickPrimaryPrompt(prompts: PersonaPromptOption[]) {
@@ -122,6 +127,29 @@ export function getPersonaInterviewGuide(
       ],
     },
   ];
+}
+
+export function parseStoredInterviewGuide(guideText: string): PersonaGuideItem[] {
+  const trimmed = guideText.trim();
+  if (!trimmed) return [];
+
+  const blocks = trimmed
+    .split(/\r?\n\s*\r?\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+
+  return blocks.map((block, index) => {
+    const lines = block
+      .split(/\r?\n/)
+      .map((line) => compactWhitespace(line.replace(/^[-*]\s*/, "").replace(/^#+\s*/, "")))
+      .filter(Boolean);
+
+    const [first, ...rest] = lines;
+    return {
+      title: first || `Theme ${index + 1}`,
+      lines: rest,
+    };
+  });
 }
 
 export function getPersonaPostureTips(agent: Agent, promptText: string): PersonaPostureTip[] {
