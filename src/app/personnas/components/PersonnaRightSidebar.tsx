@@ -1,13 +1,17 @@
 "use client";
 
-import { Box, Heading, VStack } from "@chakra-ui/react";
+import { Box, Heading, Text, VStack } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 
 type PersonnaRightSidebarProps = {
+  subtitle?: string;
   children?: ReactNode;
 };
 
-export default function PersonnaRightSidebar({ children }: PersonnaRightSidebarProps) {
+export default function PersonnaRightSidebar({
+  subtitle,
+  children,
+}: PersonnaRightSidebarProps) {
   return (
     <Box
       width={{ base: "full", lg: "var(--personna-right-sidebar-width)" }}
@@ -28,6 +32,11 @@ export default function PersonnaRightSidebar({ children }: PersonnaRightSidebarP
       <VStack align="stretch" gap={4}>
         <VStack align="stretch" gap={1}>
           <Heading size="md">Validation du prompt</Heading>
+          {subtitle ? (
+            <Text fontSize="sm" color="fg.muted" lineHeight="1.6">
+              {subtitle}
+            </Text>
+          ) : null}
         </VStack>
         {children}
       </VStack>

@@ -51,6 +51,32 @@ export default function PromptReviewSidebar({
   return (
       <VStack alignItems="stretch" gap={4}>
 
+        <Box
+          borderRadius="md"
+          padding={3}
+          backgroundColor={{ base: "blue.50", _dark: "gray.800" }}
+          borderLeft="3px solid"
+          borderLeftColor="blue.500"
+        >
+          <Text fontSize="sm" fontWeight="semibold">
+            Ce que nous verifions
+          </Text>
+          <Text fontSize="sm" color="fg.muted" marginTop={2}>
+            Le prompt doit rester coherent, actionnable et publiable sans perdre la logique du persona.
+          </Text>
+          <VStack alignItems="stretch" gap={1} marginTop={3}>
+            <Text fontSize="sm" color="fg.muted">
+              - clarte du profil et de la voix
+            </Text>
+            <Text fontSize="sm" color="fg.muted">
+              - situations, usages et tensions observables
+            </Text>
+            <Text fontSize="sm" color="fg.muted">
+              - absence d&apos;incoherences bloquantes
+            </Text>
+          </VStack>
+        </Box>
+
         <Box borderRadius="md" padding={3} backgroundColor={status.bg}>
           <Text fontSize="sm" fontWeight="semibold" color={status.color}>
             {status.label}

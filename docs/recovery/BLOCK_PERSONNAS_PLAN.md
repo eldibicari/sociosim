@@ -123,6 +123,12 @@ Creation de personna :
 - polir la colonne validation
 - garder Cauldron visible mais pas lourd
 
+Etat :
+- en cours avance
+- la creation est maintenant plus guidee et plus rassurante
+- la validation explique mieux ce qu'elle verifie
+- l'ecran d'edition retrouve le meme ton pedagogique
+
 ### Etape 5
 
 Finitions :

@@ -676,6 +676,7 @@ export default function EditAgentPromptPage() {
               <Box flex="1" minHeight={0} display="flex">
                 <PersonnaPromptEditor
                   editor={editor}
+                  subtitle="Travaille ici la version active du prompt : voix, situations, tensions, limites et coherence generale du persona."
                   error={error}
                   headingRight={(
                     <Menu.Root positioning={{ placement: "bottom-end" }}>
@@ -762,7 +763,7 @@ export default function EditAgentPromptPage() {
             </Box>
           )}
           right={(
-            <PersonnaRightSidebar>
+            <PersonnaRightSidebar subtitle="La validation te dit si le prompt est deja solide pour etre publie ou s'il faut encore le reprendre.">
               <PromptReviewSidebar
                 review={review}
                 reviewError={reviewError}

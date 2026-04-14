@@ -9,6 +9,7 @@ type PersonnaPromptEditorProps = {
   editor: Editor | null;
   editorToolbarRight?: ReactNode;
   headingRight?: ReactNode;
+  subtitle?: string;
   error?: string | null;
 };
 
@@ -16,6 +17,7 @@ export default function PersonnaPromptEditor({
   editor,
   editorToolbarRight,
   headingRight,
+  subtitle,
   error,
 }: PersonnaPromptEditorProps) {
   return (
@@ -33,7 +35,14 @@ export default function PersonnaPromptEditor({
       ) : null}
       <Field.Root display="flex" flexDirection="column" flex="1" minHeight={0}>
         <HStack justify="space-between" align="center" width="full">
-          <Heading size="md">Prompt du personna</Heading>
+          <VStack align="stretch" gap={1}>
+            <Heading size="md">Prompt du personna</Heading>
+            {subtitle ? (
+              <Text fontSize="sm" color="fg.muted" lineHeight="1.6">
+                {subtitle}
+              </Text>
+            ) : null}
+          </VStack>
           {headingRight}
         </HStack>
         <RichTextEditor.Root
