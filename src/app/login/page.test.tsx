@@ -148,6 +148,26 @@ describe("LoginPage", () => {
     expect(submitButton).not.toBeDisabled();
   });
 
+  it("shows a local timeout message when sign-in takes too long", async () => {
+    const user = userEvent.setup();
+    signInWithPassword.mockRejectedValue(new Error("auth.signInWithPassword timed out after 30000ms"));
+
+    renderWithChakra(<LoginPage />);
+
+    await user.type(screen.getByLabelText("Adresse e-mail"), "user@example.com");
+    await user.type(screen.getByLabelText("Mot de passe"), "password123");
+    await user.click(screen.getByRole("button", { name: /Se connecter/i }));
+
+    await waitFor(() => {
+      expect(toaster.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description:
+            "La connexion prend trop de temps sur l'environnement local. Réessayez dans quelques secondes.",
+        })
+      );
+    });
+  });
+
   it("redirects on successful sign-in", async () => {
     const user = userEvent.setup();
     vi.mocked(useRouter).mockReturnValue(mockRouter as ReturnType<typeof useRouter>);

@@ -15,17 +15,17 @@ const enqueueAuth = <T,>(label: string, fn: () => Promise<T>, timeoutMs: number)
 };
 
 export const authService = {
-  getSession: () => enqueueAuth("auth.getSession", () => supabase.auth.getSession(), 10000),
+  getSession: () => enqueueAuth("auth.getSession", () => supabase.auth.getSession(), 15000),
   signInWithPassword: (payload: { email: string; password: string }) =>
-    enqueueAuth("auth.signInWithPassword", () => supabase.auth.signInWithPassword(payload), 15000),
+    enqueueAuth("auth.signInWithPassword", () => supabase.auth.signInWithPassword(payload), 30000),
   signOutLocal: () =>
-    enqueueAuth("auth.signOutLocal", () => supabase.auth.signOut({ scope: "local" }), 2000),
+    enqueueAuth("auth.signOutLocal", () => supabase.auth.signOut({ scope: "local" }), 5000),
   setSession: (payload: { access_token: string; refresh_token: string }) =>
-    enqueueAuth("auth.setSession", () => supabase.auth.setSession(payload), 8000),
+    enqueueAuth("auth.setSession", () => supabase.auth.setSession(payload), 15000),
   exchangeCodeForSession: (code: string) =>
-    enqueueAuth("auth.exchangeCodeForSession", () => supabase.auth.exchangeCodeForSession(code), 8000),
+    enqueueAuth("auth.exchangeCodeForSession", () => supabase.auth.exchangeCodeForSession(code), 15000),
   updateUser: (attributes: UserAttributes) =>
-    enqueueAuth("auth.updateUser", () => supabase.auth.updateUser(attributes), 10000),
+    enqueueAuth("auth.updateUser", () => supabase.auth.updateUser(attributes), 15000),
   onAuthStateChange: (callback: (event: AuthChangeEvent, session: AuthSession | null) => void) =>
     supabase.auth.onAuthStateChange(callback),
 };

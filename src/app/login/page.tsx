@@ -45,6 +45,9 @@ function LoginPageInner() {
       return "Impossible de vous connecter pour le moment. Veuillez réessayer.";
     }
     const lower = message.toLowerCase();
+    if (lower.includes("timed out")) {
+      return "La connexion prend trop de temps sur l'environnement local. Réessayez dans quelques secondes.";
+    }
     if (lower.includes("banned")) {
       return "Impossible de vous connecter. Contacter un administrateur du site.";
     }
@@ -102,7 +105,7 @@ function LoginPageInner() {
       toaster.create({
         title: "Connexion impossible",
         description: isTimeout
-          ? "La connexion a expiré. Timeout."
+          ? "La connexion prend trop de temps sur l'environnement local. Réessayez dans quelques secondes."
           : "Impossible de vous connecter pour le moment. Veuillez réessayer.",
         type: "error",
       });
