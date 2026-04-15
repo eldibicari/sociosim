@@ -44,7 +44,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
   const [agentName, setAgentName] = useState("");
   const [description, setDescription] = useState("");
   const [interviewGuide, setInterviewGuide] = useState(
-    "Entrer dans le contexte\n- Situer le parcours, le quotidien et le rapport general a l'IA\n\nFaire raconter des usages concrets\n- Demander un exemple recent, date et situe\n- Relancer sur ce qui a ete garde, modifie ou abandonne\n\nExplorer les tensions\n- Faire emerger hesitations, limites, contournements et contradictions"
+    "Entrer dans le contexte\n- Situer le parcours, le quotidien et le rapport général à l'IA\n\nFaire raconter des usages concrets\n- Demander un exemple récent, daté et situé\n- Relancer sur ce qui a été gardé, modifié ou abandonné\n\nExplorer les tensions\n- Faire émerger hésitations, limites, contournements et contradictions"
   );
   const [systemPrompt, setSystemPrompt] = useState(templatePrompt);
   const [error, setError] = useState<string | null>(null);
@@ -168,7 +168,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
     }
 
     if (!trimmedPrompt) {
-      setError("Le prompt systeme est requis.");
+      setError("Le prompt système est requis.");
       return;
     }
 
@@ -179,7 +179,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
         return;
       }
       if (reviewResult.status === "invalid") {
-        setError("Le prompt a ete refuse par la validation.");
+        setError("Le prompt a été refusé par la validation.");
         return;
       }
 
@@ -205,19 +205,19 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
         console.error("Error creating personna:", payload);
-        setError("Impossible de creer le personna.");
+        setError("Impossible de créer le personna.");
         return;
       }
 
       const payload = (await response.json().catch(() => null)) as { id?: string } | null;
       if (!payload?.id) {
-        setError("Impossible de creer le personna.");
+        setError("Impossible de créer le personna.");
         return;
       }
 
       toaster.create({
-        title: "Personna cree",
-        description: "Le prompt a ete enregistre et peut maintenant etre retravaille.",
+        title: "Personna créé",
+        description: "Le prompt a été enregistré et peut maintenant être retravaillé.",
         type: "success",
       });
       router.push(`/personnas/${payload.id}/edit`);
@@ -235,8 +235,8 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
         <PersonnaLayout
           left={
             <PersonnaLeftSidebar
-              title="Creer un nouveau personna"
-              subtitle="Nommer le profil, clarifier son contexte et poser une premiere base de prompt."
+              title="Créer un nouveau personna"
+              subtitle="Nommer le profil, clarifier son contexte et poser une première base de prompt."
             >
               <VStack align="stretch" gap={4}>
                 <Box
@@ -251,16 +251,16 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       Avant de commencer
                     </Text>
                     <Text fontSize="sm" color="fg.muted">
-                      Cette page sert a poser une premiere version credible du persona. Le prompt pourra ensuite etre retravaille dans sa fiche.
+                      Cette page sert à poser une première version crédible du persona. Le prompt pourra ensuite être retravaillé dans sa fiche.
                     </Text>
                     <Text fontSize="sm" color="fg.muted">
                       - choisis un nom clair et reconnaissable
                     </Text>
                     <Text fontSize="sm" color="fg.muted">
-                      - resume en deux lignes le profil et le rapport a l&apos;IA
+                      - résume en deux lignes le profil et le rapport à l&apos;IA
                     </Text>
                     <Text fontSize="sm" color="fg.muted">
-                      - colle un prompt qui donne deja une voix et des situations
+                      - colle un prompt qui donne déjà une voix et des situations
                     </Text>
                   </VStack>
                 </Box>
@@ -307,7 +307,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                     resize="vertical"
                   />
                   <Field.HelperText fontSize="xs" color="fg.muted">
-                    Cette grille sert avant l&apos;entretien pour guider l&apos;etudiant. Elle pourra ensuite etre amelioree a partir de l&apos;analyse.
+                    Cette grille sert avant l&apos;entretien pour guider l&apos;étudiant. Elle pourra ensuite être améliorée à partir de l&apos;analyse.
                   </Field.HelperText>
                 </Field.Root>
 
@@ -322,7 +322,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       paddingInline={0}
                       color="fg.muted"
                     >
-                      <Text fontSize="xs">Comment generer un system prompt ?</Text>
+                      <Text fontSize="xs">Comment générer un prompt système ?</Text>
                       {helpOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </Button>
                   </Collapsible.Trigger>
@@ -349,23 +349,23 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                         </Button>
                       </Text>
                       <Text fontSize="xs" color="fg.muted">
-                        Ce prompt de depart sert surtout a poser une voix, des usages, des tensions et des scenes plausibles.
+                        Ce prompt de départ sert surtout à poser une voix, des usages, des tensions et des scènes plausibles.
                       </Text>
                       <Box fontFamily="mono" fontSize="2xs" color="fg.muted" paddingLeft={3}>
-                        Nous allons construire un system prompt pour une personna a partir d&apos;une interview
-                        sociologique de la personne reelle sur son usage de l&apos;IA.
+                        Nous allons construire un prompt système pour une personna à partir d&apos;une interview
+                        sociologique de la personne réelle sur son usage de l&apos;IA.
                         <br />
-                        Voir fichier PDF de l&apos;interview
+                        Voir le fichier PDF de l&apos;entretien
                         <br />
                         Le but est de generer un fichier markdown suivant le template fourni.
                         <br />
-                        Il faut renseigner tous les elements entre accolades {"{"}{"}"}.
+                        Il faut renseigner tous les éléments entre accolades {"{"}{"}"}.
                         <br />
-                        Ce fichier markdown servira de system prompt pour une personna dans une application de
-                        simulation d&apos;entretien en sociologie.
+                        Ce fichier markdown servira de prompt système pour une personna dans une application de
+                        simulation d&apos;entretien sociologique.
                       </Box>
                       <Text fontSize="xs" color="fg.muted">
-                        Tu peux ensuite coller le resultat genere par l&apos;IA dans l&apos;editeur central.
+                        Tu peux ensuite coller le résultat généré par l&apos;IA dans l&apos;éditeur central.
                       </Text>
                     </VStack>
                   </Collapsible.Content>
@@ -399,7 +399,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       disabled={!agentName.trim() || !description.trim() || isSaving}
                       paddingInline={5}
                     >
-                      Creer la personna
+                      Créer la personna
                     </Button>
                   }
                 />
@@ -407,7 +407,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
             </Box>
           }
           right={
-            <PersonnaRightSidebar subtitle="La validation t&apos;aide a voir si le prompt est deja publiable ou s&apos;il faut encore le consolider.">
+            <PersonnaRightSidebar subtitle="Cette validation concerne seulement le prompt du persona. Elle vérifie si sa voix, son contexte et ses tensions sont assez clairs pour être utilisés en entretien.">
               <PromptReviewSidebar
                 review={review}
                 reviewError={reviewError}

@@ -124,11 +124,12 @@ Creation de personna :
 - garder Cauldron visible mais pas lourd
 
 Etat :
-- en cours avance
+- termine pour la demo
 - la creation est maintenant plus guidee et plus rassurante
 - la validation explique mieux ce qu'elle verifie
 - l'ecran d'edition retrouve le meme ton pedagogique
 - la grille d'entretien devient maintenant un vrai contenu editable du persona
+- la page edition distingue mieux identite, grille d'entretien et prompt
 
 ### Etape 5
 
@@ -137,16 +138,22 @@ Finitions :
 - micro-textes
 - verification de demo
 
+Etat :
+- en cours de cloture
+- resume persona lisible sans tronquer les phrases
+- validation du prompt clarifiee
+- preparation des personnas exemples pour l'accueil documentee dans `PERSONNAS_HOME_EXAMPLES_PLAN.md`
+
 ## Recommandation immediate
 
 La prochaine sous-etape la plus rentable est :
-- tester visuellement la fiche persona V1
-- puis enrichir ce qui manque le plus entre historique detaille, grille associee et creation / edition
+- faire un test visuel rapide du parcours complet personnas
+- puis passer au bloc `accueil` si aucun bug visible ne bloque
 
 Pourquoi :
-- la liste a deja retrouve un bon niveau
-- la fiche persona devient maintenant le vrai noyau du bloc
-- c'est elle qui doit relier entretien, prompt et historique
+- le bloc personnas relie maintenant liste, carte, fiche, grille, prompt, historique et entretien
+- les ameliorations restantes sont surtout du polish visuel global
+- les personnas exemples de la home sont maintenant cadrés pour le prochain grand bloc
 
 ## Cadrage complementaire deja retenu
 

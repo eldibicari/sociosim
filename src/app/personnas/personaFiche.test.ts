@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildPromptHighlights, getPersonaHistoryTitle, getPersonaInterviewGuide, pickPrimaryPrompt } from "./personaFiche";
+import {
+  buildPromptHighlights,
+  buildPromptSummaryPoints,
+  getPersonaHistoryTitle,
+  getPersonaInterviewGuide,
+  pickPrimaryPrompt,
+} from "./personaFiche";
 
 describe("personaFiche helpers", () => {
   it("prefers a published prompt when selecting the main prompt", () => {
@@ -33,6 +39,16 @@ Etudiante en master qui utilise l'IA pour organiser son travail.
 
     expect(highlights).toContain("Profil general");
     expect(highlights.some((line) => line.includes("utilise l'IA"))).toBe(true);
+  });
+
+  it("keeps persona summary points readable without truncating them", () => {
+    const longLine =
+      "Simulation d'une recherche sociologique sur les usages des intelligences artificielles génératives dans les études, les arbitrages quotidiens et les tensions observables.";
+
+    const points = buildPromptSummaryPoints(longLine);
+
+    expect(points).toContain(longLine);
+    expect(points[0]).not.toContain("...");
   });
 
   it("creates a pedagogical interview guide and history labels", () => {

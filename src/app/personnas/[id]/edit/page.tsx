@@ -8,6 +8,7 @@ import {
   HStack,
   Input,
   Menu,
+  Separator,
   Textarea,
   Spinner,
   Text,
@@ -560,13 +561,31 @@ export default function EditAgentPromptPage() {
               )}
             >
               <VStack align="stretch" gap={4}>
+                <Box
+                  borderRadius="2xl"
+                  borderWidth="1px"
+                  borderColor="border.subtle"
+                  backgroundColor="white"
+                  padding={4}
+                >
+                  <VStack align="stretch" gap={3}>
+                    <VStack align="stretch" gap={1}>
+                      <Text fontSize="sm" fontWeight="semibold">
+                        Identité du persona
+                      </Text>
+                      <Text fontSize="xs" color="fg.muted" lineHeight="1.6">
+                        Cette partie sert à reconnaître le persona dans la bibliothèque,
+                        l&apos;historique et les entretiens.
+                      </Text>
+                    </VStack>
+
                 <Field.Root>
-                  <Field.Label fontSize="sm">Prénom</Field.Label>
+                  <Field.Label fontSize="sm">Nom affiché</Field.Label>
                   <Input
                     size="xs"
                     value={agentName}
                     onChange={(event) => setAgentName(event.target.value)}
-                    placeholder="Camille, Karim, Zoé, Alexis, Bilel, ..."
+                    placeholder="Camille, Karim, Zoé, Alexis, Bilel..."
                     paddingInlineStart={4}
                   />
                 </Field.Root>
@@ -578,24 +597,52 @@ export default function EditAgentPromptPage() {
                     rows={2}
                     value={description}
                     onChange={(event) => setDescription(event.target.value)}
-                    placeholder="Étudiant curieux, négociateur expérimenté..."
-                    paddingInlineStart={4}
-                    resize="none"
-                  />
-                </Field.Root>
-
-                <Field.Root>
-                  <Field.Label fontSize="sm">Grille d&apos;entretien</Field.Label>
-                  <Textarea
-                    size="sm"
-                    rows={8}
-                    value={interviewGuide}
-                    onChange={(event) => setInterviewGuide(event.target.value)}
-                    placeholder="Themes, questions utiles, relances conseillees..."
+                    placeholder="Étudiante curieuse, négociateur expérimenté, posture prudente face à l'IA..."
                     paddingInlineStart={4}
                     resize="vertical"
                   />
+                  <Field.HelperText fontSize="xs" color="fg.muted">
+                    Une phrase claire suffit : profil, contexte et rapport à l&apos;IA.
+                  </Field.HelperText>
                 </Field.Root>
+                  </VStack>
+                </Box>
+
+                <Box
+                  borderRadius="2xl"
+                  borderWidth="1px"
+                  borderColor="border.subtle"
+                  backgroundColor="white"
+                  padding={4}
+                >
+                  <VStack align="stretch" gap={3}>
+                    <VStack align="stretch" gap={1}>
+                      <Text fontSize="sm" fontWeight="semibold">
+                        Grille d&apos;entretien
+                      </Text>
+                      <Text fontSize="xs" color="fg.muted" lineHeight="1.6">
+                        Elle guide l&apos;étudiant avant et pendant l&apos;entretien. Le
+                        prompt fait vivre le persona, la grille aide à le questionner.
+                      </Text>
+                    </VStack>
+
+                <Field.Root>
+                  <Field.Label fontSize="sm">Thèmes et relances</Field.Label>
+                  <Textarea
+                    size="sm"
+                    rows={10}
+                    value={interviewGuide}
+                    onChange={(event) => setInterviewGuide(event.target.value)}
+                    placeholder="Entrer dans le contexte&#10;- Question ouverte&#10;- Relance utile&#10;&#10;Explorer les usages&#10;- Exemple concret&#10;- Tension à approfondir"
+                    paddingInlineStart={4}
+                    resize="vertical"
+                  />
+                  <Field.HelperText fontSize="xs" color="fg.muted">
+                    Format conseillé : un thème, puis deux ou trois questions ou relances.
+                  </Field.HelperText>
+                </Field.Root>
+                  </VStack>
+                </Box>
 
                 <Button
                   size="sm"
@@ -603,11 +650,13 @@ export default function EditAgentPromptPage() {
                   onClick={handleSaveAgent}
                   loading={isSavingAgent}
                   disabled={!isAgentDirty || isSavingAgent}
-                  alignSelf="flex-end"
+                  alignSelf="stretch"
                   paddingInline={5}
                 >
-                  Modifier
+                  Enregistrer la fiche
                 </Button>
+
+                <Separator />
 
                 <Collapsible.Root open={helpOpen} onOpenChange={({ open }) => setHelpOpen(open)}>
                   <Collapsible.Trigger asChild>
@@ -618,15 +667,15 @@ export default function EditAgentPromptPage() {
                       paddingInline={0}
                       color="fg.muted"
                     >
-                      <Text fontSize="xs">Comment générer un system prompt ?</Text>
+                      <Text fontSize="xs">Comment générer un prompt système ?</Text>
                       {helpOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </Button>
                   </Collapsible.Trigger>
                   <Collapsible.Content>
                     <VStack align="stretch" gap={2} paddingTop={2}>
                       <Text fontSize="xs" color="fg.muted">
-                        Le plus simple est de fournir à un chatbot (Claude, chatGPT, etc):
-                        <br />- un pdf de l&apos;interview
+                        Le plus simple est de fournir à un chatbot (Claude, ChatGPT, etc.) :
+                        <br />- un PDF d&apos;entretien
                         <br />- un fichier de{" "}
                         <Button
                           asChild
@@ -645,7 +694,8 @@ export default function EditAgentPromptPage() {
                         </Button>
                       </Text>
                       <Text fontSize="xs" color="fg.muted">
-                        Le prompt suivant donne de bons résultats avec Claude.
+                        Le prompt doit surtout poser une voix, des usages, des tensions et
+                        des scènes plausibles.
                       </Text>
                       <Box
                         fontFamily="mono"
@@ -653,25 +703,25 @@ export default function EditAgentPromptPage() {
                         color="fg.muted"
                         paddingLeft={3}
                       >
-                        Nous allons construire un system prompt pour une personna à partir d&apos;une interview
-                        sociologique de la personne réélle sur son usage de l&apos;IA.
+                        Nous allons construire un prompt système pour une persona à partir d&apos;une
+                        interview sociologique sur son usage de l&apos;IA.
                         <br />
-                        Voir fichier pdf de l&apos;interview
+                        Voir le fichier PDF de l&apos;entretien
                         <br />
                         Le but est de générer un fichier markdown suivant le template fourni.
                         <br />
-                        Il faut renseigner tous les élèments entre acolades {"{"}{"}"}.
+                        Il faut renseigner tous les éléments entre accolades {"{"}{"}"}.
                         <br />
-                        Ce fichier markdown servira de system prompt pour une personna dans une application de
-                        simulation d&apos;entretien en sociologie
+                        Ce fichier markdown servira de prompt système pour une persona dans une
+                        application de simulation d&apos;entretien sociologique.
                         <br />
-                        Les élèments doivent être assez précis
+                        Les éléments doivent être assez précis.
                         <br />
                         Faisons un premier essai
                       </Box>
                       <Text fontSize="xs" color="fg.muted">
-                        Vous pouvez ensuite copier coller le resultat généré par l&apos;IA dans le champ ci-dessous.
-                        Le template en markdown est disponible{" "}
+                        Tu peux ensuite coller le résultat généré par l&apos;IA dans
+                        l&apos;éditeur central. Le template markdown est disponible{" "}
                         <Button
                           asChild
                           variant="plain"
@@ -797,7 +847,7 @@ export default function EditAgentPromptPage() {
             </Box>
           )}
           right={(
-            <PersonnaRightSidebar subtitle="La validation te dit si le prompt est deja solide pour etre publie ou s'il faut encore le reprendre.">
+            <PersonnaRightSidebar subtitle="Cette validation concerne seulement le prompt du persona. Elle vérifie si sa voix, son contexte et ses tensions sont assez clairs pour être utilisés en entretien.">
               <PromptReviewSidebar
                 review={review}
                 reviewError={reviewError}

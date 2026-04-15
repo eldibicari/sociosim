@@ -25,7 +25,7 @@ import {
   parseStoredInterviewGuide,
   type PersonaHistoryItem,
   type PersonaPromptOption,
-  buildPromptHighlights,
+  buildPromptSummaryPoints,
   getPersonaHistoryTitle,
   getPersonaInterviewGuide,
   getPersonaPostureTips,
@@ -182,7 +182,7 @@ export default function PersonaFichePage() {
   const primaryPrompt = useMemo(() => pickPrimaryPrompt(prompts), [prompts]);
   const promptText = primaryPrompt?.system_prompt ?? "";
   const storedGuide = agent?.interview_guide ?? "";
-  const promptHighlights = useMemo(() => buildPromptHighlights(promptText), [promptText]);
+  const promptSummaryPoints = useMemo(() => buildPromptSummaryPoints(promptText), [promptText]);
   const storedGuideBlocks = useMemo(() => parseStoredInterviewGuide(storedGuide), [storedGuide]);
   const guideSections = useMemo<PersonaGuideSection[]>(
     () => (agent ? getPersonaInterviewGuide(agent, promptText) : []),
@@ -256,7 +256,7 @@ export default function PersonaFichePage() {
         <VStack gap={4} alignItems="flex-start">
           <Heading size="lg">Fiche persona introuvable</Heading>
           <Text color="fg.muted">
-            {error ?? "Aucune donnee n'est disponible pour ce persona."}
+            {error ?? "Aucune donnée n'est disponible pour ce persona."}
           </Text>
           <Button variant="subtle" onClick={() => router.push("/personnas")}>
             Retour aux personnas
@@ -357,35 +357,44 @@ export default function PersonaFichePage() {
             gap={6}
           >
             <VStack alignItems="stretch" gap={6}>
-              <SectionCard title="Resume du persona" icon={<BookOpen size={18} />}>
+              <SectionCard title="Résumé du persona" icon={<BookOpen size={18} />}>
                 <VStack alignItems="stretch" gap={3}>
                   <Text lineHeight="1.7" color="fg.default">
-                    Cette fiche sert de point d&apos;entree pour comprendre comment
-                    aborder {title}, quel type de materiau il peut produire et quelles
+                    Cette fiche sert de point d&apos;entrée pour comprendre comment
+                    aborder {title}, quel type de matériau il peut produire et quelles
                     relances sont les plus utiles.
                   </Text>
-                  {promptHighlights.length > 0 ? (
+                  {promptSummaryPoints.length > 0 ? (
                     <VStack alignItems="stretch" gap={2}>
-                      <Text fontWeight="semibold">Points a garder en tete</Text>
-                      {promptHighlights.map((highlight) => (
-                        <Text key={highlight} fontSize="sm" color="fg.muted">
-                          - {highlight}
-                        </Text>
-                      ))}
+                      <Text fontWeight="semibold">Points à garder en tête</Text>
+                      <Box
+                        maxHeight="260px"
+                        overflowY="auto"
+                        paddingRight={2}
+                        borderRadius="xl"
+                      >
+                        <VStack alignItems="stretch" gap={2}>
+                          {promptSummaryPoints.map((highlight) => (
+                            <Text key={highlight} fontSize="sm" color="fg.muted" lineHeight="1.65">
+                              - {highlight}
+                            </Text>
+                          ))}
+                        </VStack>
+                      </Box>
                     </VStack>
                   ) : null}
                 </VStack>
               </SectionCard>
 
               <SectionCard
-                title="Grille d'entretien conseillee"
+                title="Grille d'entretien conseillée"
                 icon={<BookOpen size={18} />}
               >
                 <VStack alignItems="stretch" gap={5}>
                   {storedGuideBlocks.length > 0 ? (
                     <>
                       <Text color="fg.muted" fontSize="sm" lineHeight="1.7">
-                        Cette grille est rattachee a ce persona et peut etre modifiee dans l&apos;espace d&apos;edition. L&apos;etudiant s&apos;en sert avant et pendant l&apos;entretien pour personnaliser sa conduite.
+                        Cette grille est rattachée à ce persona et peut être modifiée dans l&apos;espace d&apos;édition. L&apos;étudiant s&apos;en sert avant et pendant l&apos;entretien pour personnaliser sa conduite.
                       </Text>
                       {storedGuideBlocks.map((section) => (
                         <Box
@@ -406,7 +415,7 @@ export default function PersonaFichePage() {
                                 ))
                               ) : (
                                 <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
-                                  Theme renseigne sans sous-questions pour l&apos;instant.
+                                  Thème renseigné sans sous-questions pour l&apos;instant.
                                 </Text>
                               )}
                             </VStack>
@@ -417,7 +426,7 @@ export default function PersonaFichePage() {
                   ) : (
                     <>
                       <Text color="fg.muted" fontSize="sm" lineHeight="1.7">
-                        Aucune grille n&apos;a encore ete saisie pour ce persona. Cette version de secours est derivee du prompt pour aider l&apos;etudiant a demarrer.
+                        Aucune grille n&apos;a encore été saisie pour ce persona. Cette version de secours est dérivée du prompt pour aider l&apos;étudiant à démarrer.
                       </Text>
                       {guideSections.map((section) => (
                         <Box
@@ -454,7 +463,7 @@ export default function PersonaFichePage() {
                 </VStack>
               </SectionCard>
 
-              <SectionCard title="Prompt associe" icon={<FileText size={18} />}>
+              <SectionCard title="Prompt associé" icon={<FileText size={18} />}>
                 <VStack alignItems="stretch" gap={4}>
                   {primaryPrompt ? (
                     <>
@@ -465,7 +474,7 @@ export default function PersonaFichePage() {
                           borderRadius="full"
                           px={3}
                         >
-                          {primaryPrompt.published ? "Prompt publie" : "Dernier brouillon"}
+                          {primaryPrompt.published ? "Prompt publié" : "Dernier brouillon"}
                         </Badge>
                         <Badge
                           colorPalette="blue"
@@ -490,7 +499,7 @@ export default function PersonaFichePage() {
                     </>
                   ) : (
                     <Text color="fg.muted">
-                      Aucun prompt n&apos;est encore disponible pour ce persona.
+                    Aucun prompt n&apos;est encore disponible pour ce persona.
                     </Text>
                   )}
                   <Button
@@ -498,7 +507,7 @@ export default function PersonaFichePage() {
                     variant="subtle"
                     onClick={() => router.push(`/personnas/${agent.id}/edit`)}
                   >
-                    Ouvrir l&apos;editeur de prompt
+                    Ouvrir l&apos;éditeur de prompt
                   </Button>
                 </VStack>
               </SectionCard>
@@ -508,17 +517,17 @@ export default function PersonaFichePage() {
               <SectionCard title="Repere rapide" icon={<Clock3 size={18} />}>
                 <VStack alignItems="stretch" gap={3}>
                   <Text fontSize="sm" color="fg.muted">
-                    Entretiens lies a ce persona
+                    Entretiens liés à ce persona
                   </Text>
                   <Heading size="lg">{history.length}</Heading>
                   <Text fontSize="sm" color="fg.muted">
                     {interviewsWithMaterial.length} entretien
                     {interviewsWithMaterial.length > 1 ? "s" : ""} avec un minimum de
-                    matiere exploitable
+                    matière exploitable
                   </Text>
                   <Text fontSize="sm" color="fg.muted">
                     {history[0]?.updated_at
-                      ? `Derniere activite : ${formatDate(history[0].updated_at)}`
+                      ? `Dernière activité : ${formatDate(history[0].updated_at)}`
                       : "Aucun historique pour le moment"}
                   </Text>
                 </VStack>
@@ -590,7 +599,7 @@ export default function PersonaFichePage() {
                     ))
                   ) : (
                     <Text color="fg.muted">
-                      Aucun entretien n&apos;est encore rattache a ce persona.
+                      Aucun entretien n&apos;est encore rattaché à ce persona.
                     </Text>
                   )}
                   <Button

@@ -23,6 +23,7 @@ Resultat attendu :
 Etat :
 - cadrage global pose
 - cadrage precis de la fiche persona documente dans `PERSONA_FICHE_PLAN.md`
+- termine
 
 ## Etape 2. Refaire la page liste `personnas`
 
@@ -35,6 +36,9 @@ Contenu :
 
 Resultat attendu :
 - une page plus proche des captures et plus comprehensible
+
+Etat :
+- termine
 
 ## Etape 3. Refaire les cartes persona
 
@@ -54,6 +58,9 @@ Actions a garder :
 Resultat attendu :
 - chaque persona devient un vrai point d'entree de travail
 
+Etat :
+- termine
+
 ## Etape 4. Creer la logique de fiche persona
 
 La fiche persona doit regrouper :
@@ -71,6 +78,9 @@ Important :
 Resultat attendu :
 - chaque persona possede un espace coherent
 
+Etat :
+- termine
+
 ## Etape 5. Verifier / ameliorer le flux de creation
 
 Contenu :
@@ -86,6 +96,9 @@ Contenu :
 Resultat attendu :
 - creation simple mais credible
 
+Etat :
+- termine
+
 ## Etape 6. Verifier l'edition / historique
 
 Contenu :
@@ -97,6 +110,11 @@ Contenu :
 Resultat attendu :
 - le persona n'est pas juste cree, il est reutilisable et suivi
 
+Etat :
+- termine pour la demo
+- la fiche relie maintenant prompt, grille, historique, edition et lancement d'entretien
+- la page edition distingue mieux identite, grille et prompt
+
 ## Etape 7. Preparer le lien avec l'accueil
 
 Contenu :
@@ -106,6 +124,10 @@ Contenu :
 
 Resultat attendu :
 - le bloc persona est pret a alimenter l'accueil
+
+Etat :
+- prepare
+- details notes dans `PERSONNAS_HOME_EXAMPLES_PLAN.md`
 
 ## Definition du bloc personnas termine
 
@@ -130,10 +152,10 @@ Le bloc sera assez fini quand on aura :
 
 ## Recommandation pour la prochaine reprise
 
-Commencer par :
-- refonte de la page liste `personnas`
-- puis adaptation des cartes vers la logique de fiche persona
+Le bloc `personnas` est assez fini pour passer ensuite au bloc `accueil`.
 
-Pourquoi :
-- la fiche persona est maintenant cadree
-- la liste devient la prochaine brique la plus rentable
+Avant de changer de bloc, faire seulement :
+- un test visuel rapide de `/personnas`
+- un test visuel rapide de `/personnas/new`
+- un test visuel rapide de `/personnas/[id]`
+- un test visuel rapide de `/personnas/[id]/edit`

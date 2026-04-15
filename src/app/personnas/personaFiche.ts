@@ -79,6 +79,26 @@ export function buildPromptHighlights(promptText: string) {
   return highlights;
 }
 
+export function buildPromptSummaryPoints(promptText: string) {
+  if (!promptText.trim()) return [];
+
+  const lines = promptText
+    .split(/\r?\n/)
+    .map((line) => compactWhitespace(line.replace(/^#+\s*/, "").replace(/^[-*]\s*/, "")))
+    .filter((line) => line.length >= 12);
+
+  const points: string[] = [];
+  for (const line of lines) {
+    if (points.some((existing) => existing.toLowerCase() === line.toLowerCase())) {
+      continue;
+    }
+    points.push(line);
+    if (points.length === 6) break;
+  }
+
+  return points;
+}
+
 export function getPersonaInterviewGuide(
   agent: Agent,
   promptText: string

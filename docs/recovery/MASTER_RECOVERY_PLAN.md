@@ -33,7 +33,8 @@ Etat :
 
 ### 2. Bloc personnas
 Statut :
-- prochain grand bloc prioritaire
+- assez fini pour la demo
+- en attente de test visuel final avant passage au bloc accueil
 
 Contenu :
 - page liste `personnas`
@@ -42,6 +43,7 @@ Contenu :
 - historique par persona
 - creation / edition
 - lien avec grille d'entretien et prompt
+- preparation des personnas exemples pour la future home
 
 ### 3. Bloc accueil
 Statut :
@@ -95,6 +97,5 @@ A chaque nouvelle session :
 
 ## Sous-etape recommandee pour la prochaine reprise
 
-- valider visuellement la fiche persona V1
-- puis choisir la prochaine sous-etape du bloc `personnas`
-- probablement historique detaille ou renforcement de la grille / du prompt associe
+- test visuel final du bloc `personnas`
+- puis passage au bloc `accueil` si le parcours est stable

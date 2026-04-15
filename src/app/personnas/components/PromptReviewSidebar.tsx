@@ -29,7 +29,7 @@ type PromptReviewSidebarProps = {
 
 const statusCopy = (review: CauldronReview | null, isReviewing?: boolean) => {
   if (isReviewing) {
-    return { label: "Analyse en cours…", color: "orange.600", bg: "orange.50" };
+    return { label: "Analyse en cours...", color: "orange.600", bg: "orange.50" };
   }
   if (!review) {
     return { label: "Non vérifié", color: "gray.600", bg: "gray.50" };
@@ -49,147 +49,145 @@ export default function PromptReviewSidebar({
   const status = statusCopy(review, isReviewing);
 
   return (
-      <VStack alignItems="stretch" gap={4}>
+    <VStack alignItems="stretch" gap={4}>
+      <Box
+        borderRadius="md"
+        padding={3}
+        backgroundColor={{ base: "blue.50", _dark: "gray.800" }}
+        borderLeft="3px solid"
+        borderLeftColor="blue.500"
+      >
+        <Text fontSize="sm" fontWeight="semibold">
+          Ce que nous vérifions
+        </Text>
+        <Text fontSize="sm" color="fg.muted" marginTop={2}>
+          Cette vérification analyse uniquement le prompt du persona : sa voix, son
+          contexte, ses usages et ses tensions. Elle ne vérifie pas encore la grille
+          d&apos;entretien.
+        </Text>
+        <VStack alignItems="stretch" gap={1} marginTop={3}>
+          <Text fontSize="sm" color="fg.muted">
+            - clarté du profil et de la voix
+          </Text>
+          <Text fontSize="sm" color="fg.muted">
+            - situations, usages et tensions observables
+          </Text>
+          <Text fontSize="sm" color="fg.muted">
+            - absence d&apos;incohérences bloquantes
+          </Text>
+        </VStack>
+      </Box>
 
+      <Box borderRadius="md" padding={3} backgroundColor={status.bg}>
+        <Text fontSize="sm" fontWeight="semibold" color={status.color}>
+          {status.label}
+        </Text>
+        {!review && !isReviewing && (
+          <Text fontSize="sm" color="fg.muted" marginTop={2}>
+            Cliquez sur « Enregistrer » pour lancer l&apos;analyse du prompt.
+          </Text>
+        )}
+      </Box>
+
+      {reviewError && (
         <Box
           borderRadius="md"
           padding={3}
-          backgroundColor={{ base: "blue.50", _dark: "gray.800" }}
+          backgroundColor={{ base: "red.50", _dark: "red.900" }}
           borderLeft="3px solid"
-          borderLeftColor="blue.500"
+          borderLeftColor="red.500"
         >
-          <Text fontSize="sm" fontWeight="semibold">
-            Ce que nous verifions
+          <Text fontSize="sm" color={{ base: "red.700", _dark: "red.200" }}>
+            {reviewError}
           </Text>
-          <Text fontSize="sm" color="fg.muted" marginTop={2}>
-            Le prompt doit rester coherent, actionnable et publiable sans perdre la logique du persona.
-          </Text>
-          <VStack alignItems="stretch" gap={1} marginTop={3}>
-            <Text fontSize="sm" color="fg.muted">
-              - clarte du profil et de la voix
-            </Text>
-            <Text fontSize="sm" color="fg.muted">
-              - situations, usages et tensions observables
-            </Text>
-            <Text fontSize="sm" color="fg.muted">
-              - absence d&apos;incoherences bloquantes
-            </Text>
-          </VStack>
         </Box>
+      )}
 
-        <Box borderRadius="md" padding={3} backgroundColor={status.bg}>
-          <Text fontSize="sm" fontWeight="semibold" color={status.color}>
-            {status.label}
+      {review && !isCurrent && (
+        <Box
+          borderRadius="md"
+          padding={3}
+          backgroundColor={{ base: "yellow.50", _dark: "yellow.900" }}
+          borderLeft="3px solid"
+          borderLeftColor="yellow.500"
+        >
+          <Text fontSize="sm" color={{ base: "yellow.800", _dark: "yellow.100" }}>
+            Le prompt a été modifié depuis la dernière validation. Relancez
+            l&apos;enregistrement pour actualiser l&apos;analyse.
           </Text>
-          {!review && !isReviewing && (
-            <Text fontSize="sm" color="fg.muted" marginTop={2}>
-              Cliquez sur « Enregistrer » pour lancer l&apos;analyse du prompt.
+        </Box>
+      )}
+
+      {review?.status === "invalid" && (
+        <VStack alignItems="stretch" gap={3}>
+          <Text fontSize="sm" fontWeight="semibold">
+            Explications
+          </Text>
+          {review.errors.length === 0 && (
+            <Text fontSize="sm" color="fg.muted">
+              Le service de validation a signalé un problème sans détail.
             </Text>
           )}
-        </Box>
-
-        {reviewError && (
-          <Box
-            borderRadius="md"
-            padding={3}
-            backgroundColor={{ base: "red.50", _dark: "red.900" }}
-            borderLeft="3px solid"
-            borderLeftColor="red.500"
-          >
-            <Text fontSize="sm" color={{ base: "red.700", _dark: "red.200" }}>
-              {reviewError}
-            </Text>
-          </Box>
-        )}
-
-        {review && !isCurrent && (
-          <Box
-            borderRadius="md"
-            padding={3}
-            backgroundColor={{ base: "yellow.50", _dark: "yellow.900" }}
-            borderLeft="3px solid"
-            borderLeftColor="yellow.500"
-          >
-            <Text fontSize="sm" color={{ base: "yellow.800", _dark: "yellow.100" }}>
-              Le prompt a été modifié depuis la dernière validation. Relancez
-              l&apos;enregistrement pour actualiser l&apos;analyse.
-            </Text>
-          </Box>
-        )}
-
-        {review?.status === "invalid" && (
-          <VStack alignItems="stretch" gap={3}>
-            <Text fontSize="sm" fontWeight="semibold">
-              Explications
-            </Text>
-            {review.errors.length === 0 && (
-              <Text fontSize="sm" color="fg.muted">
-                Le service de validation a signalé un problème sans détail.
+          {review.errors.map((error, index) => (
+            <Box
+              key={`${error.code}-${index}`}
+              padding={3}
+              borderRadius="md"
+              backgroundColor={{ base: "gray.50", _dark: "gray.800" }}
+            >
+              <Text fontSize="sm" fontWeight="semibold">
+                {error.message}
               </Text>
-            )}
-            {review.errors.map((error, index) => (
-              <Box
-                key={`${error.code}-${index}`}
-                padding={3}
-                borderRadius="md"
-                backgroundColor={{ base: "gray.50", _dark: "gray.800" }}
-              >
-                <Text fontSize="sm" fontWeight="semibold">
-                  {error.message}
+              {error.detail && (
+                <Text fontSize="sm" color="fg.muted" marginTop={1}>
+                  {error.detail}
                 </Text>
-                {error.detail && (
-                  <Text fontSize="sm" color="fg.muted" marginTop={1}>
-                    {error.detail}
-                  </Text>
-                )}
-                <Text fontSize="xs" color="fg.muted" marginTop={2}>
-                  Code : {error.code}
-                </Text>
-              </Box>
-            ))}
-          </VStack>
-        )}
-
-        {review?.status === "valid" && (
-          <VStack alignItems="stretch" gap={3}>
-            <Text fontSize="sm" fontWeight="semibold">
-              Suggestions
-            </Text>
-            {review.quality?.advice && (
-              <Box
-                padding={3}
-                borderRadius="md"
-                backgroundColor={{ base: "gray.50", _dark: "gray.800" }}
-              >
-                <Text fontSize="sm">{review.quality.advice}</Text>
-              </Box>
-            )}
-            {review.quality?.criteria?.length ? (
-              <>
-                <Box
-                  height="1px"
-                  backgroundColor={{ base: "gray.200", _dark: "gray.700" }}
-                />
-                <VStack alignItems="stretch" gap={3}>
-                  {review.quality.criteria.map((criterion, index) => (
-                    <Box key={`${criterion.name}-${index}`}>
-                      <Text fontSize="sm" fontWeight="semibold">
-                        {criterion.name}
-                      </Text>
-                      <Text fontSize="sm" color="fg.muted">
-                        {criterion.justification}
-                      </Text>
-                    </Box>
-                  ))}
-                </VStack>
-              </>
-            ) : (
-              <Text fontSize="sm" color="fg.muted">
-                Aucun conseil supplémentaire pour ce prompt.
+              )}
+              <Text fontSize="xs" color="fg.muted" marginTop={2}>
+                Code : {error.code}
               </Text>
-            )}
-          </VStack>
-        )}
-      </VStack>
+            </Box>
+          ))}
+        </VStack>
+      )}
+
+      {review?.status === "valid" && (
+        <VStack alignItems="stretch" gap={3}>
+          <Text fontSize="sm" fontWeight="semibold">
+            Suggestions
+          </Text>
+          {review.quality?.advice && (
+            <Box
+              padding={3}
+              borderRadius="md"
+              backgroundColor={{ base: "gray.50", _dark: "gray.800" }}
+            >
+              <Text fontSize="sm">{review.quality.advice}</Text>
+            </Box>
+          )}
+          {review.quality?.criteria?.length ? (
+            <>
+              <Box height="1px" backgroundColor={{ base: "gray.200", _dark: "gray.700" }} />
+              <VStack alignItems="stretch" gap={3}>
+                {review.quality.criteria.map((criterion, index) => (
+                  <Box key={`${criterion.name}-${index}`}>
+                    <Text fontSize="sm" fontWeight="semibold">
+                      {criterion.name}
+                    </Text>
+                    <Text fontSize="sm" color="fg.muted">
+                      {criterion.justification}
+                    </Text>
+                  </Box>
+                ))}
+              </VStack>
+            </>
+          ) : (
+            <Text fontSize="sm" color="fg.muted">
+              Aucun conseil supplémentaire pour ce prompt.
+            </Text>
+          )}
+        </VStack>
+      )}
+    </VStack>
   );
 }

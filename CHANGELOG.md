@@ -32,6 +32,7 @@ All notable changes to this project will be documented in this file.
 - **Persona Fiche V1:** Add a first `/personnas/[id]` persona sheet that connects interview start, prompt visibility, pedagogical interview guidance, posture tips, and persona-specific history from a single page.
 - **Personnas Creation Guidance:** Make the create/edit flow more pedagogical with clearer side guidance, stronger field framing, a prompt editor subtitle, and a more explicit prompt validation sidebar.
 - **Persona Interview Guide:** Add a dedicated editable `interview_guide` to personnas, expose it in create/edit flows, and show it in the persona sheet before falling back to a derived guide.
+- **Personnas Block Closure:** Align persona creation/editing with the fiche flow and document the future home-page persona examples inspired by Character.AI.
 - **Interview Analysis V2:** Rework interview analysis to evaluate the persona's answers as the real student material, add clearer metrics, a simple score breakdown, and a more pedagogical summary/coaching structure.
 - **Interview Analysis V3 Schema:** Prepare optional pedagogical sections for interview conduct, material reading, theme coverage, concrete examples, and alerts without breaking the current V2 response.
 - **Interview Analysis V3 Logic:** Start enriching analysis with interviewer-conduct signals, noise/test-message detection, first theme coverage hints, concrete examples, and pedagogical alerts.
@@ -67,6 +68,7 @@ All notable changes to this project will be documented in this file.
 - **Personnas Actions:** Align card actions with the interview sidebar styling and update prompt/admin controls.
 - **Personnas Validation:** Add Cauldron prompt review with sidebar feedback on create/edit and block publishing when invalid.
 ### Fixed
+- **Persona Fiche:** Keep persona summary points readable without truncating lines and clarify that prompt validation only checks the persona prompt, not the interview guide.
 - **Chakra Buttons:** Replace invalid `variant="link"` usage with Chakra v3-compatible variants.
 - **Next Config:** Move `outputFileTracingIncludes` to the top-level Next.js config.
 - **Auth Resilience:** Add shared timeout handling for auth and registration flows to prevent infinite spinners.
