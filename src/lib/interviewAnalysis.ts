@@ -1,4 +1,5 @@
 import { InterviewAnalysis, MaterialQuality, Message } from "@/lib/schemas";
+import type { GridTheme } from "@/lib/personaConfig";
 
 type UsageTotals = {
   totalInputTokens: number;
@@ -444,7 +445,7 @@ function buildMaterialReading(
   };
 }
 
-function buildThemeCoverage(studentMessages: Message[]): InterviewAnalysis["theme_coverage"] {
+function buildThemeCoverageFromKeywords(studentMessages: Message[]): InterviewAnalysis["theme_coverage"] {
   const items = THEME_KEYWORDS.map(({ theme, patterns }) => {
     const evidence = studentMessages
       .filter((message) => patterns.some((pattern) => pattern.test(message.content)))
@@ -469,6 +470,55 @@ function buildThemeCoverage(studentMessages: Message[]): InterviewAnalysis["them
       evidence: item.evidence,
     })),
   };
+}
+
+function buildThemeCoverageFromGrid(studentMessages: Message[], gridThemes: GridTheme[]): InterviewAnalysis["theme_coverage"] {
+  const normalizedContent = studentMessages
+    .map((m) => m.content.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    .join(" ");
+
+  const items = gridThemes.map(({ title, questions }) => {
+    // Cherche le titre du thème et les mots-clés des questions dans les messages
+    const titleWords = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/\s+/).filter((w) => w.length > 3);
+    const questionKeywords = questions
+      .flatMap((q) => q.label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/\s+/))
+      .filter((w) => w.length > 4);
+
+    const allKeywords = [...new Set([...titleWords, ...questionKeywords])];
+    const matches = allKeywords.filter((kw) => normalizedContent.includes(kw));
+    const matchRatio = allKeywords.length > 0 ? matches.length / allKeywords.length : 0;
+
+    const evidence = studentMessages
+      .filter((m) => allKeywords.some((kw) => m.content.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(kw)))
+      .slice(0, 2)
+      .map((m) => truncate(m.content, 110));
+
+    const coverage_status = matchRatio >= 0.3 || evidence.length >= 2
+      ? "couvert"
+      : matchRatio > 0 || evidence.length === 1
+        ? "partiel"
+        : "non_aborde";
+
+    return { theme: title, coverage_status, evidence } as const;
+  });
+
+  return {
+    themes_covered: items.filter((item) => item.coverage_status === "couvert").map((item) => item.theme),
+    themes_partial: items.filter((item) => item.coverage_status === "partiel").map((item) => item.theme),
+    themes_missing: items.filter((item) => item.coverage_status === "non_aborde").map((item) => item.theme),
+    items: items.map((item) => ({
+      theme: item.theme,
+      coverage_status: item.coverage_status,
+      evidence: item.evidence,
+    })),
+  };
+}
+
+function buildThemeCoverage(studentMessages: Message[], gridThemes?: GridTheme[]): InterviewAnalysis["theme_coverage"] {
+  if (gridThemes && gridThemes.length > 0) {
+    return buildThemeCoverageFromGrid(studentMessages, gridThemes);
+  }
+  return buildThemeCoverageFromKeywords(studentMessages);
 }
 
 function buildExamples(interviewerMessages: Message[], studentMessages: Message[]): InterviewAnalysis["examples"] {
@@ -538,7 +588,7 @@ function buildAlerts(
   return alerts;
 }
 
-export function analyzeInterviewMessages(messages: Message[], usage: UsageTotals): InterviewAnalysis {
+export function analyzeInterviewMessages(messages: Message[], usage: UsageTotals, gridThemes?: GridTheme[]): InterviewAnalysis {
   const interviewerMessages = messages.filter((message) => message.role === "user");
   const studentMessages = messages.filter((message) => message.role === "assistant");
   const studentWordCounts = studentMessages.map((message) => countWords(message.content));
@@ -627,7 +677,7 @@ export function analyzeInterviewMessages(messages: Message[], usage: UsageTotals
       teacher_comment: buildConductTeacherComment(questionStyle, followUpQuality, weakMessageSignals >= 2),
     },
     material_reading: buildMaterialReading(materialQuality, scoreBreakdown, studentMessages),
-    theme_coverage: buildThemeCoverage(studentMessages),
+    theme_coverage: buildThemeCoverage(studentMessages, gridThemes),
     examples: buildExamples(interviewerMessages, studentMessages),
     alerts,
   };

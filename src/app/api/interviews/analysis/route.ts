@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { interviews, messages } from "@/lib/data";
 import { analyzeInterviewMessages } from "@/lib/interviewAnalysis";
+import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { parseInterviewGrid } from "@/lib/interviewGridParser";
+import type { GridTheme } from "@/lib/personaConfig";
 
 /**
  * GET /api/interviews/analysis?interviewId=...
@@ -28,10 +31,29 @@ export async function GET(request: NextRequest) {
       interviews.getInterviewWithUsage(interviewId),
     ]);
 
-    const analysis = analyzeInterviewMessages(interviewMessages, {
-      totalInputTokens: interviewWithUsage.usage?.total_input_tokens ?? 0,
-      totalOutputTokens: interviewWithUsage.usage?.total_output_tokens ?? 0,
-    });
+    // Charger la grille du persona si disponible
+    let gridThemes: GridTheme[] | undefined;
+    if (interview.agent_id) {
+      const supabase = createServiceSupabaseClient();
+      const { data: agent } = await supabase
+        .from("agents")
+        .select("interview_guide")
+        .eq("id", interview.agent_id)
+        .single();
+      const parsed = parseInterviewGrid(agent?.interview_guide ?? "");
+      if (parsed && parsed.themes.length > 0) {
+        gridThemes = parsed.themes;
+      }
+    }
+
+    const analysis = analyzeInterviewMessages(
+      interviewMessages,
+      {
+        totalInputTokens: interviewWithUsage.usage?.total_input_tokens ?? 0,
+        totalOutputTokens: interviewWithUsage.usage?.total_output_tokens ?? 0,
+      },
+      gridThemes
+    );
 
     return NextResponse.json(
       {
