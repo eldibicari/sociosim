@@ -51,23 +51,27 @@ Contenu :
 
 ### 3. Bloc accueil
 Statut :
-- a faire apres `personnas`
+- terminé
 
 Contenu :
-- hero
-- personnas exemples
-- promesse produit
-- sections pedagogiques visibles
+- hero avec gradient + badge + CTAs auth-aware
+- 3 cartes personas vitrine (Jade/Oriane/Théo) avec greetings, mini-échanges, animations CSS
+- section 3 étapes pédagogiques
+- section ancrage théorique (Bourdieu/Crozier&Friedberg/Latour)
+- CTA final adapté à l'état de connexion
+- /api/home/featured pour charger les IDs réels depuis la DB
+- fallback propre si agents non trouvés en DB
 
 ### 4. Bloc guide
 Statut :
-- a faire apres accueil
+- terminé
 
 Contenu :
-- lisibilite
-- hierarchie
-- mise en forme
-- tableaux / citations / sommaire si utile
+- hero section avec icône, titre, sous-titre, CTA
+- blockquotes → style callout avec bordure violette (prompts d'entretien)
+- hiérarchie h2/h3 améliorée
+- lien "Guide" ajouté dans le header pour les utilisateurs connectés
+- CTA "Choisir un persona" en bas de page
 
 ### 5. Bloc profil / utilisateurs
 Statut :
@@ -97,9 +101,10 @@ A chaque nouvelle session :
 
 ## Bloc courant retenu
 
-- bloc `accueil`
+- bloc `polish final demo`
 
 ## Sous-etape recommandee pour la prochaine reprise
 
-- audit de la page accueil actuelle
-- hero, personas exemples, promesse produit, sections pedagogiques
+- vérification de la cohérence visuelle entre toutes les pages
+- audit des derniers bugs visibles (routing, états vides, messages d'erreur)
+- commits propres, vérification des branches

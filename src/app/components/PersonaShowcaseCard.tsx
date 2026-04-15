@@ -32,6 +32,9 @@ type Props = {
 export function PersonaShowcaseCard({ persona, index }: Props) {
   const router = useRouter();
   const initial = persona.agent_name.charAt(0).toUpperCase();
+  // If id is a real UUID (contains hyphens) we route to the fiche.
+  // Otherwise (fallback = agent_name) we send the user to the personas list.
+  const ficheHref = persona.id.includes("-") ? `/personnas/${persona.id}` : "/personnas";
 
   return (
     <Box
@@ -185,7 +188,7 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
           colorPalette="blue"
           borderRadius="xl"
           size="sm"
-          onClick={() => router.push(`/personnas/${persona.id}`)}
+          onClick={() => router.push(ficheHref)}
           variant="subtle"
         >
           Voir la fiche
@@ -195,7 +198,7 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
           colorPalette="blue"
           borderRadius="xl"
           size="sm"
-          onClick={() => router.push(`/personnas/${persona.id}`)}
+          onClick={() => router.push(ficheHref)}
         >
           <MessageSquarePlus size={13} />
           Commencer
