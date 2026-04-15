@@ -373,7 +373,7 @@ export default function Home() {
             borderRadius="xl"
             px={10}
           >
-            <Link href={user ? "/personnas" : "/login"}>
+            <Link href={user ? "/personnas" : "/register"}>
               {user ? "Voir les personas" : "Créer un compte"}
             </Link>
           </Button>
