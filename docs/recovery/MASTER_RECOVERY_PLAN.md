@@ -33,8 +33,11 @@ Etat :
 
 ### 2. Bloc personnas
 Statut :
-- assez fini pour la demo
-- en attente de test visuel final avant passage au bloc accueil
+- bloc terminé
+- grille séparée du prompt (page /grille dédiée)
+- grille visible pendant l'entretien (bouton sidebar)
+- analyse enrichie avec les vrais thèmes de la grille
+- prêt pour le bloc accueil
 
 Contenu :
 - page liste `personnas`
@@ -94,10 +97,9 @@ A chaque nouvelle session :
 
 ## Bloc courant retenu
 
-- bloc `personnas`
+- bloc `accueil`
 
 ## Sous-etape recommandee pour la prochaine reprise
 
-- test visuel final du bloc `personnas`
-- puis audit de l'evolution avancee `persona config / grille / analyse`
-- le bloc `accueil` reste le prochain grand bloc visuel, mais seulement apres clarification de cette architecture
+- audit de la page accueil actuelle
+- hero, personas exemples, promesse produit, sections pedagogiques

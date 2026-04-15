@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Interview Grid Parser:** Add `parseInterviewGrid` to convert raw `interview_guide` text into a structured `InterviewGrid` object (themes, questions, follow-ups) with a full test suite (7 tests).
+- **Dedicated Grid Page:** Add `/personnas/[id]/grille` as a standalone page for viewing and editing the interview grid, fully separated from the prompt editor.
+- **Grid API Route:** Add `PATCH /api/agents/[id]/guide` to save the interview guide without touching the prompt, and protect the existing agent PATCH from silently overwriting the guide.
+- **Grid Panel in Interview:** Add an `InterviewGridPanel` button in the interview sidebar that opens the persona's grid in a Dialog panel on demand, without cluttering the sidebar.
+- **Analysis Enriched with Grid:** `analyzeInterviewMessages` now accepts the persona's real grid themes and uses them for theme-coverage scoring instead of hardcoded generic keywords. Falls back to generic keywords when no grid is defined.
 - **Persona Architecture:** Add structured schemas for `PersonaConfig`, prompt blueprints, interview grids, grid coverage, method analysis, and export payloads as the base for the advanced persona flow.
 - **Persona Prompt Composer:** Add a pure prompt composer that turns visible `PersonaConfig` parameters into a modular internal system prompt while keeping the interview grid separate.
 - **Test Coverage:** Add comprehensive test suite for main interview page (`/interview`) with 16 tests covering authentication, session creation, agent loading, and chat interaction.
