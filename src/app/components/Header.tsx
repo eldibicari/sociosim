@@ -122,7 +122,7 @@ export default function Header() {
         <HStack gap={6}>
           <Link
             as={NextLink}
-            href={!isLoading && user ? "/personnas" : "/"}
+            href="/"
             fontWeight="bold"
             fontSize="3xl"
             color="inherit"
