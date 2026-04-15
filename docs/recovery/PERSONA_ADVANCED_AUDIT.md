@@ -277,6 +277,12 @@ Ajouter un composeur de prompt :
 
 Le prompt brut devient une sortie generee, pas le point de depart principal.
 
+Etat :
+- logique ajoutee dans `src/lib/personaPromptComposer.ts`
+- tests ajoutes dans `src/lib/personaPromptComposer.test.ts`
+- l'UI continue pour l'instant a afficher l'editeur de prompt brut
+- prochaine etape : introduire progressivement les champs de configuration visibles
+
 ### Phase 4
 
 Structurer la grille :

@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Persona Architecture:** Add structured schemas for `PersonaConfig`, prompt blueprints, interview grids, grid coverage, method analysis, and export payloads as the base for the advanced persona flow.
+- **Persona Prompt Composer:** Add a pure prompt composer that turns visible `PersonaConfig` parameters into a modular internal system prompt while keeping the interview grid separate.
 - **Test Coverage:** Add comprehensive test suite for main interview page (`/interview`) with 16 tests covering authentication, session creation, agent loading, and chat interaction.
 - **Interview Analysis Tests:** Add focused unit tests for interview analysis heuristics, including the distinction between interviewer prompts and student persona material.
 - **Interview Analysis V1:** Add `/api/interviews/analysis` with heuristic material-quality feedback (`insuffisant` / `partiel` / `exploitable`) based on interview messages and token usage.

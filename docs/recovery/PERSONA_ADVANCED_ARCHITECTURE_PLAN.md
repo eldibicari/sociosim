@@ -221,6 +221,12 @@ Etat :
 
 Ajout ou refactor leger de la generation du prompt a partir des parametres.
 
+Etat :
+- implemente comme logique pure dans `src/lib/personaPromptComposer.ts`
+- `buildPersonaPromptBlueprint(config)` produit les blocs internes
+- `buildPersonaPromptFromConfig(config)` compose le prompt systeme final
+- pas encore branche dans l'UI creation / edition
+
 ### Phase 4
 
 Structuration de la grille comme objet visible et editable.
