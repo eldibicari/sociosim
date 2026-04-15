@@ -420,7 +420,6 @@ export default function EditAgentPromptPage() {
           body: JSON.stringify({
             agent_name: trimmedName,
             description: trimmedDescription,
-            interview_guide: trimmedInterviewGuide,
           }),
         }),
         15000
@@ -612,35 +611,22 @@ export default function EditAgentPromptPage() {
                   borderRadius="2xl"
                   borderWidth="1px"
                   borderColor="border.subtle"
-                  backgroundColor="white"
+                  backgroundColor="bg.subtle"
                   padding={4}
                 >
-                  <VStack align="stretch" gap={3}>
-                    <VStack align="stretch" gap={1}>
-                      <Text fontSize="sm" fontWeight="semibold">
-                        Grille d&apos;entretien
-                      </Text>
-                      <Text fontSize="xs" color="fg.muted" lineHeight="1.6">
-                        Elle guide l&apos;étudiant avant et pendant l&apos;entretien. Le
-                        prompt fait vivre le persona, la grille aide à le questionner.
-                      </Text>
-                    </VStack>
-
-                <Field.Root>
-                  <Field.Label fontSize="sm">Thèmes et relances</Field.Label>
-                  <Textarea
-                    size="sm"
-                    rows={10}
-                    value={interviewGuide}
-                    onChange={(event) => setInterviewGuide(event.target.value)}
-                    placeholder="Entrer dans le contexte&#10;- Question ouverte&#10;- Relance utile&#10;&#10;Explorer les usages&#10;- Exemple concret&#10;- Tension à approfondir"
-                    paddingInlineStart={4}
-                    resize="vertical"
-                  />
-                  <Field.HelperText fontSize="xs" color="fg.muted">
-                    Format conseillé : un thème, puis deux ou trois questions ou relances.
-                  </Field.HelperText>
-                </Field.Root>
+                  <VStack align="stretch" gap={2}>
+                    <Text fontSize="sm" fontWeight="semibold">Grille d&apos;entretien</Text>
+                    <Text fontSize="xs" color="fg.muted" lineHeight="1.6">
+                      La grille est gérée séparément du prompt. Elle structure les thèmes et questions méthodologiques.
+                    </Text>
+                    <Button
+                      size="sm"
+                      variant="subtle"
+                      alignSelf="flex-start"
+                      onClick={() => router.push(`/personnas/${agentId}/grille`)}
+                    >
+                      Ouvrir la grille d&apos;entretien
+                    </Button>
                   </VStack>
                 </Box>
 

@@ -14,8 +14,6 @@ export async function PATCH(
     const body = await request.json().catch(() => null);
     const agentName = body?.agent_name?.trim();
     const description = body?.description?.trim();
-    const interviewGuide =
-      typeof body?.interview_guide === "string" ? body.interview_guide.trim() : "";
 
     if (!agentName || !description) {
       return NextResponse.json(
@@ -24,14 +22,17 @@ export async function PATCH(
       );
     }
 
+    // N'écrase la grille que si elle est explicitement envoyée dans le body
+    const updatePayload: Record<string, unknown> = { agent_name: agentName, description };
+    if ("interview_guide" in (body ?? {})) {
+      const guide = typeof body.interview_guide === "string" ? body.interview_guide.trim() : "";
+      updatePayload.interview_guide = guide || null;
+    }
+
     const supabase = createServiceSupabaseClient();
     const { error } = await supabase
       .from("agents")
-      .update({
-        agent_name: agentName,
-        description,
-        interview_guide: interviewGuide || null,
-      })
+      .update(updatePayload)
       .eq("id", agentId);
 
     if (error) {
