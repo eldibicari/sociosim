@@ -15,6 +15,7 @@ import {
   useBreakpointValue,
   VStack,
 } from "@chakra-ui/react";
+import { InterviewGridPanel } from "@/app/components/InterviewGridPanel";
 import {
   ArrowRight,
   BookOpenText,
@@ -768,6 +769,8 @@ export function InterviewSidebar({
                     <Text fontSize="sm">par {userName ?? "..."}</Text>
                     <Text fontSize="sm">le {dateDisplay ?? "..."}</Text>
                   </Stack>
+
+                  <InterviewGridPanel agentId={agentId ?? null} />
 
                   <HStack gap={2} flexWrap="wrap">
                     <Button
