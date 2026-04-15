@@ -19,7 +19,6 @@ import {
   type ShowcasePersona,
 } from "@/app/components/PersonaShowcaseCard";
 
-// Static persona data — IDs are merged at runtime from /api/home/featured
 const SHOWCASE_BASE: Omit<ShowcasePersona, "id">[] = [
   {
     agent_name: "jade",
@@ -68,21 +67,18 @@ const SHOWCASE_BASE: Omit<ShowcasePersona, "id">[] = [
 const STEPS = [
   {
     icon: BookOpen,
-    label: "Étape 1",
     title: "Préparez votre grille",
     body: "Définissez vos thèmes, vos questions de relance et votre objectif d'entretien. La grille est votre boussole méthodologique.",
     color: "#6366f1",
   },
   {
     icon: MessageSquare,
-    label: "Étape 2",
     title: "Conduisez l'entretien",
     body: "Engagez le dialogue avec le persona. Guidez, relancez, approfondissez. L'erreur fait partie de l'apprentissage.",
     color: "#059669",
   },
   {
     icon: BarChart2,
-    label: "Étape 3",
     title: "Analysez votre pratique",
     body: "Transcription automatique, thèmes couverts, premières pistes de codage. Prenez du recul sur votre posture d'enquêteur.",
     color: "#e53e3e",
@@ -141,43 +137,45 @@ export default function Home() {
 
   return (
     <VStack gap={0} width="100%" align="stretch">
+
       {/* ─── HERO ─── */}
       <Box
-        py={{ base: 16, md: 24 }}
+        py={{ base: 20, md: 28 }}
         textAlign="center"
-        background="linear-gradient(160deg, #f8faff 0%, #fdf8ff 100%)"
+        background="linear-gradient(150deg, #eef2ff 0%, #f5f0ff 55%, #fdf4ff 100%)"
         borderBottom="1px solid"
         borderColor="border.subtle"
-        borderRadius="2xl"
+        px={{ base: 4, md: 8 }}
       >
-        <VStack gap={6} maxW="640px" mx="auto" className="hero-animate">
+        <VStack gap={7} maxW="720px" mx="auto" className="hero-animate">
           <Badge
             variant="subtle"
             colorPalette="purple"
             borderRadius="full"
-            px={3}
+            px={4}
             py={1}
             fontSize="xs"
-            letterSpacing="wide"
+            letterSpacing="widest"
+            textTransform="uppercase"
           >
             Simulateur d&apos;entretien sociologique
           </Badge>
 
           <Heading
             as="h1"
-            fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }}
+            fontSize={{ base: "4xl", md: "5xl", lg: "6xl" }}
             fontWeight="800"
-            lineHeight="1.1"
-            letterSpacing="-0.02em"
+            lineHeight="1.08"
+            letterSpacing="-0.03em"
           >
-            Pratiquez avant le terrain
+            Pratiquez avant<br />le terrain
           </Heading>
 
           <Text
-            fontSize={{ base: "md", md: "lg" }}
+            fontSize={{ base: "md", md: "xl" }}
             color="fg.muted"
-            lineHeight="1.7"
-            maxW="480px"
+            lineHeight="1.75"
+            maxW="500px"
           >
             Conduisez des entretiens semi-directifs face à des enquêtés
             virtuels. Analysez votre pratique, comprenez vos données.
@@ -212,16 +210,26 @@ export default function Home() {
 
       {/* ─── PERSONAS VITRINE ─── */}
       <Box
-        py={{ base: 12, md: 16 }}
+        py={{ base: 14, md: 20 }}
         backgroundColor="bg.subtle"
-        borderRadius="2xl"
+        borderBottom="1px solid"
+        borderColor="border.subtle"
       >
-        <VStack gap={8} maxW="1100px" mx="auto">
-          <VStack gap={2} textAlign="center">
-            <Heading as="h2" fontSize={{ base: "xl", md: "2xl" }} fontWeight="700">
-              Rencontrez les enquêtés
+        <VStack gap={10} maxW="1100px" mx="auto" px={{ base: 2, md: 4 }}>
+          <VStack gap={3} textAlign="center">
+            <Text
+              fontSize="xs"
+              fontWeight="700"
+              color="blue.500"
+              letterSpacing="widest"
+              textTransform="uppercase"
+            >
+              Vos enquêtés
+            </Text>
+            <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
+              Rencontrez les personas
             </Heading>
-            <Text fontSize="sm" color="fg.muted" maxW="440px" lineHeight="1.7">
+            <Text fontSize="sm" color="fg.muted" maxW="420px" lineHeight="1.8">
               Trois profils construits à partir d&apos;entretiens réels sur
               l&apos;usage de l&apos;IA à l&apos;université.
             </Text>
@@ -241,55 +249,79 @@ export default function Home() {
       </Box>
 
       {/* ─── 3 ÉTAPES ─── */}
-      <Box py={{ base: 12, md: 16 }}>
-        <VStack gap={8} maxW="860px" mx="auto">
-          <VStack gap={2} textAlign="center">
-            <Heading as="h2" fontSize={{ base: "xl", md: "2xl" }} fontWeight="700">
+      <Box
+        py={{ base: 14, md: 20 }}
+        borderBottom="1px solid"
+        borderColor="border.subtle"
+      >
+        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }}>
+          <VStack gap={3} textAlign="center">
+            <Text
+              fontSize="xs"
+              fontWeight="700"
+              color="blue.500"
+              letterSpacing="widest"
+              textTransform="uppercase"
+            >
+              La méthode
+            </Text>
+            <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
               Comment ça fonctionne
             </Heading>
-            <Text fontSize="sm" color="fg.muted">
+            <Text fontSize="sm" color="fg.muted" lineHeight="1.8">
               Trois étapes pour un entretien complet, de la préparation à
               l&apos;analyse.
             </Text>
           </VStack>
 
           <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
-            {STEPS.map((step) => (
+            {STEPS.map((step, i) => (
               <VStack
                 key={step.title}
                 flex="1"
                 align="flex-start"
-                gap={3}
-                p={5}
+                gap={4}
+                p={6}
                 borderRadius="2xl"
                 borderWidth="1px"
                 borderColor="border.subtle"
                 backgroundColor="white"
+                boxShadow="sm"
               >
-                <Box
-                  width="40px"
-                  height="40px"
-                  borderRadius="xl"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  style={{ backgroundColor: `${step.color}18` }}
-                >
-                  <step.icon size={18} color={step.color} />
-                </Box>
-                <Text
-                  fontSize="2xs"
-                  fontWeight="700"
-                  color="fg.muted"
-                  letterSpacing="wider"
-                  textTransform="uppercase"
-                >
-                  {step.label}
-                </Text>
-                <Text fontWeight="600" fontSize="md">
+                {/* Numéro + icône */}
+                <HStack gap={3} alignItems="center">
+                  <Box
+                    width="34px"
+                    height="34px"
+                    borderRadius="full"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                    style={{ backgroundColor: step.color }}
+                  >
+                    <Text fontSize="sm" fontWeight="800" color="white" lineHeight="1">
+                      {i + 1}
+                    </Text>
+                  </Box>
+                  <Box
+                    width="34px"
+                    height="34px"
+                    borderRadius="xl"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                    style={{ backgroundColor: `${step.color}14` }}
+                  >
+                    <step.icon size={16} color={step.color} />
+                  </Box>
+                </HStack>
+
+                <Text fontWeight="700" fontSize="md" lineHeight="1.3">
                   {step.title}
                 </Text>
-                <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
+                <Text fontSize="sm" color="fg.muted" lineHeight="1.75">
                   {step.body}
                 </Text>
               </VStack>
@@ -300,16 +332,26 @@ export default function Home() {
 
       {/* ─── ANCRAGE THÉORIQUE ─── */}
       <Box
-        py={{ base: 12, md: 16 }}
+        py={{ base: 14, md: 20 }}
         backgroundColor="bg.subtle"
-        borderRadius="2xl"
+        borderBottom="1px solid"
+        borderColor="border.subtle"
       >
-        <VStack gap={8} maxW="860px" mx="auto">
-          <VStack gap={2} textAlign="center">
-            <Heading as="h2" fontSize={{ base: "xl", md: "2xl" }} fontWeight="700">
-              Trois grandes théories, un terrain commun
+        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }}>
+          <VStack gap={3} textAlign="center">
+            <Text
+              fontSize="xs"
+              fontWeight="700"
+              color="blue.500"
+              letterSpacing="widest"
+              textTransform="uppercase"
+            >
+              Ancrage théorique
+            </Text>
+            <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
+              Trois grandes théories,<br />un terrain commun
             </Heading>
-            <Text fontSize="sm" color="fg.muted" maxW="460px" lineHeight="1.7">
+            <Text fontSize="sm" color="fg.muted" maxW="440px" lineHeight="1.8">
               Chaque persona est adossé à un cadre analytique de la sociologie
               classique.
             </Text>
@@ -320,34 +362,53 @@ export default function Home() {
               <Box
                 key={t.author}
                 flex="1"
-                p={5}
+                p={6}
                 borderRadius="2xl"
                 borderWidth="1px"
                 borderColor="border.subtle"
                 backgroundColor="white"
-                borderTopWidth="3px"
-                style={{ borderTopColor: t.color }}
+                boxShadow="sm"
+                position="relative"
+                overflow="hidden"
               >
-                <VStack align="flex-start" gap={2}>
+                {/* Accent bar top */}
+                <Box
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  right={0}
+                  height="3px"
+                  style={{ backgroundColor: t.color }}
+                />
+                <VStack align="flex-start" gap={3} pt={2}>
                   <Text
-                    fontSize="2xs"
-                    fontWeight="700"
-                    letterSpacing="wider"
+                    fontSize="xs"
+                    fontWeight="800"
+                    letterSpacing="widest"
                     textTransform="uppercase"
                     style={{ color: t.color }}
                   >
                     {t.author}
                   </Text>
-                  <Text fontWeight="600" fontSize="md">
+                  <Text fontWeight="700" fontSize="lg" lineHeight="1.25" letterSpacing="-0.01em">
                     {t.title}
                   </Text>
-                  <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
+                  <Text fontSize="sm" color="fg.muted" lineHeight="1.75">
                     {t.body}
                   </Text>
-                  <Text fontSize="xs" color="fg.muted" mt={1}>
-                    Persona :{" "}
-                    <strong style={{ color: t.color }}>{t.persona}</strong>
-                  </Text>
+                  <Box
+                    display="inline-flex"
+                    alignItems="center"
+                    gap={1}
+                    px={2}
+                    py={0.5}
+                    borderRadius="full"
+                    style={{ backgroundColor: `${t.color}12` }}
+                  >
+                    <Text fontSize="xs" style={{ color: t.color }} fontWeight="600">
+                      → {t.persona}
+                    </Text>
+                  </Box>
                 </VStack>
               </Box>
             ))}
@@ -356,12 +417,22 @@ export default function Home() {
       </Box>
 
       {/* ─── CTA FINAL ─── */}
-      <Box py={{ base: 14, md: 20 }} textAlign="center">
-        <VStack gap={5} maxW="480px" mx="auto">
-          <Heading as="h2" fontSize={{ base: "xl", md: "2xl" }} fontWeight="700">
+      <Box
+        py={{ base: 16, md: 24 }}
+        textAlign="center"
+        background="linear-gradient(150deg, #eef2ff 0%, #f5f0ff 55%, #fdf4ff 100%)"
+        px={{ base: 4, md: 8 }}
+      >
+        <VStack gap={5} maxW="480px" mx="auto" className="hero-animate">
+          <Heading
+            as="h2"
+            fontSize={{ base: "2xl", md: "3xl" }}
+            fontWeight="800"
+            letterSpacing="-0.02em"
+          >
             Prêt à commencer ?
           </Heading>
-          <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
+          <Text fontSize="md" color="fg.muted" lineHeight="1.75">
             {user
               ? "Choisissez un persona et commencez votre premier entretien."
               : "Créez un compte pour accéder aux personas et démarrer votre premier entretien."}
@@ -379,6 +450,7 @@ export default function Home() {
           </Button>
         </VStack>
       </Box>
+
     </VStack>
   );
 }
