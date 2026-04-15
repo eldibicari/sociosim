@@ -60,6 +60,7 @@ function AgentGrid({
   togglingAgentId,
   interactedAgents,
   userAdmin,
+  currentUserId,
   onSelectAgent,
   onToggleAgent,
   onNavigateHistory,
@@ -71,6 +72,7 @@ function AgentGrid({
   togglingAgentId: string | null;
   interactedAgents: string[];
   userAdmin: boolean;
+  currentUserId?: string | null;
   onSelectAgent: (agentId: string) => void;
   onToggleAgent: (agent: Agent) => void;
   onNavigateHistory: (agentId: string) => void;
@@ -89,6 +91,7 @@ function AgentGrid({
           togglingAgentId={togglingAgentId}
           hasInteracted={interactedAgents.includes(agent.id)}
           userAdmin={userAdmin}
+          currentUserId={currentUserId}
           onSelectAgent={onSelectAgent}
           onToggleAgent={onToggleAgent}
           onNavigateHistory={onNavigateHistory}
@@ -354,6 +357,7 @@ export default function PersonnasPage() {
     togglingAgentId,
     interactedAgents,
     userAdmin: user_admin,
+    currentUserId: user?.id ?? null,
     onSelectAgent: handleSelectAgent,
     onToggleAgent: handleToggleAgent,
     onNavigateHistory: handleNavigateHistory,
