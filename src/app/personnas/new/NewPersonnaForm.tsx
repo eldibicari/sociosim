@@ -11,6 +11,7 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { useEditor } from "@tiptap/react";
@@ -43,9 +44,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
   const { user, isLoading: isAuthLoading } = useAuthUser();
   const [agentName, setAgentName] = useState("");
   const [description, setDescription] = useState("");
-  const [interviewGuide, setInterviewGuide] = useState(
-    "Entrer dans le contexte\n- Situer le parcours, le quotidien et le rapport général à l'IA\n\nFaire raconter des usages concrets\n- Demander un exemple récent, daté et situé\n- Relancer sur ce qui a été gardé, modifié ou abandonné\n\nExplorer les tensions\n- Faire émerger hésitations, limites, contournements et contradictions"
-  );
+  const interviewGuide = "";
   const [systemPrompt, setSystemPrompt] = useState(templatePrompt);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -220,7 +219,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
         description: "Le prompt a été enregistré et peut maintenant être retravaillé.",
         type: "success",
       });
-      router.push(`/personnas/${payload.id}/edit`);
+      router.push(`/personnas/${payload.id}`);
     } catch (submitError) {
       console.error("Error creating personna:", submitError);
       setError("Une erreur est survenue lors de la creation.");
@@ -239,6 +238,17 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
               subtitle="Nommer le profil, clarifier son contexte et poser une première base de prompt."
             >
               <VStack align="stretch" gap={4}>
+                <Button
+                  alignSelf="flex-start"
+                  variant="ghost"
+                  colorPalette="blue"
+                  size="sm"
+                  onClick={() => router.push("/personnas")}
+                >
+                  <ArrowLeft size={14} />
+                  Retour aux personas
+                </Button>
+
                 <Box
                   borderRadius="2xl"
                   borderWidth="1px"
@@ -295,21 +305,20 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                   </Field.HelperText>
                 </Field.Root>
 
-                <Field.Root>
-                  <Field.Label fontSize="sm">Grille d&apos;entretien</Field.Label>
-                  <Textarea
-                    size="sm"
-                    rows={10}
-                    value={interviewGuide}
-                    onChange={(event) => setInterviewGuide(event.target.value)}
-                    placeholder="Theme 1&#10;- Question ouverte 1&#10;- Relance utile&#10;&#10;Theme 2&#10;- ..."
-                    paddingInlineStart={4}
-                    resize="vertical"
-                  />
-                  <Field.HelperText fontSize="xs" color="fg.muted">
-                    Cette grille sert avant l&apos;entretien pour guider l&apos;étudiant. Elle pourra ensuite être améliorée à partir de l&apos;analyse.
-                  </Field.HelperText>
-                </Field.Root>
+                <Box
+                  borderRadius="2xl"
+                  borderWidth="1px"
+                  borderColor="border.subtle"
+                  backgroundColor="bg.subtle"
+                  padding={4}
+                >
+                  <VStack align="stretch" gap={2}>
+                    <Text fontSize="sm" fontWeight="semibold">Grille d&apos;entretien</Text>
+                    <Text fontSize="xs" color="fg.muted" lineHeight="1.6">
+                      La grille sera disponible depuis la fiche du persona après la création. Elle se configure séparément du prompt.
+                    </Text>
+                  </VStack>
+                </Box>
 
                 <Separator />
 

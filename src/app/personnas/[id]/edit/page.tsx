@@ -25,7 +25,7 @@ import HeadingExtension from "@tiptap/extension-heading";
 import ListItem from "@tiptap/extension-list-item";
 import Paragraph from "@tiptap/extension-paragraph";
 import TextExtension from "@tiptap/extension-text";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { toaster } from "@/components/ui/toaster";
 import PersonnaLayout from "@/app/personnas/components/PersonnaLayout";
 import PersonnaLeftSidebar from "@/app/personnas/components/PersonnaLeftSidebar";
@@ -560,6 +560,17 @@ export default function EditAgentPromptPage() {
               )}
             >
               <VStack align="stretch" gap={4}>
+                <Button
+                  alignSelf="flex-start"
+                  variant="ghost"
+                  colorPalette="blue"
+                  size="sm"
+                  onClick={() => router.push(`/personnas/${agentId}`)}
+                >
+                  <ArrowLeft size={14} />
+                  Retour à la fiche
+                </Button>
+
                 <Box
                   borderRadius="2xl"
                   borderWidth="1px"
