@@ -110,9 +110,9 @@ const THEORIES = [
 ];
 
 const STATS = [
-  { value: "3", label: "Enquêtés virtuels" },
+  { value: "∞", label: "Personas créables" },
   { value: "3", label: "Cadres théoriques" },
-  { value: "100 %", label: "Analyse automatique" },
+  { value: "Auto", label: "Analyse post-entretien" },
   { value: "PDF", label: "Export disponible" },
 ];
 
