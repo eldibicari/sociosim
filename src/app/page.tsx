@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { BarChart2, BookOpen, MessageSquare } from "lucide-react";
+import { BarChart2, BookOpen, Eye, FileText, MessageSquare, Settings2, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuthUser } from "@/hooks/useAuthUser";
@@ -106,6 +106,36 @@ const THEORIES = [
     body: "Les technologies ne font pas que des outils. Théo vous entraîne dans la construction sociotechnique des usages quotidiens.",
     color: "#059669",
     persona: "Théo",
+  },
+];
+
+const STATS = [
+  { value: "3", label: "Enquêtés virtuels" },
+  { value: "3", label: "Cadres théoriques" },
+  { value: "100 %", label: "Analyse automatique" },
+  { value: "PDF", label: "Export disponible" },
+];
+
+const TEACHER_FEATURES = [
+  {
+    icon: Users,
+    title: "Créez vos propres personas",
+    body: "Construisez des profils à partir de vos propres entretiens de recherche. Chaque persona dispose d'un prompt, d'une grille et d'un historique séparés.",
+  },
+  {
+    icon: Eye,
+    title: "Suivez les entretiens",
+    body: "Accédez à tous les entretiens de vos étudiants depuis votre espace admin. Lisez les verbatims, consultez les analyses et identifiez les difficultés.",
+  },
+  {
+    icon: Settings2,
+    title: "Configurez la grille",
+    body: "Définissez les thèmes et questions de relance propres à chaque persona. La grille est séparée du prompt : elle guide l'étudiant sans contraindre le persona.",
+  },
+  {
+    icon: FileText,
+    title: "Exportez les résultats",
+    body: "Transcription horodatée, analyse pédagogique et export PDF pour chaque entretien. Réutilisable en TD, en correction ou dans un portfolio étudiant.",
   },
 ];
 
@@ -206,6 +236,50 @@ export default function Home() {
             )}
           </HStack>
         </VStack>
+      </Box>
+
+      {/* ─── STATS STRIP ─── */}
+      <Box
+        py={8}
+        borderBottom="1px solid"
+        borderColor="border.subtle"
+        backgroundColor="white"
+      >
+        <Flex
+          maxW="760px"
+          mx="auto"
+          px={{ base: 4, md: 8 }}
+          gap={0}
+          direction={{ base: "column", sm: "row" }}
+          alignItems="stretch"
+        >
+          {STATS.map((s, i) => (
+            <Box
+              key={s.label}
+              flex="1"
+              textAlign="center"
+              px={4}
+              py={{ base: 4, sm: 0 }}
+              borderLeft={i > 0 ? { base: "none", sm: "1px solid" } : "none"}
+              borderTop={i > 0 ? { base: "1px solid", sm: "none" } : "none"}
+              borderColor="border.subtle"
+            >
+              <Text
+                fontSize={{ base: "2xl", md: "3xl" }}
+                fontWeight="800"
+                letterSpacing="-0.02em"
+                color="blue.600"
+                lineHeight="1"
+                mb={1}
+              >
+                {s.value}
+              </Text>
+              <Text fontSize="xs" color="fg.muted" fontWeight="500">
+                {s.label}
+              </Text>
+            </Box>
+          ))}
+        </Flex>
       </Box>
 
       {/* ─── PERSONAS VITRINE ─── */}
@@ -413,6 +487,115 @@ export default function Home() {
               </Box>
             ))}
           </Flex>
+        </VStack>
+      </Box>
+
+      {/* ─── POUR LES ENSEIGNANTS ─── */}
+      <Box
+        py={{ base: 14, md: 20 }}
+        borderBottom="1px solid"
+        borderColor="border.subtle"
+      >
+        <VStack gap={10} maxW="900px" mx="auto" px={{ base: 2, md: 4 }}>
+          <VStack gap={3} textAlign="center">
+            <Text
+              fontSize="xs"
+              fontWeight="700"
+              color="blue.500"
+              letterSpacing="widest"
+              textTransform="uppercase"
+            >
+              Pour les enseignants
+            </Text>
+            <Heading
+              as="h2"
+              fontSize={{ base: "2xl", md: "3xl" }}
+              fontWeight="700"
+              letterSpacing="-0.02em"
+            >
+              Conçu pour l&apos;enseignement universitaire
+            </Heading>
+            <Text fontSize="sm" color="fg.muted" maxW="480px" lineHeight="1.8">
+              Mimesis est développé au sein de l&apos;UMR LISIS — Université Gustave
+              Eiffel. Les enseignants disposent d&apos;un espace admin complet pour
+              piloter les activités pédagogiques.
+            </Text>
+          </VStack>
+
+          <Flex
+            gap={5}
+            direction={{ base: "column", md: "row" }}
+            width="100%"
+            flexWrap="wrap"
+          >
+            {TEACHER_FEATURES.map((f) => (
+              <Box
+                key={f.title}
+                flex={{ base: "1 1 100%", md: "1 1 calc(50% - 10px)" }}
+                p={5}
+                borderRadius="2xl"
+                borderWidth="1px"
+                borderColor="border.subtle"
+                backgroundColor="white"
+                boxShadow="sm"
+              >
+                <HStack gap={3} alignItems="flex-start">
+                  <Box
+                    mt={0.5}
+                    width="36px"
+                    height="36px"
+                    borderRadius="lg"
+                    backgroundColor="#6366f114"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                  >
+                    <f.icon size={17} color="#6366f1" />
+                  </Box>
+                  <VStack align="flex-start" gap={1}>
+                    <Text fontWeight="700" fontSize="sm">
+                      {f.title}
+                    </Text>
+                    <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
+                      {f.body}
+                    </Text>
+                  </VStack>
+                </HStack>
+              </Box>
+            ))}
+          </Flex>
+
+          {/* Crédibilité institutionnelle */}
+          <HStack
+            gap={4}
+            px={6}
+            py={4}
+            borderRadius="2xl"
+            borderWidth="1px"
+            borderColor="border.subtle"
+            backgroundColor="bg.subtle"
+            width="100%"
+            flexWrap="wrap"
+            justifyContent="center"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logos/Logo_Universite_Gustave_Eiffel_2020.svg"
+              alt="Université Gustave Eiffel"
+              style={{ height: "28px", width: "auto", opacity: 0.8 }}
+            />
+            <Box
+              width="1px"
+              height="28px"
+              backgroundColor="border.muted"
+              display={{ base: "none", sm: "block" }}
+            />
+            <Text fontSize="xs" color="fg.muted" textAlign="center">
+              Développé par l&apos;UMR LISIS — Laboratoire Interdisciplinaire Sciences,
+              Innovations, Sociétés
+            </Text>
+          </HStack>
         </VStack>
       </Box>
 
