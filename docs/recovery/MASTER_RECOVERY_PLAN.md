@@ -44,6 +44,7 @@ Contenu :
 - creation / edition
 - lien avec grille d'entretien et prompt
 - preparation des personnas exemples pour la future home
+- evolution avancee a cadrer dans `PERSONA_ADVANCED_ARCHITECTURE_PLAN.md`
 
 ### 3. Bloc accueil
 Statut :
@@ -98,4 +99,5 @@ A chaque nouvelle session :
 ## Sous-etape recommandee pour la prochaine reprise
 
 - test visuel final du bloc `personnas`
-- puis passage au bloc `accueil` si le parcours est stable
+- puis audit de l'evolution avancee `persona config / grille / analyse`
+- le bloc `accueil` reste le prochain grand bloc visuel, mais seulement apres clarification de cette architecture
