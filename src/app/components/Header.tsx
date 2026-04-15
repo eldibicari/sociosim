@@ -153,6 +153,15 @@ export default function Header() {
               >
                 {role === "admin" ? "Entretiens" : "Mes entretiens"}
               </Link>
+              <Link
+                as={NextLink}
+                href="/guide-entretien"
+                fontWeight="medium"
+                color="fg.muted"
+                _hover={{ color: "accent.primary" }}
+              >
+                Guide
+              </Link>
               {user_admin && (
                 <Link
                   as={NextLink}
