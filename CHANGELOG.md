@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Home Page Rebuild:** Replace generic card page with a full showcase experience — hero section, 3 persona vitrine cards (Jade/Oriane/Théo) with greetings and sample exchanges, 3-step pedagogical section, theory anchors (Bourdieu/Crozier&Friedberg/Latour), and auth-aware CTAs.
+- **Persona Showcase Card:** Add `PersonaShowcaseCard` component with staggered CSS entrance animation, avatar pulse, persona greeting quote, mini exchange bubbles, and "Voir la fiche"/"Commencer" actions.
+- **Featured Personas API:** Add `GET /api/home/featured` returning jade/oriane/théo IDs in fixed order for the home page showcase.
+- **CSS Animations:** Add `cardEntrance`, `avatarPulse`, and `heroFadeIn` keyframes to `globals.css` for the home showcase.
+- **Guide Link in Nav:** Add "Guide" link to the header navigation for authenticated users.
+- **Guide Page Polish:** Add hero section, improved blockquote styling (interview prompts as callouts), better table/heading hierarchy, and a CTA to start an interview at the bottom of the guide page.
+- **Navigation Coherence:** Add back buttons across persona creation, edit, and grille pages to ensure coherent navigation flow.
+- **Interview Grid Parser:** Add `parseInterviewGrid` to convert raw `interview_guide` text into a structured `InterviewGrid` object (themes, questions, follow-ups) with a full test suite (7 tests).
+- **Dedicated Grid Page:** Add `/personnas/[id]/grille` as a standalone page for viewing and editing the interview grid, fully separated from the prompt editor.
+- **Grid API Route:** Add `PATCH /api/agents/[id]/guide` to save the interview guide without touching the prompt, and protect the existing agent PATCH from silently overwriting the guide.
+- **Grid Panel in Interview:** Add an `InterviewGridPanel` button in the interview sidebar that opens the persona's grid in a Dialog panel on demand, without cluttering the sidebar.
+- **Analysis Enriched with Grid:** `analyzeInterviewMessages` now accepts the persona's real grid themes and uses them for theme-coverage scoring instead of hardcoded generic keywords. Falls back to generic keywords when no grid is defined.
 - **Interview Grid Parser:** Add `parseInterviewGrid` to convert raw `interview_guide` text into a structured `InterviewGrid` object (themes, questions, follow-ups) with a full test suite (7 tests).
 - **Dedicated Grid Page:** Add `/personnas/[id]/grille` as a standalone page for viewing and editing the interview grid, fully separated from the prompt editor.
 - **Grid API Route:** Add `PATCH /api/agents/[id]/guide` to save the interview guide without touching the prompt, and protect the existing agent PATCH from silently overwriting the guide.
@@ -35,6 +47,9 @@ All notable changes to this project will be documented in this file.
 - **Agent Policy Module:** Centralize all agent visibility, toggle, and interview-start rules in `src/lib/agentPolicy.ts`, replacing duplicated `isAdminLike()` checks across 3 API routes.
 
 ### Changed
+- **Layout lang:** Fix `lang="en"` to `lang="fr"` — all content is in French.
+- **Home Page:** Remove automatic redirect of authenticated users to `/personnas` — the home page is now shown to everyone and adapts CTAs based on auth state.
+- **Persona Creation Flow:** Redirect after creation goes to `/personnas/[id]` (fiche) instead of `/edit`, and the grid editing is removed from the creation form (available from the fiche after creation).
 - **Personnas List UX:** Rework `/personnas` with a stronger pedagogical page intro, visible search, filter pills, clearer grouped sections, and richer cards with more explicit interview/history/prompt actions.
 - **Persona Fiche V1:** Add a first `/personnas/[id]` persona sheet that connects interview start, prompt visibility, pedagogical interview guidance, posture tips, and persona-specific history from a single page.
 - **Personnas Creation Guidance:** Make the create/edit flow more pedagogical with clearer side guidance, stronger field framing, a prompt editor subtitle, and a more explicit prompt validation sidebar.
