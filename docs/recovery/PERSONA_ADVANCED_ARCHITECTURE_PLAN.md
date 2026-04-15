@@ -212,6 +212,11 @@ Definition des types pour :
 - grille
 - analyse finale
 
+Etat :
+- implemente dans `src/lib/personaConfig.ts`
+- couvre `PersonaConfig`, `PersonaPromptBlueprint`, `InterviewGrid`, `GridTheme`, `GridQuestion`, `InterviewGridCoverage`, `InterviewMethodAnalysis` et `ExportPayload`
+- ne change pas encore la base de donnees
+
 ### Phase 3
 
 Ajout ou refactor leger de la generation du prompt a partir des parametres.
