@@ -19,6 +19,7 @@ import {
   type ShowcasePersona,
 } from "@/app/components/PersonaShowcaseCard";
 import { InterviewScene3D } from "@/app/components/InterviewScene3D";
+import { Reveal, StaggerParent, StaggerChild, AnimatedCounter } from "@/app/components/ScrollReveal";
 
 const SHOWCASE_BASE: Omit<ShowcasePersona, "id">[] = [
   {
@@ -285,43 +286,50 @@ export default function Home() {
         py={8}
         borderBottom="1px solid"
         borderColor="border.subtle"
-        backgroundColor="white"
+        background="linear-gradient(90deg, #fafbff 0%, #f5f0ff 50%, #fafbff 100%)"
       >
-        <Flex
-          maxW="760px"
-          mx="auto"
-          px={{ base: 4, md: 8 }}
-          gap={0}
-          direction={{ base: "column", sm: "row" }}
-          alignItems="stretch"
-        >
-          {STATS.map((s, i) => (
-            <Box
-              key={s.label}
-              flex="1"
-              textAlign="center"
-              px={4}
-              py={{ base: 4, sm: 0 }}
-              borderLeft={i > 0 ? { base: "none", sm: "1px solid" } : "none"}
-              borderTop={i > 0 ? { base: "1px solid", sm: "none" } : "none"}
-              borderColor="border.subtle"
-            >
-              <Text
-                fontSize={{ base: "2xl", md: "3xl" }}
-                fontWeight="800"
-                letterSpacing="-0.02em"
-                color="blue.600"
-                lineHeight="1"
-                mb={1}
-              >
-                {s.value}
-              </Text>
-              <Text fontSize="xs" color="fg.muted" fontWeight="500">
-                {s.label}
-              </Text>
-            </Box>
-          ))}
-        </Flex>
+        <StaggerParent>
+          <Flex
+            maxW="760px"
+            mx="auto"
+            px={{ base: 4, md: 8 }}
+            gap={0}
+            direction={{ base: "column", sm: "row" }}
+            alignItems="stretch"
+          >
+            {STATS.map((s, i) => (
+              <StaggerChild key={s.label} style={{ flex: 1 }}>
+                <Box
+                  textAlign="center"
+                  px={4}
+                  py={{ base: 4, sm: 0 }}
+                  borderLeft={i > 0 ? { base: "none", sm: "1px solid" } : "none"}
+                  borderTop={i > 0 ? { base: "1px solid", sm: "none" } : "none"}
+                  borderColor="border.subtle"
+                >
+                  <Text
+                    fontSize={{ base: "2xl", md: "3xl" }}
+                    fontWeight="800"
+                    letterSpacing="-0.02em"
+                    lineHeight="1"
+                    mb={1}
+                    style={{
+                      background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    <AnimatedCounter value={s.value} />
+                  </Text>
+                  <Text fontSize="xs" color="fg.muted" fontWeight="500">
+                    {s.label}
+                  </Text>
+                </Box>
+              </StaggerChild>
+            ))}
+          </Flex>
+        </StaggerParent>
       </Box>
 
       {/* ─── PERSONAS VITRINE ─── */}
@@ -332,35 +340,41 @@ export default function Home() {
         borderColor="border.subtle"
       >
         <VStack gap={10} maxW="1100px" mx="auto" px={{ base: 2, md: 4 }}>
-          <VStack gap={3} textAlign="center">
-            <Text
-              fontSize="xs"
-              fontWeight="700"
-              color="blue.500"
-              letterSpacing="widest"
-              textTransform="uppercase"
-            >
-              Vos enquêtés
-            </Text>
-            <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
-              Rencontrez les personas
-            </Heading>
-            <Text fontSize="sm" color="fg.muted" maxW="420px" lineHeight="1.8">
-              Trois profils construits à partir d&apos;entretiens réels sur
-              l&apos;usage de l&apos;IA à l&apos;université.
-            </Text>
-          </VStack>
+          <Reveal>
+            <VStack gap={3} textAlign="center">
+              <Text
+                fontSize="xs"
+                fontWeight="700"
+                color="blue.500"
+                letterSpacing="widest"
+                textTransform="uppercase"
+              >
+                Vos enquêtés
+              </Text>
+              <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
+                Rencontrez les personas
+              </Heading>
+              <Text fontSize="sm" color="fg.muted" maxW="420px" lineHeight="1.8">
+                Trois profils construits à partir d&apos;entretiens réels sur
+                l&apos;usage de l&apos;IA à l&apos;université.
+              </Text>
+            </VStack>
+          </Reveal>
 
-          <Flex
-            gap={5}
-            direction={{ base: "column", lg: "row" }}
-            width="100%"
-            alignItems="stretch"
-          >
-            {displayPersonas.map((p, i) => (
-              <PersonaShowcaseCard key={p.agent_name} persona={p} index={i} />
-            ))}
-          </Flex>
+          <StaggerParent>
+            <Flex
+              gap={5}
+              direction={{ base: "column", lg: "row" }}
+              width="100%"
+              alignItems="stretch"
+            >
+              {displayPersonas.map((p) => (
+                <StaggerChild key={p.agent_name} style={{ flex: 1, minWidth: 0 }}>
+                  <PersonaShowcaseCard persona={p} index={0} />
+                </StaggerChild>
+              ))}
+            </Flex>
+          </StaggerParent>
         </VStack>
       </Box>
 
@@ -369,80 +383,114 @@ export default function Home() {
         py={{ base: 14, md: 20 }}
         borderBottom="1px solid"
         borderColor="border.subtle"
+        position="relative"
+        overflow="hidden"
+        background="linear-gradient(180deg, #ffffff 0%, #f8f7ff 100%)"
       >
-        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }}>
-          <VStack gap={3} textAlign="center">
-            <Text
-              fontSize="xs"
-              fontWeight="700"
-              color="blue.500"
-              letterSpacing="widest"
-              textTransform="uppercase"
-            >
-              La méthode
-            </Text>
-            <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
-              Comment ça fonctionne
-            </Heading>
-            <Text fontSize="sm" color="fg.muted" lineHeight="1.8">
-              Trois étapes pour un entretien complet, de la préparation à
-              l&apos;analyse.
-            </Text>
-          </VStack>
-
-          <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
-            {STEPS.map((step, i) => (
-              <VStack
-                key={step.title}
-                flex="1"
-                align="flex-start"
-                gap={4}
-                p={6}
-                borderRadius="2xl"
-                borderWidth="1px"
-                borderColor="border.subtle"
-                backgroundColor="white"
-                boxShadow="sm"
+        {/* Subtle grid pattern */}
+        <Box
+          position="absolute"
+          inset={0}
+          pointerEvents="none"
+          style={{
+            backgroundImage: "linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px)",
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }} position="relative" zIndex={1}>
+          <Reveal>
+            <VStack gap={3} textAlign="center">
+              <Text
+                fontSize="xs"
+                fontWeight="700"
+                color="blue.500"
+                letterSpacing="widest"
+                textTransform="uppercase"
               >
-                {/* Numéro + icône */}
-                <HStack gap={3} alignItems="center">
-                  <Box
-                    width="34px"
-                    height="34px"
-                    borderRadius="full"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
-                    style={{ backgroundColor: step.color }}
-                  >
-                    <Text fontSize="sm" fontWeight="800" color="white" lineHeight="1">
-                      {i + 1}
-                    </Text>
-                  </Box>
-                  <Box
-                    width="34px"
-                    height="34px"
-                    borderRadius="xl"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
-                    style={{ backgroundColor: `${step.color}14` }}
-                  >
-                    <step.icon size={16} color={step.color} />
-                  </Box>
-                </HStack>
+                La méthode
+              </Text>
+              <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
+                Comment ça fonctionne
+              </Heading>
+              <Text fontSize="sm" color="fg.muted" lineHeight="1.8">
+                Trois étapes pour un entretien complet, de la préparation à
+                l&apos;analyse.
+              </Text>
+            </VStack>
+          </Reveal>
 
-                <Text fontWeight="700" fontSize="md" lineHeight="1.3">
-                  {step.title}
-                </Text>
-                <Text fontSize="sm" color="fg.muted" lineHeight="1.75">
-                  {step.body}
-                </Text>
-              </VStack>
-            ))}
-          </Flex>
+          <StaggerParent>
+            <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
+              {STEPS.map((step, i) => (
+                <StaggerChild key={step.title} style={{ flex: 1 }}>
+                  <VStack
+                    align="flex-start"
+                    gap={4}
+                    p={6}
+                    borderRadius="2xl"
+                    borderWidth="1px"
+                    height="100%"
+                    position="relative"
+                    overflow="hidden"
+                    style={{
+                      borderColor: `${step.color}22`,
+                      background: `linear-gradient(135deg, ${step.color}08 0%, white 60%)`,
+                      boxShadow: `0 4px 24px -8px ${step.color}22`,
+                    }}
+                  >
+                    {/* Accent corner glow */}
+                    <Box
+                      position="absolute"
+                      top="-20px"
+                      right="-20px"
+                      width="80px"
+                      height="80px"
+                      borderRadius="full"
+                      pointerEvents="none"
+                      style={{
+                        background: `radial-gradient(circle, ${step.color}20, transparent 70%)`,
+                        filter: "blur(12px)",
+                      }}
+                    />
+                    <HStack gap={3} alignItems="center">
+                      <Box
+                        width="34px"
+                        height="34px"
+                        borderRadius="full"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        flexShrink={0}
+                        style={{ backgroundColor: step.color }}
+                      >
+                        <Text fontSize="sm" fontWeight="800" color="white" lineHeight="1">
+                          {i + 1}
+                        </Text>
+                      </Box>
+                      <Box
+                        width="34px"
+                        height="34px"
+                        borderRadius="xl"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        flexShrink={0}
+                        style={{ backgroundColor: `${step.color}14` }}
+                      >
+                        <step.icon size={16} color={step.color} />
+                      </Box>
+                    </HStack>
+                    <Text fontWeight="700" fontSize="md" lineHeight="1.3">
+                      {step.title}
+                    </Text>
+                    <Text fontSize="sm" color="fg.muted" lineHeight="1.75">
+                      {step.body}
+                    </Text>
+                  </VStack>
+                </StaggerChild>
+              ))}
+            </Flex>
+          </StaggerParent>
         </VStack>
       </Box>
 
@@ -475,93 +523,97 @@ export default function Home() {
         />
 
         <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }} position="relative" zIndex={1}>
-          <VStack gap={3} textAlign="center">
-            <Text
-              fontSize="xs"
-              fontWeight="700"
-              letterSpacing="widest"
-              textTransform="uppercase"
-              style={{ color: "#818cf8" }}
-            >
-              Ancrage théorique
-            </Text>
-            <Heading
-              as="h2"
-              fontSize={{ base: "2xl", md: "3xl" }}
-              fontWeight="700"
-              letterSpacing="-0.02em"
-              color="white"
-            >
-              Trois grandes théories,<br />un terrain commun
-            </Heading>
-            <Text fontSize="sm" maxW="440px" lineHeight="1.8" style={{ color: "rgba(255,255,255,0.5)" }}>
-              Chaque persona est adossé à un cadre analytique de la sociologie
-              classique.
-            </Text>
-          </VStack>
-
-          <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
-            {THEORIES.map((t) => (
-              <Box
-                key={t.author}
-                flex="1"
-                p={6}
-                borderRadius="2xl"
-                borderWidth="1px"
-                className="theory-glass-card"
-                position="relative"
-                overflow="hidden"
-                style={{
-                  borderColor: `${t.color}30`,
-                  background: `linear-gradient(135deg, ${t.color}12 0%, ${t.color}05 100%)`,
-                }}
-                _hover={{
-                  transform: "translateY(-5px)",
-                  boxShadow: `0 20px 48px -8px ${t.color}44`,
-                }}
+          <Reveal>
+            <VStack gap={3} textAlign="center">
+              <Text
+                fontSize="xs"
+                fontWeight="700"
+                letterSpacing="widest"
+                textTransform="uppercase"
+                style={{ color: "#818cf8" }}
               >
-                {/* Accent bar top avec gradient */}
-                <Box
-                  position="absolute"
-                  top={0}
-                  left={0}
-                  right={0}
-                  height="2px"
-                  style={{ background: `linear-gradient(90deg, ${t.color}, transparent)` }}
-                />
-                <VStack align="flex-start" gap={3} pt={2}>
-                  <Text
-                    fontSize="xs"
-                    fontWeight="800"
-                    letterSpacing="widest"
-                    textTransform="uppercase"
-                    style={{ color: t.color }}
-                  >
-                    {t.author}
-                  </Text>
-                  <Text fontWeight="700" fontSize="lg" lineHeight="1.25" letterSpacing="-0.01em" color="white">
-                    {t.title}
-                  </Text>
-                  <Text fontSize="sm" lineHeight="1.75" style={{ color: "rgba(255,255,255,0.55)" }}>
-                    {t.body}
-                  </Text>
+                Ancrage théorique
+              </Text>
+              <Heading
+                as="h2"
+                fontSize={{ base: "2xl", md: "3xl" }}
+                fontWeight="700"
+                letterSpacing="-0.02em"
+                color="white"
+              >
+                Trois grandes théories,<br />un terrain commun
+              </Heading>
+              <Text fontSize="sm" maxW="440px" lineHeight="1.8" style={{ color: "rgba(255,255,255,0.5)" }}>
+                Chaque persona est adossé à un cadre analytique de la sociologie
+                classique.
+              </Text>
+            </VStack>
+          </Reveal>
+
+          <StaggerParent>
+            <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
+              {THEORIES.map((t) => (
+                <StaggerChild key={t.author} style={{ flex: 1 }}>
                   <Box
-                    display="inline-flex"
-                    alignItems="center"
-                    gap={1}
-                    px={2}
-                    py={0.5}
-                    borderRadius="full"
-                    style={{ backgroundColor: `${t.color}20` }}
+                    p={6}
+                    borderRadius="2xl"
+                    borderWidth="1px"
+                    className="theory-glass-card"
+                    position="relative"
+                    overflow="hidden"
+                    height="100%"
+                    style={{
+                      borderColor: `${t.color}30`,
+                      background: `linear-gradient(135deg, ${t.color}12 0%, ${t.color}05 100%)`,
+                    }}
+                    _hover={{
+                      transform: "translateY(-5px)",
+                      boxShadow: `0 20px 48px -8px ${t.color}44`,
+                    }}
                   >
-                    <Text fontSize="xs" style={{ color: t.color }} fontWeight="600">
-                      → {t.persona}
-                    </Text>
+                    <Box
+                      position="absolute"
+                      top={0}
+                      left={0}
+                      right={0}
+                      height="2px"
+                      style={{ background: `linear-gradient(90deg, ${t.color}, transparent)` }}
+                    />
+                    <VStack align="flex-start" gap={3} pt={2}>
+                      <Text
+                        fontSize="xs"
+                        fontWeight="800"
+                        letterSpacing="widest"
+                        textTransform="uppercase"
+                        style={{ color: t.color }}
+                      >
+                        {t.author}
+                      </Text>
+                      <Text fontWeight="700" fontSize="lg" lineHeight="1.25" letterSpacing="-0.01em" color="white">
+                        {t.title}
+                      </Text>
+                      <Text fontSize="sm" lineHeight="1.75" style={{ color: "rgba(255,255,255,0.55)" }}>
+                        {t.body}
+                      </Text>
+                      <Box
+                        display="inline-flex"
+                        alignItems="center"
+                        gap={1}
+                        px={2}
+                        py={0.5}
+                        borderRadius="full"
+                        style={{ backgroundColor: `${t.color}20` }}
+                      >
+                        <Text fontSize="xs" style={{ color: t.color }} fontWeight="600">
+                          → {t.persona}
+                        </Text>
+                      </Box>
+                    </VStack>
                   </Box>
-                </VStack>
-              </Box>
-            ))}
-          </Flex>
+                </StaggerChild>
+              ))}
+            </Flex>
+          </StaggerParent>
         </VStack>
       </Box>
 
@@ -570,107 +622,113 @@ export default function Home() {
         py={{ base: 14, md: 20 }}
         borderBottom="1px solid"
         borderColor="border.subtle"
+        position="relative"
+        overflow="hidden"
+        background="linear-gradient(180deg, #f8f7ff 0%, #ffffff 100%)"
       >
-        <VStack gap={10} maxW="900px" mx="auto" px={{ base: 2, md: 4 }}>
-          <VStack gap={3} textAlign="center">
-            <Text
-              fontSize="xs"
-              fontWeight="700"
-              color="blue.500"
-              letterSpacing="widest"
-              textTransform="uppercase"
-            >
-              Pour les enseignants
-            </Text>
-            <Heading
-              as="h2"
-              fontSize={{ base: "2xl", md: "3xl" }}
-              fontWeight="700"
-              letterSpacing="-0.02em"
-            >
-              Conçu pour l&apos;enseignement universitaire
-            </Heading>
-            <Text fontSize="sm" color="fg.muted" maxW="480px" lineHeight="1.8">
-              Mimesis est développé au sein de l&apos;UMR LISIS — Université Gustave
-              Eiffel. Les enseignants disposent d&apos;un espace admin complet pour
-              piloter les activités pédagogiques.
-            </Text>
-          </VStack>
-
-          <Flex
-            gap={5}
-            direction={{ base: "column", md: "row" }}
-            width="100%"
-            flexWrap="wrap"
-          >
-            {TEACHER_FEATURES.map((f) => (
-              <Box
-                key={f.title}
-                flex={{ base: "1 1 100%", md: "1 1 calc(50% - 10px)" }}
-                p={5}
-                borderRadius="2xl"
-                borderWidth="1px"
-                borderColor="border.subtle"
-                backgroundColor="white"
-                boxShadow="sm"
+        <Box
+          position="absolute"
+          inset={0}
+          pointerEvents="none"
+          style={{
+            backgroundImage: "radial-gradient(circle, rgba(99,102,241,0.07) 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+        <VStack gap={10} maxW="900px" mx="auto" px={{ base: 2, md: 4 }} position="relative" zIndex={1}>
+          <Reveal>
+            <VStack gap={3} textAlign="center">
+              <Text
+                fontSize="xs"
+                fontWeight="700"
+                letterSpacing="widest"
+                textTransform="uppercase"
+                style={{ color: "#6366f1" }}
               >
-                <HStack gap={3} alignItems="flex-start">
-                  <Box
-                    mt={0.5}
-                    width="36px"
-                    height="36px"
-                    borderRadius="lg"
-                    backgroundColor="#6366f114"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
-                  >
-                    <f.icon size={17} color="#6366f1" />
-                  </Box>
-                  <VStack align="flex-start" gap={1}>
-                    <Text fontWeight="700" fontSize="sm">
-                      {f.title}
-                    </Text>
-                    <Text fontSize="sm" color="fg.muted" lineHeight="1.7">
-                      {f.body}
-                    </Text>
-                  </VStack>
-                </HStack>
-              </Box>
-            ))}
-          </Flex>
+                Pour les enseignants
+              </Text>
+              <Heading
+                as="h2"
+                fontSize={{ base: "2xl", md: "3xl" }}
+                fontWeight="700"
+                letterSpacing="-0.02em"
+              >
+                Conçu pour l&apos;enseignement universitaire
+              </Heading>
+              <Text fontSize="sm" color="fg.muted" maxW="480px" lineHeight="1.8">
+                Mimesis est développé au sein de l&apos;UMR LISIS — Université Gustave
+                Eiffel. Les enseignants disposent d&apos;un espace admin complet pour
+                piloter les activités pédagogiques.
+              </Text>
+            </VStack>
+          </Reveal>
 
-          {/* Crédibilité institutionnelle */}
-          <HStack
-            gap={4}
-            px={6}
-            py={4}
-            borderRadius="2xl"
-            borderWidth="1px"
-            borderColor="border.subtle"
-            backgroundColor="bg.subtle"
-            width="100%"
-            flexWrap="wrap"
-            justifyContent="center"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logos/Logo_Universite_Gustave_Eiffel_2020.svg"
-              alt="Université Gustave Eiffel"
-              style={{ height: "28px", width: "auto", opacity: 0.8 }}
-            />
-            <Box
-              width="1px"
-              height="28px"
-              backgroundColor="border.muted"
-              display={{ base: "none", sm: "block" }}
-            />
-            <Text fontSize="xs" color="fg.muted" textAlign="center">
-              Développé par l&apos;UMR LISIS — Laboratoire Interdisciplinaire Sciences,
-              Innovations, Sociétés
-            </Text>
-          </HStack>
+          <StaggerParent>
+            <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%" flexWrap="wrap">
+              {TEACHER_FEATURES.map((f) => (
+                <StaggerChild key={f.title} style={{ flex: "1 1 calc(50% - 10px)", minWidth: "260px" }}>
+                  <Box
+                    p={5}
+                    borderRadius="2xl"
+                    borderWidth="1px"
+                    height="100%"
+                    style={{
+                      borderColor: "rgba(99,102,241,0.15)",
+                      background: "linear-gradient(135deg, rgba(99,102,241,0.04) 0%, white 60%)",
+                      boxShadow: "0 2px 16px -4px rgba(99,102,241,0.12)",
+                    }}
+                  >
+                    <HStack gap={3} alignItems="flex-start">
+                      <Box
+                        mt={0.5}
+                        width="36px"
+                        height="36px"
+                        borderRadius="lg"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        flexShrink={0}
+                        style={{ backgroundColor: "rgba(99,102,241,0.1)" }}
+                      >
+                        <f.icon size={17} color="#6366f1" />
+                      </Box>
+                      <VStack align="flex-start" gap={1}>
+                        <Text fontWeight="700" fontSize="sm">{f.title}</Text>
+                        <Text fontSize="sm" color="fg.muted" lineHeight="1.7">{f.body}</Text>
+                      </VStack>
+                    </HStack>
+                  </Box>
+                </StaggerChild>
+              ))}
+            </Flex>
+          </StaggerParent>
+
+          <Reveal delay={0.2}>
+            <HStack
+              gap={4}
+              px={6}
+              py={4}
+              borderRadius="2xl"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              backgroundColor="bg.subtle"
+              width="100%"
+              flexWrap="wrap"
+              justifyContent="center"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logos/Logo_Universite_Gustave_Eiffel_2020.svg"
+                alt="Université Gustave Eiffel"
+                style={{ height: "28px", width: "auto", opacity: 0.8 }}
+              />
+              <Box width="1px" height="28px" backgroundColor="border.muted" display={{ base: "none", sm: "block" }} />
+              <Text fontSize="xs" color="fg.muted" textAlign="center">
+                Développé par l&apos;UMR LISIS — Laboratoire Interdisciplinaire Sciences,
+                Innovations, Sociétés
+              </Text>
+            </HStack>
+          </Reveal>
         </VStack>
       </Box>
 
