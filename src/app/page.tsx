@@ -19,7 +19,7 @@ import {
   type ShowcasePersona,
 } from "@/app/components/PersonaShowcaseCard";
 import { InterviewScene3D } from "@/app/components/InterviewScene3D";
-import { Reveal, StaggerParent, StaggerChild, AnimatedCounter } from "@/app/components/ScrollReveal";
+import { Reveal, FadeIn, AnimatedCounter } from "@/app/components/ScrollReveal";
 
 const SHOWCASE_BASE: Omit<ShowcasePersona, "id">[] = [
   {
@@ -288,48 +288,46 @@ export default function Home() {
         borderColor="border.subtle"
         background="linear-gradient(90deg, #fafbff 0%, #f5f0ff 50%, #fafbff 100%)"
       >
-        <StaggerParent>
-          <Flex
-            maxW="760px"
-            mx="auto"
-            px={{ base: 4, md: 8 }}
-            gap={0}
-            direction={{ base: "column", sm: "row" }}
-            alignItems="stretch"
-          >
-            {STATS.map((s, i) => (
-              <StaggerChild key={s.label} style={{ flex: 1 }}>
-                <Box
-                  textAlign="center"
-                  px={4}
-                  py={{ base: 4, sm: 0 }}
-                  borderLeft={i > 0 ? { base: "none", sm: "1px solid" } : "none"}
-                  borderTop={i > 0 ? { base: "1px solid", sm: "none" } : "none"}
-                  borderColor="border.subtle"
+        <Flex
+          maxW="760px"
+          mx="auto"
+          px={{ base: 4, md: 8 }}
+          gap={0}
+          direction={{ base: "column", sm: "row" }}
+          alignItems="stretch"
+        >
+          {STATS.map((s, i) => (
+            <FadeIn key={s.label} index={i} style={{ flex: 1 }}>
+              <Box
+                textAlign="center"
+                px={4}
+                py={{ base: 4, sm: 0 }}
+                borderLeft={i > 0 ? { base: "none", sm: "1px solid" } : "none"}
+                borderTop={i > 0 ? { base: "1px solid", sm: "none" } : "none"}
+                borderColor="border.subtle"
+              >
+                <Text
+                  fontSize={{ base: "2xl", md: "3xl" }}
+                  fontWeight="800"
+                  letterSpacing="-0.02em"
+                  lineHeight="1"
+                  mb={1}
+                  style={{
+                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                  }}
                 >
-                  <Text
-                    fontSize={{ base: "2xl", md: "3xl" }}
-                    fontWeight="800"
-                    letterSpacing="-0.02em"
-                    lineHeight="1"
-                    mb={1}
-                    style={{
-                      background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    <AnimatedCounter value={s.value} />
-                  </Text>
-                  <Text fontSize="xs" color="fg.muted" fontWeight="500">
-                    {s.label}
-                  </Text>
-                </Box>
-              </StaggerChild>
-            ))}
-          </Flex>
-        </StaggerParent>
+                  <AnimatedCounter value={s.value} />
+                </Text>
+                <Text fontSize="xs" color="fg.muted" fontWeight="500">
+                  {s.label}
+                </Text>
+              </Box>
+            </FadeIn>
+          ))}
+        </Flex>
       </Box>
 
       {/* ─── PERSONAS VITRINE ─── */}
@@ -361,20 +359,13 @@ export default function Home() {
             </VStack>
           </Reveal>
 
-          <StaggerParent>
-            <Flex
-              gap={5}
-              direction={{ base: "column", lg: "row" }}
-              width="100%"
-              alignItems="stretch"
-            >
-              {displayPersonas.map((p) => (
-                <StaggerChild key={p.agent_name} style={{ flex: 1, minWidth: 0 }}>
-                  <PersonaShowcaseCard persona={p} index={0} />
-                </StaggerChild>
-              ))}
-            </Flex>
-          </StaggerParent>
+          <Flex gap={5} direction={{ base: "column", lg: "row" }} width="100%" alignItems="stretch">
+            {displayPersonas.map((p, i) => (
+              <FadeIn key={p.agent_name} index={i} style={{ flex: 1, minWidth: 0 }}>
+                <PersonaShowcaseCard persona={p} index={0} />
+              </FadeIn>
+            ))}
+          </Flex>
         </VStack>
       </Box>
 
@@ -419,78 +410,75 @@ export default function Home() {
             </VStack>
           </Reveal>
 
-          <StaggerParent>
-            <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
-              {STEPS.map((step, i) => (
-                <StaggerChild key={step.title} style={{ flex: 1 }}>
-                  <VStack
-                    align="flex-start"
-                    gap={4}
-                    p={6}
-                    borderRadius="2xl"
-                    borderWidth="1px"
-                    height="100%"
-                    position="relative"
-                    overflow="hidden"
+          <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
+            {STEPS.map((step, i) => (
+              <FadeIn key={step.title} index={i} style={{ flex: 1 }}>
+                <VStack
+                  align="flex-start"
+                  gap={4}
+                  p={6}
+                  borderRadius="2xl"
+                  borderWidth="1px"
+                  height="100%"
+                  position="relative"
+                  overflow="hidden"
+                  style={{
+                    borderColor: `${step.color}22`,
+                    background: `linear-gradient(135deg, ${step.color}08 0%, white 60%)`,
+                    boxShadow: `0 4px 24px -8px ${step.color}22`,
+                  }}
+                >
+                  <Box
+                    position="absolute"
+                    top="-20px"
+                    right="-20px"
+                    width="80px"
+                    height="80px"
+                    borderRadius="full"
+                    pointerEvents="none"
                     style={{
-                      borderColor: `${step.color}22`,
-                      background: `linear-gradient(135deg, ${step.color}08 0%, white 60%)`,
-                      boxShadow: `0 4px 24px -8px ${step.color}22`,
+                      background: `radial-gradient(circle, ${step.color}20, transparent 70%)`,
+                      filter: "blur(12px)",
                     }}
-                  >
-                    {/* Accent corner glow */}
+                  />
+                  <HStack gap={3} alignItems="center">
                     <Box
-                      position="absolute"
-                      top="-20px"
-                      right="-20px"
-                      width="80px"
-                      height="80px"
+                      width="34px"
+                      height="34px"
                       borderRadius="full"
-                      pointerEvents="none"
-                      style={{
-                        background: `radial-gradient(circle, ${step.color}20, transparent 70%)`,
-                        filter: "blur(12px)",
-                      }}
-                    />
-                    <HStack gap={3} alignItems="center">
-                      <Box
-                        width="34px"
-                        height="34px"
-                        borderRadius="full"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        flexShrink={0}
-                        style={{ backgroundColor: step.color }}
-                      >
-                        <Text fontSize="sm" fontWeight="800" color="white" lineHeight="1">
-                          {i + 1}
-                        </Text>
-                      </Box>
-                      <Box
-                        width="34px"
-                        height="34px"
-                        borderRadius="xl"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        flexShrink={0}
-                        style={{ backgroundColor: `${step.color}14` }}
-                      >
-                        <step.icon size={16} color={step.color} />
-                      </Box>
-                    </HStack>
-                    <Text fontWeight="700" fontSize="md" lineHeight="1.3">
-                      {step.title}
-                    </Text>
-                    <Text fontSize="sm" color="fg.muted" lineHeight="1.75">
-                      {step.body}
-                    </Text>
-                  </VStack>
-                </StaggerChild>
-              ))}
-            </Flex>
-          </StaggerParent>
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                      style={{ backgroundColor: step.color }}
+                    >
+                      <Text fontSize="sm" fontWeight="800" color="white" lineHeight="1">
+                        {i + 1}
+                      </Text>
+                    </Box>
+                    <Box
+                      width="34px"
+                      height="34px"
+                      borderRadius="xl"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                      style={{ backgroundColor: `${step.color}14` }}
+                    >
+                      <step.icon size={16} color={step.color} />
+                    </Box>
+                  </HStack>
+                  <Text fontWeight="700" fontSize="md" lineHeight="1.3">
+                    {step.title}
+                  </Text>
+                  <Text fontSize="sm" color="fg.muted" lineHeight="1.75">
+                    {step.body}
+                  </Text>
+                </VStack>
+              </FadeIn>
+            ))}
+          </Flex>
         </VStack>
       </Box>
 
@@ -550,10 +538,9 @@ export default function Home() {
             </VStack>
           </Reveal>
 
-          <StaggerParent>
-            <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
+          <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
               {THEORIES.map((t) => (
-                <StaggerChild key={t.author} style={{ flex: 1 }}>
+                <FadeIn key={t.author} index={THEORIES.indexOf(t)} style={{ flex: 1 }}>
                   <Box
                     p={6}
                     borderRadius="2xl"
@@ -610,10 +597,9 @@ export default function Home() {
                       </Box>
                     </VStack>
                   </Box>
-                </StaggerChild>
+                </FadeIn>
               ))}
-            </Flex>
-          </StaggerParent>
+          </Flex>
         </VStack>
       </Box>
 
@@ -663,45 +649,43 @@ export default function Home() {
             </VStack>
           </Reveal>
 
-          <StaggerParent>
-            <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%" flexWrap="wrap">
-              {TEACHER_FEATURES.map((f) => (
-                <StaggerChild key={f.title} style={{ flex: "1 1 calc(50% - 10px)", minWidth: "260px" }}>
-                  <Box
-                    p={5}
-                    borderRadius="2xl"
-                    borderWidth="1px"
-                    height="100%"
-                    style={{
-                      borderColor: "rgba(99,102,241,0.15)",
-                      background: "linear-gradient(135deg, rgba(99,102,241,0.04) 0%, white 60%)",
-                      boxShadow: "0 2px 16px -4px rgba(99,102,241,0.12)",
-                    }}
-                  >
-                    <HStack gap={3} alignItems="flex-start">
-                      <Box
-                        mt={0.5}
-                        width="36px"
-                        height="36px"
-                        borderRadius="lg"
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        flexShrink={0}
-                        style={{ backgroundColor: "rgba(99,102,241,0.1)" }}
-                      >
-                        <f.icon size={17} color="#6366f1" />
-                      </Box>
-                      <VStack align="flex-start" gap={1}>
-                        <Text fontWeight="700" fontSize="sm">{f.title}</Text>
-                        <Text fontSize="sm" color="fg.muted" lineHeight="1.7">{f.body}</Text>
-                      </VStack>
-                    </HStack>
-                  </Box>
-                </StaggerChild>
-              ))}
-            </Flex>
-          </StaggerParent>
+          <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%" flexWrap="wrap">
+            {TEACHER_FEATURES.map((f, i) => (
+              <FadeIn key={f.title} index={i} style={{ flex: "1 1 calc(50% - 10px)", minWidth: "260px" }}>
+                <Box
+                  p={5}
+                  borderRadius="2xl"
+                  borderWidth="1px"
+                  height="100%"
+                  style={{
+                    borderColor: "rgba(99,102,241,0.15)",
+                    background: "linear-gradient(135deg, rgba(99,102,241,0.04) 0%, white 60%)",
+                    boxShadow: "0 2px 16px -4px rgba(99,102,241,0.12)",
+                  }}
+                >
+                  <HStack gap={3} alignItems="flex-start">
+                    <Box
+                      mt={0.5}
+                      width="36px"
+                      height="36px"
+                      borderRadius="lg"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                      style={{ backgroundColor: "rgba(99,102,241,0.1)" }}
+                    >
+                      <f.icon size={17} color="#6366f1" />
+                    </Box>
+                    <VStack align="flex-start" gap={1}>
+                      <Text fontWeight="700" fontSize="sm">{f.title}</Text>
+                      <Text fontSize="sm" color="fg.muted" lineHeight="1.7">{f.body}</Text>
+                    </VStack>
+                  </HStack>
+                </Box>
+              </FadeIn>
+            ))}
+          </Flex>
 
           <Reveal delay={0.2}>
             <HStack
