@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "coverage/**",
+    // Three.js imperative code — React Compiler rules don't apply here
+    "src/app/components/InterviewScene3D.tsx",
   ]),
 ]);
 
