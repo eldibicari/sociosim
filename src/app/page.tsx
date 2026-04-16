@@ -18,6 +18,7 @@ import {
   PersonaShowcaseCard,
   type ShowcasePersona,
 } from "@/app/components/PersonaShowcaseCard";
+import { InterviewScene3D } from "@/app/components/InterviewScene3D";
 
 const SHOWCASE_BASE: Omit<ShowcasePersona, "id">[] = [
   {
@@ -185,6 +186,10 @@ export default function Home() {
         <Box className="hero-blob-3" />
         {/* Grille de points */}
         <Box className="hero-dot-grid" />
+        {/* Scène 3D : deux entités en entretien */}
+        <Box position="absolute" inset={0} opacity={0.55} pointerEvents="none">
+          <InterviewScene3D />
+        </Box>
 
         <VStack gap={6} maxW="720px" mx="auto" position="relative" zIndex={1}>
 
