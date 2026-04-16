@@ -39,22 +39,24 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
   return (
     <Box
       className="persona-showcase-card"
-      style={{ animationDelay: `${index * 120}ms` }}
       flex="1"
       minWidth="0"
       borderRadius="3xl"
       borderWidth="1px"
-      borderColor="border.subtle"
-      backgroundColor="white"
       overflow="hidden"
       display="flex"
       flexDirection="column"
-      transition="transform 0.22s ease, box-shadow 0.22s ease"
+      transition="transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease"
       _hover={{
-        transform: "translateY(-6px)",
-        boxShadow: `0 20px 40px -12px ${persona.color}33`,
+        transform: "translateY(-8px) scale(1.01)",
+        boxShadow: `0 28px 56px -14px ${persona.color}44`,
       }}
-      boxShadow="sm"
+      style={{
+        animationDelay: `${index * 120}ms`,
+        borderColor: `${persona.color}22`,
+        background: `linear-gradient(180deg, ${persona.color}06 0%, white 40%)`,
+        boxShadow: `0 2px 16px -4px ${persona.color}20`,
+      }}
     >
       {/* Header coloré */}
       <Box

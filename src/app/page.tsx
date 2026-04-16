@@ -170,71 +170,108 @@ export default function Home() {
 
       {/* ─── HERO ─── */}
       <Box
+        position="relative"
+        overflow="hidden"
         py={{ base: 20, md: 28 }}
         textAlign="center"
-        background="linear-gradient(150deg, #eef2ff 0%, #f5f0ff 55%, #fdf4ff 100%)"
+        background="linear-gradient(160deg, #f8faff 0%, #f0ebff 55%, #fdf2ff 100%)"
         borderBottom="1px solid"
         borderColor="border.subtle"
         px={{ base: 4, md: 8 }}
       >
-        <VStack gap={7} maxW="720px" mx="auto" className="hero-animate">
-          <Badge
-            variant="subtle"
-            colorPalette="purple"
-            borderRadius="full"
-            px={4}
-            py={1}
-            fontSize="xs"
-            letterSpacing="widest"
-            textTransform="uppercase"
-          >
-            Simulateur d&apos;entretien sociologique
-          </Badge>
+        {/* Mesh background : blobs flottants animés */}
+        <Box className="hero-blob-1" />
+        <Box className="hero-blob-2" />
+        <Box className="hero-blob-3" />
+        {/* Grille de points */}
+        <Box className="hero-dot-grid" />
 
-          <Heading
-            as="h1"
-            fontSize={{ base: "4xl", md: "5xl", lg: "6xl" }}
-            fontWeight="800"
-            lineHeight="1.08"
-            letterSpacing="-0.03em"
-          >
-            Pratiquez avant<br />le terrain
-          </Heading>
+        <VStack gap={6} maxW="720px" mx="auto" position="relative" zIndex={1}>
 
-          <Text
-            fontSize={{ base: "md", md: "xl" }}
-            color="fg.muted"
-            lineHeight="1.75"
-            maxW="500px"
-          >
-            Conduisez des entretiens semi-directifs face à des enquêtés
-            virtuels. Analysez votre pratique, comprenez vos données.
-          </Text>
-
-          <HStack gap={3} mt={2} flexWrap="wrap" justifyContent="center">
-            <Button
-              asChild
-              size="lg"
-              colorPalette="blue"
-              borderRadius="xl"
-              px={8}
+          {/* Logo Mimesis wordmark aurora */}
+          <Box className="hero-animate">
+            <Text
+              className="mimesis-wordmark"
+              fontSize={{ base: "5xl", md: "6xl", lg: "7xl" }}
+              fontWeight="900"
+              letterSpacing="-0.05em"
+              lineHeight="1"
+              as="span"
             >
-              <Link href="/personnas">
-                {user ? "Accéder aux personas" : "Voir les personas"}
-              </Link>
-            </Button>
-            {!isLoading && !user && (
+              Mimesis
+            </Text>
+          </Box>
+
+          <VStack gap={5} className="hero-animate" style={{ animationDelay: "0.18s" }}>
+            <Badge
+              variant="subtle"
+              colorPalette="purple"
+              borderRadius="full"
+              px={4}
+              py={1}
+              fontSize="xs"
+              letterSpacing="widest"
+              textTransform="uppercase"
+            >
+              Simulateur d&apos;entretien sociologique
+            </Badge>
+
+            <Heading
+              as="h1"
+              fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }}
+              fontWeight="800"
+              lineHeight="1.1"
+              letterSpacing="-0.03em"
+            >
+              Pratiquez avant{" "}
+              <Text
+                as="span"
+                style={{
+                  background: "linear-gradient(135deg, #6366f1 30%, #8b5cf6 70%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                le terrain
+              </Text>
+            </Heading>
+
+            <Text
+              fontSize={{ base: "md", md: "lg" }}
+              color="fg.muted"
+              lineHeight="1.75"
+              maxW="480px"
+            >
+              Conduisez des entretiens semi-directifs face à des enquêtés
+              virtuels. Analysez votre pratique, comprenez vos données.
+            </Text>
+
+            <HStack gap={3} mt={2} flexWrap="wrap" justifyContent="center">
               <Button
                 asChild
                 size="lg"
-                variant="outline"
+                colorPalette="blue"
                 borderRadius="xl"
                 px={8}
               >
-                <Link href="/login">Se connecter</Link>
+                <Link href="/personnas">
+                  {user ? "Accéder aux personas" : "Voir les personas"}
+                </Link>
               </Button>
-            )}
-          </HStack>
+              {!isLoading && !user && (
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  borderRadius="xl"
+                  px={8}
+                >
+                  <Link href="/login">Se connecter</Link>
+                </Button>
+              )}
+            </HStack>
+          </VStack>
         </VStack>
       </Box>
 
@@ -407,25 +444,52 @@ export default function Home() {
       {/* ─── ANCRAGE THÉORIQUE ─── */}
       <Box
         py={{ base: 14, md: 20 }}
-        backgroundColor="bg.subtle"
-        borderBottom="1px solid"
-        borderColor="border.subtle"
+        position="relative"
+        overflow="hidden"
+        style={{
+          background: "linear-gradient(160deg, #07071a 0%, #100d28 55%, #070f1e 100%)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
       >
-        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }}>
+        {/* Grille de points sombre */}
+        <Box className="dark-section-dots" />
+        {/* Blob central lumineux */}
+        <Box
+          position="absolute"
+          width="700px"
+          height="380px"
+          borderRadius="50%"
+          top="-60px"
+          left="50%"
+          style={{
+            transform: "translateX(-50%)",
+            background: "radial-gradient(ellipse, rgba(99,102,241,0.14) 0%, transparent 70%)",
+            filter: "blur(64px)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }} position="relative" zIndex={1}>
           <VStack gap={3} textAlign="center">
             <Text
               fontSize="xs"
               fontWeight="700"
-              color="blue.500"
               letterSpacing="widest"
               textTransform="uppercase"
+              style={{ color: "#818cf8" }}
             >
               Ancrage théorique
             </Text>
-            <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
+            <Heading
+              as="h2"
+              fontSize={{ base: "2xl", md: "3xl" }}
+              fontWeight="700"
+              letterSpacing="-0.02em"
+              color="white"
+            >
               Trois grandes théories,<br />un terrain commun
             </Heading>
-            <Text fontSize="sm" color="fg.muted" maxW="440px" lineHeight="1.8">
+            <Text fontSize="sm" maxW="440px" lineHeight="1.8" style={{ color: "rgba(255,255,255,0.5)" }}>
               Chaque persona est adossé à un cadre analytique de la sociologie
               classique.
             </Text>
@@ -439,20 +503,26 @@ export default function Home() {
                 p={6}
                 borderRadius="2xl"
                 borderWidth="1px"
-                borderColor="border.subtle"
-                backgroundColor="white"
-                boxShadow="sm"
+                className="theory-glass-card"
                 position="relative"
                 overflow="hidden"
+                style={{
+                  borderColor: `${t.color}30`,
+                  background: `linear-gradient(135deg, ${t.color}12 0%, ${t.color}05 100%)`,
+                }}
+                _hover={{
+                  transform: "translateY(-5px)",
+                  boxShadow: `0 20px 48px -8px ${t.color}44`,
+                }}
               >
-                {/* Accent bar top */}
+                {/* Accent bar top avec gradient */}
                 <Box
                   position="absolute"
                   top={0}
                   left={0}
                   right={0}
-                  height="3px"
-                  style={{ backgroundColor: t.color }}
+                  height="2px"
+                  style={{ background: `linear-gradient(90deg, ${t.color}, transparent)` }}
                 />
                 <VStack align="flex-start" gap={3} pt={2}>
                   <Text
@@ -464,10 +534,10 @@ export default function Home() {
                   >
                     {t.author}
                   </Text>
-                  <Text fontWeight="700" fontSize="lg" lineHeight="1.25" letterSpacing="-0.01em">
+                  <Text fontWeight="700" fontSize="lg" lineHeight="1.25" letterSpacing="-0.01em" color="white">
                     {t.title}
                   </Text>
-                  <Text fontSize="sm" color="fg.muted" lineHeight="1.75">
+                  <Text fontSize="sm" lineHeight="1.75" style={{ color: "rgba(255,255,255,0.55)" }}>
                     {t.body}
                   </Text>
                   <Box
@@ -477,7 +547,7 @@ export default function Home() {
                     px={2}
                     py={0.5}
                     borderRadius="full"
-                    style={{ backgroundColor: `${t.color}12` }}
+                    style={{ backgroundColor: `${t.color}20` }}
                   >
                     <Text fontSize="xs" style={{ color: t.color }} fontWeight="600">
                       → {t.persona}
@@ -603,15 +673,73 @@ export default function Home() {
       <Box
         py={{ base: 16, md: 24 }}
         textAlign="center"
-        background="linear-gradient(150deg, #eef2ff 0%, #f5f0ff 55%, #fdf4ff 100%)"
+        position="relative"
+        overflow="hidden"
+        background="linear-gradient(160deg, #f8faff 0%, #f0ebff 55%, #fdf2ff 100%)"
         px={{ base: 4, md: 8 }}
       >
-        <VStack gap={5} maxW="480px" mx="auto" className="hero-animate">
+        {/* Blob central */}
+        <Box
+          position="absolute"
+          width="600px"
+          height="400px"
+          borderRadius="50%"
+          top="-130px"
+          left="50%"
+          style={{
+            transform: "translateX(-50%)",
+            background: "radial-gradient(ellipse, rgba(99,102,241,0.18) 0%, transparent 65%)",
+            filter: "blur(80px)",
+            pointerEvents: "none",
+          }}
+        />
+        {/* Blob bas-droite */}
+        <Box
+          position="absolute"
+          width="360px"
+          height="300px"
+          borderRadius="50%"
+          bottom="-80px"
+          right="8%"
+          style={{
+            background: "radial-gradient(ellipse, rgba(236,72,153,0.13) 0%, transparent 65%)",
+            filter: "blur(72px)",
+            pointerEvents: "none",
+          }}
+        />
+        {/* Blob bas-gauche */}
+        <Box
+          position="absolute"
+          width="280px"
+          height="240px"
+          borderRadius="50%"
+          bottom="-60px"
+          left="8%"
+          style={{
+            background: "radial-gradient(ellipse, rgba(6,182,212,0.1) 0%, transparent 65%)",
+            filter: "blur(64px)",
+            pointerEvents: "none",
+          }}
+        />
+        <Box className="hero-dot-grid" />
+
+        <VStack gap={5} maxW="480px" mx="auto" className="hero-animate" position="relative" zIndex={1}>
+          <Text
+            className="mimesis-wordmark"
+            fontSize={{ base: "2xl", md: "3xl" }}
+            fontWeight="900"
+            letterSpacing="-0.04em"
+            lineHeight="1"
+            as="span"
+          >
+            Mimesis
+          </Text>
           <Heading
             as="h2"
             fontSize={{ base: "2xl", md: "3xl" }}
             fontWeight="800"
             letterSpacing="-0.02em"
+            mt={-2}
           >
             Prêt à commencer ?
           </Heading>
