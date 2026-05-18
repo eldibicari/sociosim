@@ -337,8 +337,12 @@ select {
 /* ─── SIDEBAR LAYOUT ─── */
 body.hide-footer footer { display: none !important; }
 @media (min-width: 1024px) {
+  body.hide-header header { display: none !important; }
+}
+@media (min-width: 1024px) {
   :root { --sidebar-offset: 220px; }
   .personnas-with-sidebar { padding-left: 220px; }
+  body.hide-header .interview-layout { padding-left: 220px; }
 }
 
 /* ─── MIMESIS UTILITY CLASSES ─── */

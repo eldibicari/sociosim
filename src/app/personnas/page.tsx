@@ -148,8 +148,8 @@ export default function PersonnasPage() {
   const deferredSearch = useDeferredValue(search);
 
   useEffect(() => {
-    document.body.classList.add("hide-footer");
-    return () => { document.body.classList.remove("hide-footer"); };
+    document.body.classList.add("hide-footer", "hide-header");
+    return () => { document.body.classList.remove("hide-footer", "hide-header"); };
   }, []);
 
   useEffect(() => {

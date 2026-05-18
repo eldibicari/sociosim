@@ -27,7 +27,7 @@ export function MimesisAppSidebar() {
     ?? "Utilisateur";
 
   async function handleLogout() {
-    await authService.signOut();
+    await authService.signOutLocal();
     router.push("/login");
   }
 
@@ -111,6 +111,27 @@ export function MimesisAppSidebar() {
           );
         })}
       </VStack>
+
+      {/* Historique récent */}
+      <Box pt={3} pb={2} borderTop="1px solid var(--color-border)">
+        <Text fontSize="2xs" fontWeight="700" color="var(--color-text-muted)" textTransform="uppercase" letterSpacing="0.1em" px={3} mb={1}>
+          Récents
+        </Text>
+        <HStack
+          gap={3}
+          px={3}
+          py="0.5rem"
+          borderRadius="10px"
+          cursor="pointer"
+          fontSize="sm"
+          color="var(--color-text-muted)"
+          _hover={{ background: "var(--color-surface-muted)", color: "var(--color-text-primary)" }}
+          onClick={() => router.push("/interviews")}
+        >
+          <MessageSquare size={14} />
+          <Text fontSize="xs">Voir tous mes entretiens</Text>
+        </HStack>
+      </Box>
 
       {/* Profil + déconnexion */}
       {user && (

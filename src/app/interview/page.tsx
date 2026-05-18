@@ -4,6 +4,7 @@ import { Container, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { InterviewLayout } from "@/app/components/InterviewLayout";
+import { MimesisAppSidebar } from "@/app/components/MimesisAppSidebar";
 import { useInterviewSession } from "@/hooks/useInterviewSession";
 import { UIMessage } from "@/types/ui";
 import { useAuthUser } from "@/hooks/useAuthUser";
@@ -95,6 +96,11 @@ function InterviewPageInner() {
     ? formatAgentName(interviewSummary.agentName)
     : undefined;
   const dateDisplay = interviewSummary ? formatInterviewDate(interviewSummary.startedAt) : undefined;
+
+  useEffect(() => {
+    document.body.classList.add("hide-header");
+    return () => { document.body.classList.remove("hide-header"); };
+  }, []);
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -198,7 +204,9 @@ function InterviewPageInner() {
   }
 
   return (
-    <InterviewLayout
+    <>
+      <MimesisAppSidebar />
+      <InterviewLayout
       agentDisplayName={agentDisplayName}
       agentId={interviewSummary?.agentId ?? null}
       userId={user?.id ?? null}
@@ -227,6 +235,7 @@ function InterviewPageInner() {
       analysisError={analysisError}
       isAnalysisLoading={isAnalysisLoading}
     />
+    </>
   );
 }
 
