@@ -334,6 +334,12 @@ select {
   transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
 
+/* ─── SIDEBAR LAYOUT ─── */
+@media (min-width: 1024px) {
+  :root { --sidebar-offset: 220px; }
+  .personnas-with-sidebar { padding-left: 220px; }
+}
+
 /* ─── MIMESIS UTILITY CLASSES ─── */
 
 .mimesis-app-shell {
