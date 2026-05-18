@@ -46,9 +46,12 @@ body {
   --color-accent-border:rgba(91, 91, 214, 0.18);
   --color-border:       rgba(26, 26, 46, 0.09);
   --color-border-strong:rgba(26, 26, 46, 0.16);
+  --color-surface-muted: #f1f0ed;
   --color-shadow-sm:    0 2px 8px  rgba(26, 26, 46, 0.06);
   --color-shadow-md:    0 6px 20px rgba(26, 26, 46, 0.08);
   --color-shadow-lg:    0 16px 48px rgba(26, 26, 46, 0.10);
+  --color-shadow-card:  0 4px 24px rgba(26, 26, 46, 0.09), 0 1px 4px rgba(26, 26, 46, 0.05);
+  --color-shadow-float: 0 12px 40px rgba(26, 26, 46, 0.14), 0 2px 8px rgba(26, 26, 46, 0.06);
   --color-text-primary: #1a1a2e;
   --color-text-muted:   #64748b;
 }
@@ -329,4 +332,61 @@ select {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+/* ─── MIMESIS UTILITY CLASSES ─── */
+
+.mimesis-app-shell {
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.persona-card-tilt {
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+.persona-card-tilt:hover {
+  box-shadow: var(--color-shadow-float);
+}
+
+.persona-card-shine {
+  position: relative;
+  overflow: hidden;
+}
+.persona-card-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.persona-card-shine:hover::after {
+  opacity: 1;
+}
+
+.soft-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 213, 225, 0.6) transparent;
+}
+.soft-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.soft-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(203, 213, 225, 0.6);
+  border-radius: 999px;
+}
+.soft-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
