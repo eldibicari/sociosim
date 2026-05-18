@@ -34,6 +34,7 @@ export default function Header() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [fontSize, setFontSize] = useState<"md" | "lg" | "xl">("md");
   const [scrolled, setScrolled] = useState(false);
+  const [peekVisible, setPeekVisible] = useState(false);
   const isInInterview = pathname.startsWith("/interview/") || pathname === "/interview";
 
   useEffect(() => {
@@ -41,6 +42,16 @@ export default function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isInInterview) return;
+    const onMouseMove = (e: MouseEvent) => {
+      if (e.clientY <= 12) setPeekVisible(true);
+      else if (e.clientY > 64) setPeekVisible(false);
+    };
+    document.addEventListener("mousemove", onMouseMove);
+    return () => document.removeEventListener("mousemove", onMouseMove);
+  }, [isInInterview]);
 
   const handleLogout = async () => {
     const clearLocalAuth = () => {
@@ -103,24 +114,28 @@ export default function Header() {
     ? `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Utilisateur"
     : "Utilisateur";
 
-  if (isInInterview) return null;
-
   return (
     <Box
       as="header"
-      position="sticky"
+      position={isInInterview ? "fixed" : "sticky"}
       top={0}
-      zIndex={100}
+      left={isInInterview ? 0 : undefined}
+      right={isInInterview ? 0 : undefined}
+      zIndex={isInInterview ? 150 : 100}
       height="var(--app-header-height)"
-      transition="background 0.2s ease, box-shadow 0.2s ease, backdrop-filter 0.2s ease"
-      background={scrolled
-        ? "rgba(247,246,243,0.92)"
-        : "rgba(247,246,243,0.98)"
+      style={isInInterview ? {
+        transform: peekVisible ? "translateY(0)" : "translateY(-100%)",
+        transition: "transform 0.28s cubic-bezier(0.22,1,0.36,1)",
+      } : undefined}
+      transition={isInInterview ? undefined : "background 0.2s ease, box-shadow 0.2s ease, backdrop-filter 0.2s ease"}
+      background={isInInterview
+        ? "rgba(247,246,243,0.97)"
+        : scrolled ? "rgba(247,246,243,0.92)" : "rgba(247,246,243,0.98)"
       }
-      backdropFilter={scrolled ? "blur(20px)" : "blur(8px)"}
+      backdropFilter={isInInterview ? "blur(20px)" : scrolled ? "blur(20px)" : "blur(8px)"}
       borderBottomWidth="1px"
       borderBottomColor={scrolled ? "var(--color-border-strong)" : "var(--color-border)"}
-      boxShadow={scrolled ? "var(--color-shadow-sm)" : "none"}
+      boxShadow={isInInterview ? "var(--color-shadow-md)" : scrolled ? "var(--color-shadow-sm)" : "none"}
     >
       {/* Static top accent line */}
       <Box
