@@ -143,7 +143,7 @@ export default function Header() {
         insetX={0}
         top={0}
         height="1px"
-        background="linear-gradient(90deg, transparent 0%, #6366f1 25%, #8b5cf6 50%, #ec4899 75%, transparent 100%)"
+        background="linear-gradient(90deg, transparent 0%, var(--color-accent) 40%, var(--color-accent-hover) 60%, transparent 100%)"
         opacity={0.6}
       />
 
@@ -254,7 +254,7 @@ export default function Header() {
                     <Avatar.Root size="sm">
                       <Avatar.Fallback
                         name={fullName}
-                        background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+                        background="linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))"
                         color="white"
                         fontSize="xs"
                         fontWeight="700"
@@ -279,15 +279,15 @@ export default function Header() {
                     <Box
                       px={4}
                       py={4}
-                      background="linear-gradient(135deg, rgba(239,246,255,0.8), rgba(237,233,254,0.5))"
+                      background="var(--color-accent-soft)"
                       borderBottomWidth="1px"
-                      borderBottomColor="rgba(148,163,184,0.14)"
+                      borderBottomColor="var(--color-border)"
                     >
                       <HStack gap={3}>
                         <Avatar.Root size="md">
                           <Avatar.Fallback
                             name={fullName}
-                            background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+                            background="linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))"
                             color="white"
                             fontSize="sm"
                             fontWeight="700"
@@ -405,9 +405,9 @@ export default function Header() {
                 py={1.5}
                 borderRadius="xl"
                 borderWidth="1px"
-                borderColor="rgba(99,102,241,0.3)"
-                color="blue.700"
-                _hover={{ textDecoration: "none", background: "rgba(99,102,241,0.06)" }}
+                borderColor="var(--color-accent-border)"
+                color="var(--color-accent)"
+                _hover={{ textDecoration: "none", background: "var(--color-accent-soft)" }}
               >
                 Se connecter
               </Link>

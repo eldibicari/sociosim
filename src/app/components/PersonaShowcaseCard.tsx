@@ -130,16 +130,16 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
 
             {/* Name + role */}
             <VStack gap={0.5} alignItems="center">
-              <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" lineHeight="1.2" color="gray.900" textAlign="center">
+              <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" lineHeight="1.2" color="var(--color-text-primary)" textAlign="center">
                 {title}
               </Text>
-              <Text fontSize="xs" color="fg.muted" textAlign="center">{persona.role}</Text>
+              <Text fontSize="xs" color="var(--color-text-muted)" textAlign="center">{persona.role}</Text>
             </VStack>
           </Box>
 
           {/* Greeting */}
           <Box px={5} pb={3} flex="1">
-            <Text fontSize="sm" color="gray.600" lineHeight="1.75" fontStyle="italic" lineClamp={3}>
+            <Text fontSize="sm" color="var(--color-text-muted)" lineHeight="1.75" fontStyle="italic" lineClamp={3}>
               &ldquo;{persona.greeting}&rdquo;
             </Text>
           </Box>
@@ -162,14 +162,14 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
               </Text>
             </Box>
             <Box
-              backgroundColor={`${visual.accent}12`}
+              background="var(--color-accent-soft)"
               borderRadius="12px"
               px={3}
               py={2}
               alignSelf="flex-end"
               maxWidth="90%"
               borderWidth="1px"
-              borderColor={`${visual.accent}22`}
+              borderColor="var(--color-accent-border)"
             >
               <Text fontSize="xs" lineHeight="1.6" color="var(--color-text-primary)">
                 {persona.sampleAnswer}
@@ -195,9 +195,9 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
                 size="sm"
                 borderRadius="xl"
                 fontWeight="700"
-                background={visual.gradient}
+                background="var(--color-accent)"
                 color="white"
-                _hover={{ opacity: 0.9 }}
+                _hover={{ background: "var(--color-accent-hover)" }}
                 onClick={() => router.push(ficheHref)}
               >
                 <MessageSquarePlus size={14} />

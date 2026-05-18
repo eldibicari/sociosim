@@ -71,19 +71,16 @@ const STEPS = [
     icon: BookOpen,
     title: "Préparez votre grille",
     body: "Définissez vos thèmes, vos questions de relance et votre objectif d'entretien. La grille est votre boussole méthodologique.",
-    color: "#6366f1",
   },
   {
     icon: MessageSquare,
     title: "Conduisez l'entretien",
     body: "Engagez le dialogue avec le persona. Guidez, relancez, approfondissez. L'erreur fait partie de l'apprentissage.",
-    color: "#059669",
   },
   {
     icon: BarChart2,
     title: "Analysez votre pratique",
     body: "Transcription automatique, thèmes couverts, premières pistes de codage. Prenez du recul sur votre posture d'enquêteur.",
-    color: "#e53e3e",
   },
 ];
 
@@ -141,52 +138,32 @@ export default function Home() {
 
       {/* ─── HERO ─── */}
       <Box
-        position="relative"
-        overflow="hidden"
-        py={{ base: 20, md: 28 }}
-        textAlign="center"
-        background="linear-gradient(160deg, #f8faff 0%, #f0ebff 55%, #fdf2ff 100%)"
-        borderBottom="1px solid"
-        borderColor="border.subtle"
-        px={{ base: 4, md: 8 }}
+        py={{ base: 16, md: 24 }}
+        background="var(--color-bg)"
+        borderBottom="1px solid var(--color-border)"
+        px={{ base: 6, md: 8 }}
       >
-        {/* Mesh background : blobs flottants animés */}
-        <Box className="hero-blob-1" />
-        <Box className="hero-blob-2" />
-        <Box className="hero-blob-3" />
-        {/* Grille de points */}
-        <Box className="hero-dot-grid" />
-        {/* Scène 3D : deux entités en entretien */}
-        <Box position="absolute" inset={0} opacity={0.55} pointerEvents="none">
-          <InterviewSceneSVG />
-        </Box>
-
-        <VStack gap={6} maxW="720px" mx="auto" position="relative" zIndex={1}>
-
-          {/* Logo Mimesis wordmark aurora */}
-          <Box className="hero-animate">
-            <Text
-              className="mimesis-wordmark"
-              fontSize={{ base: "5xl", md: "6xl", lg: "7xl" }}
-              fontWeight="900"
-              letterSpacing="-0.05em"
-              lineHeight="1"
-              as="span"
-            >
-              Mimesis
-            </Text>
-          </Box>
-
-          <VStack gap={5} className="hero-animate" style={{ animationDelay: "0.18s" }}>
+        <Flex
+          maxW="1100px"
+          mx="auto"
+          gap={{ base: 12, md: 16 }}
+          direction={{ base: "column", md: "row" }}
+          align="center"
+        >
+          {/* Left: copy */}
+          <VStack align="flex-start" gap={6} flex="1">
             <Badge
-              variant="subtle"
-              colorPalette="purple"
               borderRadius="full"
               px={4}
               py={1}
               fontSize="xs"
               letterSpacing="widest"
               textTransform="uppercase"
+              style={{
+                background: "var(--color-accent-soft)",
+                color: "var(--color-accent)",
+                border: "1px solid var(--color-accent-border)",
+              }}
             >
               Simulateur d&apos;entretien sociologique
             </Badge>
@@ -198,38 +175,31 @@ export default function Home() {
               fontWeight="400"
               lineHeight="1.1"
               letterSpacing="-0.03em"
+              color="var(--color-text-primary)"
             >
-              Pratiquez avant{" "}
-              <Text
-                as="span"
-                style={{
-                  background: "linear-gradient(135deg, #6366f1 30%, #8b5cf6 70%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                le terrain
-              </Text>
+              Pratiquez avant le terrain
             </Heading>
 
             <Text
               fontSize={{ base: "md", md: "lg" }}
-              color="fg.muted"
+              color="var(--color-text-muted)"
               lineHeight="1.75"
-              maxW="480px"
+              maxW="440px"
             >
               Conduisez des entretiens semi-directifs face à des enquêtés
               virtuels. Analysez votre pratique, comprenez vos données.
             </Text>
 
-            <HStack gap={3} mt={2} flexWrap="wrap" justifyContent="center">
+            <HStack gap={3} mt={2} flexWrap="wrap">
               <Button
                 asChild
                 size="lg"
-                colorPalette="blue"
                 borderRadius="xl"
                 px={8}
+                style={{
+                  background: "var(--color-accent)",
+                  color: "white",
+                }}
               >
                 <Link href="/personnas">
                   {user ? "Accéder aux personas" : "Voir les personas"}
@@ -242,38 +212,62 @@ export default function Home() {
                   variant="outline"
                   borderRadius="xl"
                   px={8}
+                  style={{
+                    borderColor: "var(--color-border-strong)",
+                    color: "var(--color-text-primary)",
+                  }}
                 >
                   <Link href="/login">Se connecter</Link>
                 </Button>
               )}
             </HStack>
           </VStack>
-        </VStack>
+
+          {/* Right: scene illustration */}
+          <Box
+            flex="1"
+            display={{ base: "none", md: "block" }}
+            position="relative"
+            height="320px"
+            borderRadius="2xl"
+            overflow="hidden"
+            borderWidth="1px"
+            borderColor="var(--color-border)"
+            background="var(--color-accent-soft)"
+          >
+            <InterviewSceneSVG />
+          </Box>
+        </Flex>
       </Box>
 
       {/* ─── PERSONAS VITRINE ─── */}
       <Box
         py={{ base: 14, md: 20 }}
-        backgroundColor="bg.subtle"
-        borderBottom="1px solid"
-        borderColor="border.subtle"
+        background="var(--color-surface)"
+        borderBottom="1px solid var(--color-border)"
       >
-        <VStack gap={10} maxW="1100px" mx="auto" px={{ base: 2, md: 4 }}>
+        <VStack gap={10} maxW="1100px" mx="auto" px={{ base: 4, md: 6 }}>
           <Reveal>
             <VStack gap={3} textAlign="center">
               <Text
                 fontSize="xs"
                 fontWeight="700"
-                color="blue.500"
+                color="var(--color-accent)"
                 letterSpacing="widest"
                 textTransform="uppercase"
               >
                 Vos enquêtés
               </Text>
-              <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
+              <Heading
+                as="h2"
+                fontSize={{ base: "2xl", md: "3xl" }}
+                fontWeight="700"
+                letterSpacing="-0.02em"
+                color="var(--color-text-primary)"
+              >
                 Rencontrez les personas
               </Heading>
-              <Text fontSize="sm" color="fg.muted" maxW="420px" lineHeight="1.8">
+              <Text fontSize="sm" color="var(--color-text-muted)" maxW="420px" lineHeight="1.8">
                 Trois profils construits à partir d&apos;entretiens réels sur
                 l&apos;usage de l&apos;IA à l&apos;université.
               </Text>
@@ -293,38 +287,31 @@ export default function Home() {
       {/* ─── 3 ÉTAPES ─── */}
       <Box
         py={{ base: 14, md: 20 }}
-        borderBottom="1px solid"
-        borderColor="border.subtle"
-        position="relative"
-        overflow="hidden"
-        background="linear-gradient(180deg, #ffffff 0%, #f8f7ff 100%)"
+        borderBottom="1px solid var(--color-border)"
+        background="var(--color-surface-muted)"
       >
-        {/* Subtle grid pattern */}
-        <Box
-          position="absolute"
-          inset={0}
-          pointerEvents="none"
-          style={{
-            backgroundImage: "linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
-        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }} position="relative" zIndex={1}>
+        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 4, md: 6 }}>
           <Reveal>
             <VStack gap={3} textAlign="center">
               <Text
                 fontSize="xs"
                 fontWeight="700"
-                color="blue.500"
+                color="var(--color-accent)"
                 letterSpacing="widest"
                 textTransform="uppercase"
               >
                 La méthode
               </Text>
-              <Heading as="h2" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="700" letterSpacing="-0.02em">
+              <Heading
+                as="h2"
+                fontSize={{ base: "2xl", md: "3xl" }}
+                fontWeight="700"
+                letterSpacing="-0.02em"
+                color="var(--color-text-primary)"
+              >
                 Comment ça fonctionne
               </Heading>
-              <Text fontSize="sm" color="fg.muted" lineHeight="1.8">
+              <Text fontSize="sm" color="var(--color-text-muted)" lineHeight="1.8">
                 Trois étapes pour un entretien complet, de la préparation à
                 l&apos;analyse.
               </Text>
@@ -340,60 +327,43 @@ export default function Home() {
                   p={6}
                   borderRadius="2xl"
                   borderWidth="1px"
+                  borderColor="var(--color-border)"
+                  background="var(--color-surface)"
                   height="100%"
-                  position="relative"
-                  overflow="hidden"
-                  style={{
-                    borderColor: `${step.color}22`,
-                    background: `linear-gradient(135deg, ${step.color}08 0%, white 60%)`,
-                    boxShadow: `0 4px 24px -8px ${step.color}22`,
-                  }}
+                  boxShadow="var(--color-shadow-sm)"
                 >
-                  <Box
-                    position="absolute"
-                    top="-20px"
-                    right="-20px"
-                    width="80px"
-                    height="80px"
-                    borderRadius="full"
-                    pointerEvents="none"
-                    style={{
-                      background: `radial-gradient(circle, ${step.color}20, transparent 70%)`,
-                      filter: "blur(12px)",
-                    }}
-                  />
                   <HStack gap={3} alignItems="center">
                     <Box
-                      width="34px"
-                      height="34px"
+                      width="32px"
+                      height="32px"
                       borderRadius="full"
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
+                      background="var(--color-accent)"
                       flexShrink={0}
-                      style={{ backgroundColor: step.color }}
                     >
                       <Text fontSize="sm" fontWeight="800" color="white" lineHeight="1">
                         {i + 1}
                       </Text>
                     </Box>
                     <Box
-                      width="34px"
-                      height="34px"
+                      width="32px"
+                      height="32px"
                       borderRadius="xl"
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
+                      background="var(--color-accent-soft)"
                       flexShrink={0}
-                      style={{ backgroundColor: `${step.color}14` }}
                     >
-                      <step.icon size={16} color={step.color} />
+                      <step.icon size={16} color="var(--color-accent)" />
                     </Box>
                   </HStack>
-                  <Text fontWeight="700" fontSize="md" lineHeight="1.3">
+                  <Text fontWeight="700" fontSize="md" lineHeight="1.3" color="var(--color-text-primary)">
                     {step.title}
                   </Text>
-                  <Text fontSize="sm" color="fg.muted" lineHeight="1.75">
+                  <Text fontSize="sm" color="var(--color-text-muted)" lineHeight="1.75">
                     {step.body}
                   </Text>
                 </VStack>
@@ -406,22 +376,10 @@ export default function Home() {
       {/* ─── POUR LES ENSEIGNANTS ─── */}
       <Box
         py={{ base: 14, md: 20 }}
-        borderBottom="1px solid"
-        borderColor="border.subtle"
-        position="relative"
-        overflow="hidden"
-        background="linear-gradient(180deg, #f8f7ff 0%, #ffffff 100%)"
+        borderBottom="1px solid var(--color-border)"
+        background="var(--color-surface)"
       >
-        <Box
-          position="absolute"
-          inset={0}
-          pointerEvents="none"
-          style={{
-            backgroundImage: "radial-gradient(circle, rgba(99,102,241,0.07) 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
-          }}
-        />
-        <VStack gap={10} maxW="900px" mx="auto" px={{ base: 2, md: 4 }} position="relative" zIndex={1}>
+        <VStack gap={10} maxW="900px" mx="auto" px={{ base: 4, md: 6 }}>
           <Reveal>
             <VStack gap={3} textAlign="center">
               <Text
@@ -429,7 +387,7 @@ export default function Home() {
                 fontWeight="700"
                 letterSpacing="widest"
                 textTransform="uppercase"
-                style={{ color: "#6366f1" }}
+                color="var(--color-accent)"
               >
                 Pour les enseignants
               </Text>
@@ -438,10 +396,11 @@ export default function Home() {
                 fontSize={{ base: "2xl", md: "3xl" }}
                 fontWeight="700"
                 letterSpacing="-0.02em"
+                color="var(--color-text-primary)"
               >
                 Conçu pour l&apos;enseignement universitaire
               </Heading>
-              <Text fontSize="sm" color="fg.muted" maxW="480px" lineHeight="1.8">
+              <Text fontSize="sm" color="var(--color-text-muted)" maxW="480px" lineHeight="1.8">
                 Mimesis est développé au sein de l&apos;UMR LISIS — Université Gustave
                 Eiffel. Les enseignants disposent d&apos;un espace admin complet pour
                 piloter les activités pédagogiques.
@@ -456,12 +415,10 @@ export default function Home() {
                   p={5}
                   borderRadius="2xl"
                   borderWidth="1px"
+                  borderColor="var(--color-border)"
+                  background="var(--color-surface)"
                   height="100%"
-                  style={{
-                    borderColor: "rgba(99,102,241,0.15)",
-                    background: "linear-gradient(135deg, rgba(99,102,241,0.04) 0%, white 60%)",
-                    boxShadow: "0 2px 16px -4px rgba(99,102,241,0.12)",
-                  }}
+                  boxShadow="var(--color-shadow-sm)"
                 >
                   <HStack gap={3} alignItems="flex-start">
                     <Box
@@ -473,13 +430,13 @@ export default function Home() {
                       alignItems="center"
                       justifyContent="center"
                       flexShrink={0}
-                      style={{ backgroundColor: "rgba(99,102,241,0.1)" }}
+                      background="var(--color-accent-soft)"
                     >
-                      <f.icon size={17} color="#6366f1" />
+                      <f.icon size={17} color="var(--color-accent)" />
                     </Box>
                     <VStack align="flex-start" gap={1}>
-                      <Text fontWeight="700" fontSize="sm">{f.title}</Text>
-                      <Text fontSize="sm" color="fg.muted" lineHeight="1.7">{f.body}</Text>
+                      <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">{f.title}</Text>
+                      <Text fontSize="sm" color="var(--color-text-muted)" lineHeight="1.7">{f.body}</Text>
                     </VStack>
                   </HStack>
                 </Box>
@@ -494,8 +451,8 @@ export default function Home() {
               py={4}
               borderRadius="2xl"
               borderWidth="1px"
-              borderColor="border.subtle"
-              backgroundColor="bg.subtle"
+              borderColor="var(--color-border)"
+              background="var(--color-surface-muted)"
               width="100%"
               flexWrap="wrap"
               justifyContent="center"
@@ -506,8 +463,13 @@ export default function Home() {
                 alt="Université Gustave Eiffel"
                 style={{ height: "28px", width: "auto", opacity: 0.8 }}
               />
-              <Box width="1px" height="28px" backgroundColor="border.muted" display={{ base: "none", sm: "block" }} />
-              <Text fontSize="xs" color="fg.muted" textAlign="center">
+              <Box
+                width="1px"
+                height="28px"
+                background="var(--color-border)"
+                display={{ base: "none", sm: "block" }}
+              />
+              <Text fontSize="xs" color="var(--color-text-muted)" textAlign="center">
                 Développé par l&apos;UMR LISIS — Laboratoire Interdisciplinaire Sciences,
                 Innovations, Sociétés
               </Text>
@@ -520,77 +482,21 @@ export default function Home() {
       <Box
         py={{ base: 16, md: 24 }}
         textAlign="center"
-        position="relative"
-        overflow="hidden"
-        background="linear-gradient(160deg, #f8faff 0%, #f0ebff 55%, #fdf2ff 100%)"
-        px={{ base: 4, md: 8 }}
+        background="var(--color-accent-soft)"
+        borderTop="1px solid var(--color-accent-border)"
+        px={{ base: 6, md: 8 }}
       >
-        {/* Blob central */}
-        <Box
-          position="absolute"
-          width="600px"
-          height="400px"
-          borderRadius="50%"
-          top="-130px"
-          left="50%"
-          style={{
-            transform: "translateX(-50%)",
-            background: "radial-gradient(ellipse, rgba(99,102,241,0.18) 0%, transparent 65%)",
-            filter: "blur(80px)",
-            pointerEvents: "none",
-          }}
-        />
-        {/* Blob bas-droite */}
-        <Box
-          position="absolute"
-          width="360px"
-          height="300px"
-          borderRadius="50%"
-          bottom="-80px"
-          right="8%"
-          style={{
-            background: "radial-gradient(ellipse, rgba(236,72,153,0.13) 0%, transparent 65%)",
-            filter: "blur(72px)",
-            pointerEvents: "none",
-          }}
-        />
-        {/* Blob bas-gauche */}
-        <Box
-          position="absolute"
-          width="280px"
-          height="240px"
-          borderRadius="50%"
-          bottom="-60px"
-          left="8%"
-          style={{
-            background: "radial-gradient(ellipse, rgba(6,182,212,0.1) 0%, transparent 65%)",
-            filter: "blur(64px)",
-            pointerEvents: "none",
-          }}
-        />
-        <Box className="hero-dot-grid" />
-
-        <VStack gap={5} maxW="480px" mx="auto" className="hero-animate" position="relative" zIndex={1}>
-          <Text
-            className="mimesis-wordmark"
-            fontSize={{ base: "2xl", md: "3xl" }}
-            fontWeight="900"
-            letterSpacing="-0.04em"
-            lineHeight="1"
-            as="span"
-          >
-            Mimesis
-          </Text>
+        <VStack gap={5} maxW="480px" mx="auto">
           <Heading
             as="h2"
             fontSize={{ base: "2xl", md: "3xl" }}
-            fontWeight="800"
+            fontWeight="700"
             letterSpacing="-0.02em"
-            mt={-2}
+            color="var(--color-text-primary)"
           >
             Prêt à commencer ?
           </Heading>
-          <Text fontSize="md" color="fg.muted" lineHeight="1.75">
+          <Text fontSize="md" color="var(--color-text-muted)" lineHeight="1.75">
             {user
               ? "Choisissez un persona et commencez votre premier entretien."
               : "Créez un compte pour accéder aux personas et démarrer votre premier entretien."}
@@ -598,9 +504,12 @@ export default function Home() {
           <Button
             asChild
             size="lg"
-            colorPalette="blue"
             borderRadius="xl"
             px={10}
+            style={{
+              background: "var(--color-accent)",
+              color: "white",
+            }}
           >
             <Link href={user ? "/personnas" : "/register"}>
               {user ? "Voir les personas" : "Créer un compte"}
