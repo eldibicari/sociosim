@@ -1,9 +1,10 @@
 "use client";
 
 import { Badge, Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
-import { Mic, MessageSquarePlus } from "lucide-react";
+import { MessageSquarePlus, BookOpen } from "lucide-react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { getPersonaVisual } from "@/lib/personaVisuals";
 
 export type ShowcasePersona = {
   id: string;
@@ -32,8 +33,10 @@ type Props = {
 
 export function PersonaShowcaseCard({ persona, index }: Props) {
   const router = useRouter();
-  const initial = persona.agent_name.charAt(0).toUpperCase();
+  const title = persona.agent_name.charAt(0).toUpperCase() + persona.agent_name.slice(1);
+  const initial = title.charAt(0).toUpperCase();
   const ficheHref = persona.id.includes("-") ? `/personnas/${persona.id}` : "/personnas";
+  const visual = getPersonaVisual(persona.agent_name);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -66,176 +69,146 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
       >
         <Box
           className="persona-card-shine"
-          height="100%"
-          borderRadius="3xl"
+          borderRadius="24px"
           borderWidth="1px"
+          borderColor="var(--color-border)"
+          background="var(--color-surface)"
+          boxShadow="var(--color-shadow-card)"
           overflow="hidden"
           display="flex"
           flexDirection="column"
-          style={{
-            borderColor: `${persona.color}22`,
-            background: `linear-gradient(180deg, ${persona.color}06 0%, white 40%)`,
-            boxShadow: `0 2px 16px -4px ${persona.color}20`,
-          }}
+          height="100%"
+          position="relative"
+          transition="box-shadow 0.2s ease"
+          _hover={{ boxShadow: "var(--color-shadow-float)" }}
         >
-          {/* Header coloré */}
+          {/* Avatar section */}
           <Box
-            px={6}
+            position="relative"
+            px={5}
             pt={6}
-            pb={4}
-            background={`linear-gradient(135deg, ${persona.color}18 0%, ${persona.accent}10 100%)`}
-            borderBottom="1px solid"
-            borderColor="border.subtle"
+            pb={5}
+            background={`linear-gradient(160deg, ${visual.bg} 0%, transparent 100%)`}
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            gap={3}
           >
-            <HStack gap={4} alignItems="flex-start">
-              {/* Avatar animé */}
-              <Box
-                className="persona-avatar"
-                minWidth="56px"
-                height="56px"
+            {/* Difficulty badge */}
+            <Box position="absolute" top={4} right={4}>
+              <Badge
+                colorPalette={DIFFICULTY_PALETTE[persona.difficulty]}
+                variant="subtle"
                 borderRadius="full"
-                backgroundColor={persona.avatarBg}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                boxShadow={`0 0 0 0 ${persona.color}44`}
-                style={{ animation: "avatarPulse 3s ease-in-out infinite" }}
+                px={2}
+                py={0.5}
+                fontSize="2xs"
+                fontWeight="700"
               >
-                <Text
-                  fontSize="2xl"
-                  fontWeight="bold"
-                  color="white"
-                  userSelect="none"
-                >
-                  {initial}
-                </Text>
-              </Box>
-
-              <VStack alignItems="flex-start" gap={1} flex={1} minWidth={0}>
-                <HStack gap={2} flexWrap="wrap">
-                  <Text fontSize="xl" fontWeight="bold" lineHeight="1.1">
-                    {persona.agent_name.charAt(0).toUpperCase() + persona.agent_name.slice(1)}
-                  </Text>
-                  <Badge
-                    colorPalette={DIFFICULTY_PALETTE[persona.difficulty]}
-                    variant="subtle"
-                    borderRadius="full"
-                    fontSize="xs"
-                    px={2}
-                  >
-                    {persona.difficulty}
-                  </Badge>
-                </HStack>
-                <Text fontSize="xs" color="fg.muted" lineHeight="1.5">
-                  {persona.role}
-                </Text>
-                <Badge
-                  variant="outline"
-                  borderRadius="full"
-                  fontSize="xs"
-                  px={2}
-                  borderColor={persona.color}
-                  color={persona.color}
-                >
-                  {persona.posture}
-                </Badge>
-              </VStack>
-            </HStack>
-
-            {/* Parole de la persona */}
-            <Box
-              mt={4}
-              pl={4}
-              borderLeft="3px solid"
-              borderColor={persona.color}
-            >
-              <Text
-                fontSize="sm"
-                fontStyle="italic"
-                color="fg.default"
-                lineHeight="1.7"
-              >
-                &ldquo;{persona.greeting}&rdquo;
-              </Text>
+                {persona.difficulty}
+              </Badge>
             </Box>
+
+            {/* Avatar */}
+            <Box
+              width="76px"
+              height="76px"
+              borderRadius="24px"
+              background={visual.gradient}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              boxShadow={`0 8px 24px ${visual.accent}40`}
+              flexShrink={0}
+            >
+              {visual.emoji !== "👤" ? (
+                <Text fontSize="2xl" lineHeight="1">{visual.emoji}</Text>
+              ) : (
+                <Text fontSize="3xl" fontWeight="800" color="white" lineHeight="1">{initial}</Text>
+              )}
+            </Box>
+
+            {/* Name + role */}
+            <VStack gap={0.5} alignItems="center">
+              <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" lineHeight="1.2" color="gray.900" textAlign="center">
+                {title}
+              </Text>
+              <Text fontSize="xs" color="fg.muted" textAlign="center">{persona.role}</Text>
+            </VStack>
+          </Box>
+
+          {/* Greeting */}
+          <Box px={5} pb={3} flex="1">
+            <Text fontSize="sm" color="gray.600" lineHeight="1.75" fontStyle="italic" lineClamp={3}>
+              &ldquo;{persona.greeting}&rdquo;
+            </Text>
           </Box>
 
           {/* Mini-échange */}
-          <VStack alignItems="stretch" gap={3} px={6} py={4} flex={1}>
-            <Text fontSize="xs" fontWeight="semibold" color="fg.muted" textTransform="uppercase" letterSpacing="wider">
+          <VStack alignItems="stretch" gap={2} px={5} pb={4}>
+            <Text fontSize="2xs" fontWeight="700" color="fg.muted" textTransform="uppercase" letterSpacing="wider">
               Extrait d&apos;entretien
             </Text>
-
-            {/* Question de l'enquêteur */}
             <Box
-              backgroundColor="bg.subtle"
-              borderRadius="xl"
+              backgroundColor="var(--color-surface-muted)"
+              borderRadius="12px"
               px={3}
               py={2}
               alignSelf="flex-start"
-              maxWidth="85%"
+              maxWidth="90%"
             >
-              <Text fontSize="xs" color="fg.muted" mb={1} fontWeight="medium">
-                Vous
-              </Text>
-              <Text fontSize="sm" lineHeight="1.6">
+              <Text fontSize="xs" lineHeight="1.6" color="var(--color-text-muted)">
                 {persona.sampleQuestion}
               </Text>
             </Box>
-
-            {/* Réponse du persona */}
             <Box
-              backgroundColor={`${persona.color}0F`}
-              borderRadius="xl"
+              backgroundColor={`${visual.accent}12`}
+              borderRadius="12px"
               px={3}
               py={2}
               alignSelf="flex-end"
               maxWidth="90%"
               borderWidth="1px"
-              borderColor={`${persona.color}22`}
+              borderColor={`${visual.accent}22`}
             >
-              <Text fontSize="xs" color={persona.color} mb={1} fontWeight="medium">
-                {persona.agent_name.charAt(0).toUpperCase() + persona.agent_name.slice(1)}
-              </Text>
-              <Text fontSize="sm" lineHeight="1.6" color="fg.default">
+              <Text fontSize="xs" lineHeight="1.6" color="var(--color-text-primary)">
                 {persona.sampleAnswer}
               </Text>
             </Box>
           </VStack>
 
+          {/* Badges */}
+          <Box px={5} pb={4}>
+            <HStack gap={1.5} flexWrap="wrap">
+              <Badge colorPalette="purple" variant="subtle" borderRadius="full" px={2} fontSize="2xs">
+                {persona.posture}
+              </Badge>
+            </HStack>
+          </Box>
+
+          <Box mx={5} height="1px" background="var(--color-border)" />
+
           {/* Actions */}
-          <HStack gap={2} px={6} pb={5} pt={2}>
-            <Button
-              flex={1}
-              colorPalette="blue"
-              borderRadius="xl"
-              size="sm"
-              onClick={() => router.push(ficheHref)}
-              variant="subtle"
-            >
-              Voir la fiche
-            </Button>
-            <Button
-              flex={1}
-              colorPalette="blue"
-              borderRadius="xl"
-              size="sm"
-              onClick={() => router.push(ficheHref)}
-            >
-              <MessageSquarePlus size={13} />
-              Commencer
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              borderRadius="xl"
-              title="Voix (bientôt disponible)"
-              disabled
-              opacity={0.4}
-            >
-              <Mic size={14} />
-            </Button>
-          </HStack>
+          <Box px={5} py={4}>
+            <VStack alignItems="stretch" gap={2}>
+              <Button
+                size="sm"
+                borderRadius="xl"
+                fontWeight="700"
+                background={visual.gradient}
+                color="white"
+                _hover={{ opacity: 0.9 }}
+                onClick={() => router.push(ficheHref)}
+              >
+                <MessageSquarePlus size={14} />
+                Commencer un entretien
+              </Button>
+              <Button variant="subtle" size="xs" borderRadius="lg" onClick={() => router.push(ficheHref)}>
+                <BookOpen size={12} />
+                Voir la fiche
+              </Button>
+            </VStack>
+          </Box>
         </Box>
       </motion.div>
     </motion.div>
