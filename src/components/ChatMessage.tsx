@@ -19,110 +19,129 @@ export function ChatMessage({
 }: ChatMessageProps) {
   const isUser = role === "user";
   const initial = isUser
-    ? (userName ?? "U").charAt(0).toUpperCase()
+    ? (userName ?? "V").charAt(0).toUpperCase()
     : (agentName ?? "A").charAt(0).toUpperCase();
 
+  if (isUser) {
+    return (
+      <Box
+        width="100%"
+        paddingX={4}
+        paddingY="6px"
+        display="flex"
+        justifyContent="flex-end"
+      >
+        <Box maxWidth="68%" width="fit-content">
+          <Box
+            px={4}
+            py="10px"
+            borderRadius="18px 4px 18px 18px"
+            background="rgba(91,91,214,0.09)"
+          >
+            <Text
+              fontSize="sm"
+              lineHeight="1.75"
+              whiteSpace="pre-wrap"
+              color="var(--color-text-primary)"
+            >
+              {text}
+            </Text>
+          </Box>
+          {timestamp && (
+            <Text
+              fontSize="2xs"
+              color="var(--color-text-muted)"
+              mt="3px"
+              textAlign="right"
+              opacity={0.7}
+            >
+              {timestamp}
+            </Text>
+          )}
+        </Box>
+      </Box>
+    );
+  }
+
   return (
-    <HStack
+    <Box
       width="100%"
-      justifyContent={isUser ? "flex-end" : "flex-start"}
-      align="flex-start"
       paddingX={4}
-      paddingY={2}
-      gap={3}
+      paddingY="6px"
+      display="flex"
+      justifyContent="flex-start"
     >
-      {!isUser && (
+      <HStack align="flex-start" gap={3} maxWidth="80%">
         <Box
-          width="32px"
-          height="32px"
-          borderRadius="10px"
+          width="30px"
+          height="30px"
+          borderRadius="9px"
           background="linear-gradient(135deg, #6366f1, #8b5cf6)"
           display="flex"
           alignItems="center"
           justifyContent="center"
           flexShrink={0}
           marginTop="2px"
-          boxShadow="0 2px 8px rgba(99,102,241,0.25)"
+          boxShadow="0 2px 6px rgba(99,102,241,0.2)"
         >
           <Text fontSize="xs" fontWeight="700" color="white" lineHeight="1">
             {initial}
           </Text>
         </Box>
-      )}
 
-      <Box maxWidth={isUser ? "62%" : "72%"} width="fit-content" wordBreak="break-word">
-        {/* Sender label */}
-        <Text
-          fontSize="2xs"
-          fontWeight="600"
-          letterSpacing="0.06em"
-          textTransform="uppercase"
-          color="var(--color-text-muted)"
-          mb={1}
-          textAlign={isUser ? "right" : "left"}
-        >
-          {isUser ? (userName ?? "Vous") : (agentName ?? "Persona")}
-        </Text>
-
-        {/* Bubble */}
-        <Box
-          padding={4}
-          borderRadius={isUser ? "20px 4px 20px 20px" : "4px 20px 20px 20px"}
-          background={isUser ? "#e8e7ff" : "var(--color-surface)"}
-          borderWidth="1px"
-          borderColor={isUser ? "rgba(99,102,241,0.18)" : "var(--color-border)"}
-          boxShadow="var(--color-shadow-sm)"
-        >
-          <Text
-            fontSize="sm"
-            lineHeight="1.75"
-            whiteSpace="pre-wrap"
-            color="var(--color-text-primary)"
-          >
-            {text}
-            {!isUser && isStreaming && (
-              <Box
-                as="span"
-                display="inline-block"
-                marginLeft={1}
-                opacity={0.6}
-                style={{ animation: "pulse 1s infinite" }}
-              >
-                ▋
-              </Box>
-            )}
-          </Text>
-        </Box>
-
-        {timestamp && (
+        <Box>
           <Text
             fontSize="2xs"
+            fontWeight="600"
+            letterSpacing="0.05em"
+            textTransform="uppercase"
             color="var(--color-text-muted)"
-            marginTop={1}
-            textAlign={isUser ? "right" : "left"}
+            mb="4px"
           >
-            {timestamp}
+            {agentName ?? "Persona"}
           </Text>
-        )}
-      </Box>
 
-      {isUser && (
-        <Box
-          width="32px"
-          height="32px"
-          borderRadius="10px"
-          background="linear-gradient(135deg, #1a1a2e, #4f46e5)"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          flexShrink={0}
-          marginTop="2px"
-        >
-          <Text fontSize="xs" fontWeight="700" color="white" lineHeight="1">
-            {initial}
-          </Text>
+          <Box
+            px={4}
+            py="10px"
+            borderRadius="4px 18px 18px 18px"
+            background="var(--color-surface)"
+            borderWidth="1px"
+            borderColor="var(--color-border)"
+          >
+            <Text
+              fontSize="sm"
+              lineHeight="1.8"
+              whiteSpace="pre-wrap"
+              color="var(--color-text-primary)"
+            >
+              {text}
+              {isStreaming && (
+                <Box
+                  as="span"
+                  display="inline-block"
+                  marginLeft={1}
+                  opacity={0.5}
+                  style={{ animation: "pulse 1s infinite" }}
+                >
+                  ▋
+                </Box>
+              )}
+            </Text>
+          </Box>
+
+          {timestamp && (
+            <Text
+              fontSize="2xs"
+              color="var(--color-text-muted)"
+              mt="3px"
+              opacity={0.7}
+            >
+              {timestamp}
+            </Text>
+          )}
         </Box>
-      )}
-    </HStack>
+      </HStack>
+    </Box>
   );
 }
