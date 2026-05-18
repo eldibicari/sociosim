@@ -2,7 +2,8 @@
 
 import { Box, VStack, HStack, Text, Button } from "@chakra-ui/react";
 import { usePathname, useRouter } from "next/navigation";
-import { Users, MessageSquare, BookOpen, Settings, LogOut, Plus } from "lucide-react";
+import { Users, MessageSquare, BookOpen, Settings, LogOut, Plus, Menu, X } from "lucide-react";
+import { useState } from "react";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { authService } from "@/lib/authService";
 
@@ -17,6 +18,7 @@ const ADMIN_ITEMS = [
 ];
 
 export function MimesisAppSidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { user, user_admin } = useAuthUser();
@@ -34,6 +36,39 @@ export function MimesisAppSidebar() {
   const navItems = user_admin ? [...NAV_ITEMS, ...ADMIN_ITEMS] : NAV_ITEMS;
 
   return (
+    <>
+      {/* Bouton hamburger mobile */}
+      <Box
+        display={{ base: "flex", lg: "none" }}
+        position="fixed"
+        top={3}
+        left={3}
+        zIndex={200}
+        background="var(--color-surface)"
+        borderRadius="10px"
+        borderWidth="1px"
+        borderColor="var(--color-border)"
+        boxShadow="var(--color-shadow-sm)"
+        p={2}
+        cursor="pointer"
+        onClick={() => setMobileOpen(!mobileOpen)}
+      >
+        {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+      </Box>
+
+      {/* Overlay mobile */}
+      {mobileOpen && (
+        <Box
+          display={{ base: "block", lg: "none" }}
+          position="fixed"
+          inset={0}
+          background="rgba(0,0,0,0.4)"
+          zIndex={150}
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
     <Box
       as="nav"
       position="fixed"
@@ -43,11 +78,12 @@ export function MimesisAppSidebar() {
       width="220px"
       background="var(--color-surface)"
       borderRight="1px solid var(--color-border)"
-      display={{ base: "none", lg: "flex" }}
+      display={{ base: mobileOpen ? "flex" : "none", lg: "flex" }}
       flexDirection="column"
-      zIndex={100}
+      zIndex={160}
       padding="1.25rem 0.75rem"
       gap={0}
+      transition="transform 0.2s ease"
     >
       {/* Logo */}
       <Box px={2} mb={6}>
@@ -183,5 +219,6 @@ export function MimesisAppSidebar() {
         </VStack>
       )}
     </Box>
+    </>
   );
 }
