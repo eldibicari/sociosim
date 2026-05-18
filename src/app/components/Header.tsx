@@ -163,13 +163,36 @@ export default function Header() {
           _hover={{ textDecoration: "none", opacity: 0.85 }}
           flexShrink={0}
         >
-          <Text
-            className="mimesis-wordmark display-heading"
-            fontSize="xl"
-            letterSpacing="-0.03em"
-          >
-            Mimesis
-          </Text>
+          <HStack gap={2} align="center">
+            {/* Icon mark: two abstract figures in conversation */}
+            <svg width="30" height="22" viewBox="0 0 30 22" fill="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="hdr-g1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#8B7CF8" />
+                  <stop offset="100%" stopColor="#6D5DF6" />
+                </linearGradient>
+                <linearGradient id="hdr-g2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6D5DF6" />
+                  <stop offset="100%" stopColor="#5B4BE8" />
+                </linearGradient>
+              </defs>
+              {/* Left figure: head + shoulder arc */}
+              <circle cx="8" cy="8" r="5.5" fill="url(#hdr-g1)" />
+              <path d="M 2 17 Q 8 13.5 14 17" stroke="url(#hdr-g1)" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+              {/* Right figure: head + shoulder arc */}
+              <circle cx="22" cy="8" r="5.5" fill="url(#hdr-g2)" opacity="0.82" />
+              <path d="M 16 17 Q 22 13.5 28 17" stroke="url(#hdr-g2)" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.82" />
+              {/* Connection dot — conversation */}
+              <circle cx="15" cy="9" r="1.8" fill="#A78BFA" opacity="0.9" />
+            </svg>
+            <Text
+              className="mimesis-wordmark display-heading"
+              fontSize="xl"
+              letterSpacing="-0.03em"
+            >
+              Mimesis
+            </Text>
+          </HStack>
         </Link>
 
         {/* Nav */}

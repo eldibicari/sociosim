@@ -271,7 +271,7 @@ select {
   letter-spacing: -0.02em;
 }
 
-/* ─── MIMESIS WORDMARK AURORA ─── */
+/* ─── MIMESIS WORDMARK ─── */
 @keyframes auroraShimmer {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
@@ -280,19 +280,17 @@ select {
 .mimesis-wordmark {
   background: linear-gradient(
     90deg,
-    #6366f1 0%,
-    #8b5cf6 18%,
-    #a78bfa 34%,
-    #ec4899 50%,
-    #6366f1 66%,
-    #06b6d4 82%,
-    #6366f1 100%
+    #6D5DF6 0%,
+    #A78BFA 28%,
+    #8B7CF8 50%,
+    #5B4BE8 72%,
+    #6D5DF6 100%
   );
-  background-size: 250% auto;
+  background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: auroraShimmer 7s ease infinite;
+  animation: auroraShimmer 8s ease infinite;
   display: inline-block;
 }
 
