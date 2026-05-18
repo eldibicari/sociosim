@@ -285,7 +285,6 @@ export default function PersonnasPage() {
   const myActiveAgents = useMemo(() => myAgents.filter((a) => a.active), [myAgents]);
   const myInactiveAgents = useMemo(() => myAgents.filter((a) => !a.active), [myAgents]);
   const ownsAnyAgent = useMemo(() => Boolean(user && agents.some((a) => a.created_by === user.id)), [agents, user]);
-  const activeCount = useMemo(() => agents.filter((a) => a.active).length, [agents]);
   const interactedCount = interactedAgents.length;
 
   const FILTER_OPTIONS: Array<{ key: PersonnaFilter; label: string }> = [
@@ -335,114 +334,38 @@ export default function PersonnasPage() {
         <VStack gap={10} alignItems="stretch">
 
           {/* ── Hero header ── */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Box
-              borderRadius={{ base: "28px", md: "36px" }}
-              borderWidth="1px"
-              borderColor="rgba(148,163,184,0.16)"
-              background="linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(241,245,249,0.96) 100%)"
-              boxShadow="0 20px 60px rgba(15,23,42,0.07)"
-              backdropFilter="blur(16px)"
-              overflow="hidden"
-              position="relative"
-            >
-              <Box position="absolute" insetX={0} top={0} height="3px" background="linear-gradient(90deg, #6366f1 0%, #8b5cf6 52%, #0ea5e9 100%)" />
-              <HStack
-                px={{ base: 5, md: 8 }}
-                py={{ base: 6, md: 8 }}
-                justifyContent="space-between"
-                alignItems={{ base: "flex-start", md: "center" }}
-                flexDirection={{ base: "column", lg: "row" }}
-                gap={6}
-              >
-                <VStack alignItems="flex-start" gap={3} maxWidth="3xl">
-                  <HStack gap={2} alignItems="center">
-                    <Box width="16px" height="1.5px" background="linear-gradient(90deg, #6366f1, #8b5cf6)" borderRadius="full" />
-                    <Text fontSize="2xs" textTransform="uppercase" letterSpacing="0.22em" color="blue.600" fontWeight="700">
-                      Espace personas
-                    </Text>
-                  </HStack>
-                  <Heading
-                    size="2xl"
-                    className="display-heading"
-                    letterSpacing="-0.04em"
-                    lineHeight="1.05"
-                    fontSize={{ base: "3xl", md: "4xl" }}
-                  >
-                    Choisir un persona, préparer un entretien rigoureux
-                  </Heading>
-                  <Text color="fg.muted" fontSize="md" lineHeight="1.8" maxWidth="2xl">
-                    Chaque persona est un profil sociologique simulé. Consultez sa fiche, explorez sa grille d&apos;entretien, puis démarrez une simulation pour produire du matériau d&apos;analyse.
-                  </Text>
-                </VStack>
-
-                {/* Stats + CTA */}
-                <VStack alignItems={{ base: "flex-start", lg: "flex-end" }} gap={4} flexShrink={0}>
-                  <HStack gap={4}>
-                    <VStack alignItems="center" gap={0}>
-                      <Text
-                        fontSize="2xl"
-                        fontWeight="800"
-                        letterSpacing="-0.04em"
-                        style={{
-                          background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}
-                      >
-                        {agents.length}
-                      </Text>
-                      <Text fontSize="2xs" color="fg.muted" fontWeight="600" letterSpacing="0.06em">personas</Text>
-                    </VStack>
-                    <Box width="1px" height="32px" background="rgba(148,163,184,0.25)" />
-                    <VStack alignItems="center" gap={0}>
-                      <Text
-                        fontSize="2xl"
-                        fontWeight="800"
-                        letterSpacing="-0.04em"
-                        style={{
-                          background: "linear-gradient(135deg, #10b981, #0ea5e9)",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}
-                      >
-                        {activeCount}
-                      </Text>
-                      <Text fontSize="2xs" color="fg.muted" fontWeight="600" letterSpacing="0.06em">actifs</Text>
-                    </VStack>
-                    <Box width="1px" height="32px" background="rgba(148,163,184,0.25)" />
-                    <VStack alignItems="center" gap={0}>
-                      <Text
-                        fontSize="2xl"
-                        fontWeight="800"
-                        letterSpacing="-0.04em"
-                        style={{
-                          background: "linear-gradient(135deg, #8b5cf6, #ec4899)",
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}
-                      >
-                        {interactedCount}
-                      </Text>
-                      <Text fontSize="2xs" color="fg.muted" fontWeight="600" letterSpacing="0.06em">utilisés</Text>
-                    </VStack>
-                  </HStack>
-                  <Button
-                    colorPalette="blue"
-                    borderRadius="xl"
-                    fontWeight="700"
-                    onClick={() => router.push("/personnas/new")}
-                    px={5}
-                  >
-                    <Plus size={16} />
-                    Créer un persona
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <HStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={4}>
+              <VStack alignItems="flex-start" gap={1}>
+                <Text fontSize="xs" color="fg.muted" fontWeight="500" letterSpacing="0.04em">
+                  {user?.user_metadata?.firstName
+                    ? `Bonjour, ${user.user_metadata.firstName}`
+                    : "Bienvenue"}
+                </Text>
+                <Heading fontSize={{ base: "2xl", md: "3xl" }} fontWeight="800" letterSpacing="-0.03em" color="gray.900">
+                  Choisir un enquêté virtuel
+                </Heading>
+              </VStack>
+              <HStack gap={5} alignItems="center">
+                <HStack gap={4} display={{ base: "none", md: "flex" }}>
+                  <VStack gap={0} alignItems="center">
+                    <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" color="gray.900">{agents.length}</Text>
+                    <Text fontSize="2xs" color="fg.muted">personas</Text>
+                  </VStack>
+                  <Box width="1px" height="24px" background="var(--color-border)" />
+                  <VStack gap={0} alignItems="center">
+                    <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" color="gray.900">{interactedCount}</Text>
+                    <Text fontSize="2xs" color="fg.muted">utilisés</Text>
+                  </VStack>
+                </HStack>
+                {user_admin && (
+                  <Button size="sm" borderRadius="xl" fontWeight="700" onClick={() => router.push("/personnas/new")} background="var(--color-accent)" color="white" _hover={{ background: "var(--color-accent-hover)" }}>
+                    <Plus size={14} />
+                    Créer
                   </Button>
-                </VStack>
+                )}
               </HStack>
-            </Box>
+            </HStack>
           </motion.div>
 
           {/* ── Search + filters ── */}
