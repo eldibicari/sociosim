@@ -1,185 +1,160 @@
 "use client";
 
-// Pure SVG + CSS animation — no WebGL, no Three.js, works on any GPU
 export function InterviewSceneSVG() {
   return (
     <svg
-      viewBox="0 0 800 340"
+      viewBox="0 0 520 400"
       xmlns="http://www.w3.org/2000/svg"
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        opacity: 0.45,
-      }}
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
     >
       <defs>
-        {/* Glow filters */}
-        <filter id="glow-indigo" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="3" result="blur" />
+        {/* Gradients */}
+        <radialGradient id="grad-left" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stopColor="#8B7CF8" />
+          <stop offset="100%" stopColor="#6D5DF6" />
+        </radialGradient>
+        <radialGradient id="grad-right" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stopColor="#A78BFA" />
+          <stop offset="100%" stopColor="#7C6AF5" />
+        </radialGradient>
+        <radialGradient id="orb-bg-1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#6D5DF6" stopOpacity="0.13" />
+          <stop offset="100%" stopColor="#6D5DF6" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="orb-bg-2" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#EFEDFF" stopOpacity="0.7" />
+          <stop offset="100%" stopColor="#EFEDFF" stopOpacity="0" />
+        </radialGradient>
+        {/* Glow filter */}
+        <filter id="glow-soft" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="6" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <filter id="glow-green" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="3" result="blur" />
+        <filter id="glow-strong" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="14" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <filter id="glow-beam" x="-20%" y="-100%" width="140%" height="300%">
-          <feGaussianBlur stdDeviation="4" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
+        <filter id="blur-heavy" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="28" />
         </filter>
-
-        {/* Stroke dash for drawing animation */}
-        <style>{`
-          @keyframes drawFigure {
-            0%   { stroke-dashoffset: 600; opacity: 0.4; }
-            50%  { stroke-dashoffset: 0;   opacity: 0.9; }
-            100% { stroke-dashoffset: -600; opacity: 0.4; }
-          }
-          @keyframes drawFigure2 {
-            0%   { stroke-dashoffset: -600; opacity: 0.4; }
-            50%  { stroke-dashoffset: 0;    opacity: 0.9; }
-            100% { stroke-dashoffset: 600;  opacity: 0.4; }
-          }
-          @keyframes sway1 {
-            0%, 100% { transform: translateX(0) rotate(0deg); }
-            33%      { transform: translateX(4px) rotate(1deg); }
-            66%      { transform: translateX(-3px) rotate(-0.5deg); }
-          }
-          @keyframes sway2 {
-            0%, 100% { transform: translateX(0) rotate(0deg); }
-            33%      { transform: translateX(-4px) rotate(-1deg); }
-            66%      { transform: translateX(3px) rotate(0.5deg); }
-          }
-          @keyframes beamPulse {
-            0%, 100% { opacity: 0.12; stroke-width: 1; }
-            50%      { opacity: 0.35; stroke-width: 1.5; }
-          }
-          @keyframes particleDrift {
-            0%, 100% { transform: translateY(0); opacity: 0.3; }
-            50%      { transform: translateY(-8px); opacity: 0.7; }
-          }
-          .figure-left  { animation: sway1 6s ease-in-out infinite; transform-origin: 210px 220px; }
-          .figure-right { animation: sway2 7s ease-in-out infinite; transform-origin: 590px 220px; }
-          .stroke-left  {
-            stroke-dasharray: 600;
-            animation: drawFigure 8s ease-in-out infinite;
-          }
-          .stroke-right {
-            stroke-dasharray: 600;
-            animation: drawFigure2 8s ease-in-out infinite;
-          }
-          .beam { animation: beamPulse 3s ease-in-out infinite; }
-        `}</style>
       </defs>
 
-      {/* ── Left figure (indigo) ── */}
-      <g className="figure-left" filter="url(#glow-indigo)">
-        {/* Head hexagon */}
-        <polygon
-          className="stroke-left"
-          points="210,120 225,111 240,120 240,138 225,147 210,138"
-          fill="none"
-          stroke="#818cf8"
-          strokeWidth="1.5"
-        />
-        {/* Torso */}
-        <line className="stroke-left" x1="225" y1="147" x2="225" y2="210" stroke="#818cf8" strokeWidth="1.5" fill="none" />
-        {/* Shoulders */}
-        <line className="stroke-left" x1="190" y1="165" x2="260" y2="165" stroke="#818cf8" strokeWidth="1.5" fill="none" />
-        {/* Arms */}
-        <line className="stroke-left" x1="190" y1="165" x2="175" y2="200" stroke="#818cf8" strokeWidth="1.5" fill="none" />
-        <line className="stroke-left" x1="260" y1="165" x2="272" y2="200" stroke="#818cf8" strokeWidth="1.5" fill="none" />
-        {/* Legs */}
-        <line className="stroke-left" x1="225" y1="210" x2="208" y2="260" stroke="#818cf8" strokeWidth="1.5" fill="none" />
-        <line className="stroke-left" x1="225" y1="210" x2="242" y2="260" stroke="#818cf8" strokeWidth="1.5" fill="none" />
-        {/* Detail lines on torso */}
-        <line className="stroke-left" x1="205" y1="180" x2="245" y2="180" stroke="#818cf8" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
-        <line className="stroke-left" x1="208" y1="195" x2="242" y2="195" stroke="#818cf8" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
+      {/* ── Background atmosphere orbs ── */}
+      <ellipse cx="130" cy="210" rx="140" ry="130" fill="url(#orb-bg-1)" filter="url(#blur-heavy)">
+        <animate attributeName="rx" values="140;155;140" dur="9s" repeatCount="indefinite" />
+        <animate attributeName="ry" values="130;145;130" dur="9s" repeatCount="indefinite" />
+      </ellipse>
+      <ellipse cx="390" cy="200" rx="130" ry="120" fill="url(#orb-bg-1)" filter="url(#blur-heavy)">
+        <animate attributeName="rx" values="130;145;130" dur="11s" repeatCount="indefinite" />
+        <animate attributeName="ry" values="120;135;120" dur="11s" repeatCount="indefinite" />
+      </ellipse>
+      <ellipse cx="260" cy="180" rx="100" ry="80" fill="url(#orb-bg-2)" filter="url(#blur-heavy)" />
+
+      {/* ── Left figure (student / interviewer) ── */}
+      <g filter="url(#glow-soft)">
+        {/* floating group */}
+        <g>
+          <animateTransform attributeName="transform" type="translate" values="0,0; 0,-8; 0,0" dur="6s" repeatCount="indefinite" additive="sum" />
+          {/* Body / torso shape */}
+          <ellipse cx="130" cy="295" rx="52" ry="38" fill="url(#grad-left)" opacity="0.82" />
+          {/* Shoulders curve */}
+          <path d="M 80 275 Q 130 255 180 275" stroke="url(#grad-left)" strokeWidth="18" fill="none" strokeLinecap="round" opacity="0.7" />
+          {/* Head */}
+          <circle cx="130" cy="218" r="38" fill="url(#grad-left)" opacity="0.92" />
+          {/* Face highlight */}
+          <circle cx="120" cy="210" r="10" fill="white" opacity="0.18" />
+        </g>
       </g>
 
-      {/* ── Right figure (green) ── */}
-      <g className="figure-right" filter="url(#glow-green)">
-        {/* Head hexagon */}
-        <polygon
-          className="stroke-right"
-          points="575,120 590,111 605,120 605,138 590,147 575,138"
-          fill="none"
-          stroke="#34d399"
-          strokeWidth="1.5"
-        />
-        {/* Torso */}
-        <line className="stroke-right" x1="590" y1="147" x2="590" y2="210" stroke="#34d399" strokeWidth="1.5" fill="none" />
-        {/* Shoulders */}
-        <line className="stroke-right" x1="555" y1="165" x2="625" y2="165" stroke="#34d399" strokeWidth="1.5" fill="none" />
-        {/* Arms */}
-        <line className="stroke-right" x1="555" y1="165" x2="543" y2="200" stroke="#34d399" strokeWidth="1.5" fill="none" />
-        <line className="stroke-right" x1="625" y1="165" x2="640" y2="200" stroke="#34d399" strokeWidth="1.5" fill="none" />
-        {/* Legs */}
-        <line className="stroke-right" x1="590" y1="210" x2="573" y2="260" stroke="#34d399" strokeWidth="1.5" fill="none" />
-        <line className="stroke-right" x1="590" y1="210" x2="607" y2="260" stroke="#34d399" strokeWidth="1.5" fill="none" />
-        {/* Detail lines */}
-        <line className="stroke-right" x1="570" y1="180" x2="610" y2="180" stroke="#34d399" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
-        <line className="stroke-right" x1="573" y1="195" x2="607" y2="195" stroke="#34d399" strokeWidth="0.8" strokeOpacity="0.5" fill="none" />
+      {/* ── Right figure (persona) ── */}
+      <g filter="url(#glow-soft)">
+        <g>
+          <animateTransform attributeName="transform" type="translate" values="0,0; 0,-6; 0,0" dur="7.5s" repeatCount="indefinite" additive="sum" />
+          {/* Body */}
+          <ellipse cx="390" cy="295" rx="52" ry="38" fill="url(#grad-right)" opacity="0.78" />
+          {/* Shoulders */}
+          <path d="M 340 275 Q 390 255 440 275" stroke="url(#grad-right)" strokeWidth="18" fill="none" strokeLinecap="round" opacity="0.65" />
+          {/* Head */}
+          <circle cx="390" cy="218" r="38" fill="url(#grad-right)" opacity="0.88" />
+          {/* Face highlight */}
+          <circle cx="380" cy="210" r="10" fill="white" opacity="0.15" />
+        </g>
       </g>
 
-      {/* ── Connection beam ── */}
-      <line
-        className="beam"
-        x1="272" y1="190" x2="543" y2="190"
-        stroke="#6366f1"
-        strokeWidth="1"
-        filter="url(#glow-beam)"
-      />
-      {/* Beam dots */}
-      {[320, 370, 400, 430, 480].map((x, i) => (
-        <circle
-          key={x}
-          cx={x}
-          cy={190}
-          r={2}
-          fill="#6366f1"
-          style={{
-            animation: `particleDrift ${2 + i * 0.3}s ease-in-out infinite`,
-            animationDelay: `${i * 0.4}s`,
-          }}
-        />
-      ))}
+      {/* ── Conversation flow between the two ── */}
+      {/* Animated dashed arc */}
+      <path
+        d="M 178 230 Q 260 170 342 230"
+        stroke="rgba(109,93,246,0.35)"
+        strokeWidth="2"
+        fill="none"
+        strokeDasharray="6 5"
+        strokeLinecap="round"
+      >
+        <animate attributeName="stroke-dashoffset" values="0;-44" dur="2.2s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.35;0.55;0.35" dur="4s" repeatCount="indefinite" />
+      </path>
 
-      {/* ── Floating particles ── */}
-      {[
-        { x: 80,  y: 100, c: "#818cf8", d: "2.1s", delay: "0s" },
-        { x: 130, y: 250, c: "#818cf8", d: "3.2s", delay: "0.5s" },
-        { x: 160, y: 170, c: "#a78bfa", d: "2.8s", delay: "1s" },
-        { x: 680, y: 120, c: "#34d399", d: "2.4s", delay: "0.3s" },
-        { x: 720, y: 230, c: "#34d399", d: "3.1s", delay: "0.8s" },
-        { x: 650, y: 280, c: "#6ee7b7", d: "2.6s", delay: "1.2s" },
-        { x: 400, y:  60, c: "#6366f1", d: "3.5s", delay: "0.6s" },
-        { x: 360, y: 290, c: "#8b5cf6", d: "2.9s", delay: "0.2s" },
-      ].map(({ x, y, c, d, delay }, i) => (
-        <circle
-          key={i}
-          cx={x}
-          cy={y}
-          r={2.5}
-          fill={c}
-          style={{
-            animation: `particleDrift ${d} ease-in-out infinite`,
-            animationDelay: delay,
-            opacity: 0.5,
-          }}
-        />
-      ))}
+      {/* Floating dots along the arc */}
+      <circle cx="214" cy="204" r="4.5" fill="#6D5DF6" opacity="0.5" filter="url(#glow-soft)">
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.4s" begin="0s" repeatCount="indefinite" />
+        <animate attributeName="r" values="4.5;5.5;4.5" dur="2.4s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="260" cy="186" r="5" fill="#8B7CF8" opacity="0.6" filter="url(#glow-soft)">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="2.4s" begin="0.8s" repeatCount="indefinite" />
+        <animate attributeName="r" values="5;6.5;5" dur="2.4s" begin="0.8s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="306" cy="204" r="4.5" fill="#6D5DF6" opacity="0.5" filter="url(#glow-soft)">
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="2.4s" begin="1.6s" repeatCount="indefinite" />
+        <animate attributeName="r" values="4.5;5.5;4.5" dur="2.4s" begin="1.6s" repeatCount="indefinite" />
+      </circle>
+
+      {/* ── Speech bubble left ── */}
+      <g opacity="0.88" filter="url(#glow-soft)">
+        <animate attributeName="opacity" values="0.88;1;0.88" dur="5s" repeatCount="indefinite" />
+        <animateTransform attributeName="transform" type="translate" values="0,0;0,-4;0,0" dur="5s" repeatCount="indefinite" additive="sum" />
+        <rect x="56" y="140" width="68" height="34" rx="12" fill="white" fillOpacity="0.92" />
+        <polygon points="80,174 94,174 82,185" fill="white" fillOpacity="0.92" />
+        {/* Dots inside bubble */}
+        <circle cx="76" cy="157" r="3.5" fill="#6D5DF6" opacity="0.7" />
+        <circle cx="90" cy="157" r="3.5" fill="#6D5DF6" opacity="0.7" />
+        <circle cx="104" cy="157" r="3.5" fill="#6D5DF6" opacity="0.7" />
+      </g>
+
+      {/* ── Speech bubble right ── */}
+      <g opacity="0.82" filter="url(#glow-soft)">
+        <animate attributeName="opacity" values="0.82;1;0.82" dur="5s" begin="2.5s" repeatCount="indefinite" />
+        <animateTransform attributeName="transform" type="translate" values="0,0;0,-4;0,0" dur="5s" begin="2.5s" repeatCount="indefinite" additive="sum" />
+        <rect x="390" y="134" width="80" height="36" rx="12" fill="white" fillOpacity="0.88" />
+        <polygon points="430,170 444,170 436,182" fill="white" fillOpacity="0.88" />
+        {/* Lines inside bubble (text lines) */}
+        <line x1="404" y1="148" x2="456" y2="148" stroke="#6D5DF6" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
+        <line x1="404" y1="156" x2="444" y2="156" stroke="#6D5DF6" strokeWidth="2.5" strokeLinecap="round" opacity="0.35" />
+      </g>
+
+      {/* ── Small decorative floating particles ── */}
+      <circle cx="60" cy="100" r="3" fill="#EFEDFF" opacity="0.6">
+        <animate attributeName="cy" values="100;88;100" dur="8s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.6;0.3;0.6" dur="8s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="460" cy="90" r="2.5" fill="#A78BFA" opacity="0.5">
+        <animate attributeName="cy" values="90;78;90" dur="10s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="260" cy="340" r="3.5" fill="#6D5DF6" opacity="0.3">
+        <animate attributeName="cy" values="340;328;340" dur="7s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="48" cy="310" r="2" fill="#8B7CF8" opacity="0.4">
+        <animate attributeName="cy" values="310;300;310" dur="9s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="472" cy="330" r="2.5" fill="#7C6AF5" opacity="0.4">
+        <animate attributeName="cy" values="330;320;330" dur="6s" repeatCount="indefinite" />
+      </circle>
     </svg>
   );
 }

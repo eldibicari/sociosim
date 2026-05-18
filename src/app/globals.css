@@ -191,6 +191,42 @@ select {
   margin: 0.25rem 0;
 }
 
+/* === Conversation bubble background === */
+@keyframes bubbleFloat {
+  0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(-32px) translateX(6px); opacity: 0; }
+}
+@keyframes bubbleFloatAlt {
+  0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(-28px) translateX(-8px); opacity: 0; }
+}
+.convo-bubble {
+  position: absolute;
+  padding: 8px 14px;
+  border-radius: 16px 16px 16px 4px;
+  border: 1px solid rgba(109, 93, 246, 0.14);
+  background: rgba(109, 93, 246, 0.045);
+  backdrop-filter: blur(2px);
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: rgba(109, 93, 246, 0.45);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: bubbleFloat var(--dur, 18s) ease-in-out var(--delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+.convo-bubble.question {
+  border-radius: 16px 16px 4px 16px;
+  background: rgba(23, 23, 23, 0.028);
+  border-color: rgba(23, 23, 23, 0.08);
+  color: rgba(107, 114, 128, 0.5);
+  animation-name: bubbleFloatAlt;
+}
+
 /* === Home page animations === */
 @keyframes avatarPulse {
   0%, 100% { transform: scale(1); }

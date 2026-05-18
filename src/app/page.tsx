@@ -135,109 +135,127 @@ export default function Home() {
 
   return (
     <VStack gap={0} width="100%" align="stretch">
-
       {/* ─── HERO ─── */}
       <Box
-        py={{ base: 16, md: 24 }}
-        background="var(--color-bg)"
+        position="relative"
+        overflow="hidden"
+        py={{ base: 20, md: 32 }}
         borderBottom="1px solid var(--color-border)"
         px={{ base: 6, md: 8 }}
+        background="var(--color-bg)"
       >
-        <Flex
-          maxW="1100px"
-          mx="auto"
-          gap={{ base: 12, md: 16 }}
-          direction={{ base: "column", md: "row" }}
-          align="center"
+        {/* Atmospheric orbs */}
+        <Box position="absolute" inset={0} pointerEvents="none" overflow="hidden">
+          <Box position="absolute" style={{
+            width: "700px", height: "700px", borderRadius: "50%",
+            top: "-280px", left: "-150px",
+            background: "radial-gradient(circle, rgba(109,93,246,0.10) 0%, transparent 65%)",
+            filter: "blur(60px)",
+            animation: "blobFloat1 22s ease-in-out infinite",
+          }} />
+          <Box position="absolute" style={{
+            width: "500px", height: "500px", borderRadius: "50%",
+            bottom: "-180px", right: "-80px",
+            background: "radial-gradient(circle, rgba(109,93,246,0.08) 0%, transparent 65%)",
+            filter: "blur(70px)",
+            animation: "blobFloat2 28s ease-in-out infinite",
+          }} />
+          <Box position="absolute" style={{
+            width: "340px", height: "340px", borderRadius: "50%",
+            top: "20%", right: "20%",
+            background: "radial-gradient(circle, rgba(239,237,255,0.9) 0%, transparent 70%)",
+            filter: "blur(50px)",
+          }} />
+        </Box>
+
+        {/* SVG scene — right side, decorative */}
+        <Box
+          position="absolute"
+          right={{ base: "-60px", md: "0" }}
+          top="0"
+          bottom="0"
+          width={{ base: "320px", md: "480px" }}
+          pointerEvents="none"
+          display={{ base: "none", md: "block" }}
+          opacity={0.9}
         >
-          {/* Left: copy */}
-          <VStack align="flex-start" gap={6} flex="1">
-            <Badge
-              borderRadius="full"
-              px={4}
-              py={1}
-              fontSize="xs"
-              letterSpacing="widest"
-              textTransform="uppercase"
-              style={{
-                background: "var(--color-accent-soft)",
-                color: "var(--color-accent)",
-                border: "1px solid var(--color-accent-border)",
-              }}
-            >
-              Simulateur d&apos;entretien sociologique
-            </Badge>
+          <InterviewSceneSVG />
+        </Box>
 
-            <Heading
-              as="h1"
-              className="display-heading"
-              fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }}
-              fontWeight="400"
-              lineHeight="1.1"
-              letterSpacing="-0.03em"
-              color="var(--color-text-primary)"
-            >
-              Pratiquez avant le terrain
-            </Heading>
+        {/* Content */}
+        <VStack
+          align="flex-start"
+          gap={7}
+          maxW={{ base: "100%", md: "560px" }}
+          position="relative"
+          zIndex={1}
+          mx={{ base: "auto", md: "0" }}
+          ml={{ md: "calc(50% - 550px)" }}
+        >
+          <Badge
+            borderRadius="full"
+            px={4}
+            py={1}
+            fontSize="xs"
+            letterSpacing="widest"
+            textTransform="uppercase"
+            style={{
+              background: "var(--color-accent-soft)",
+              color: "var(--color-accent)",
+              border: "1px solid var(--color-accent-border)",
+            }}
+          >
+            Simulateur d&apos;entretien sociologique
+          </Badge>
 
-            <Text
-              fontSize={{ base: "md", md: "lg" }}
-              color="var(--color-text-muted)"
-              lineHeight="1.75"
-              maxW="440px"
-            >
-              Conduisez des entretiens semi-directifs face à des enquêtés
-              virtuels. Analysez votre pratique, comprenez vos données.
-            </Text>
+          <Heading
+            as="h1"
+            className="display-heading"
+            fontSize={{ base: "4xl", md: "5xl", lg: "6xl" }}
+            fontWeight="400"
+            lineHeight="1.08"
+            letterSpacing="-0.03em"
+            color="var(--color-text-primary)"
+          >
+            Pratiquez avant<br />le terrain
+          </Heading>
 
-            <HStack gap={3} mt={2} flexWrap="wrap">
+          <Text
+            fontSize={{ base: "md", md: "lg" }}
+            color="var(--color-text-muted)"
+            lineHeight="1.8"
+            maxW="420px"
+          >
+            Conduisez des entretiens semi-directifs face à des enquêtés
+            virtuels. Analysez votre pratique, comprenez vos données.
+          </Text>
+
+          <HStack gap={3} mt={1} flexWrap="wrap">
+            <Button
+              asChild
+              size="lg"
+              borderRadius="xl"
+              px={8}
+              style={{ background: "var(--color-accent)", color: "white" }}
+            >
+              <Link href="/personnas">
+                {user ? "Accéder aux personas" : "Voir les personas"}
+              </Link>
+            </Button>
+            {!isLoading && !user && (
               <Button
                 asChild
                 size="lg"
+                variant="outline"
                 borderRadius="xl"
                 px={8}
-                style={{
-                  background: "var(--color-accent)",
-                  color: "white",
-                }}
+                style={{ borderColor: "var(--color-border-strong)", color: "var(--color-text-primary)" }}
               >
-                <Link href="/personnas">
-                  {user ? "Accéder aux personas" : "Voir les personas"}
-                </Link>
+                <Link href="/login">Se connecter</Link>
               </Button>
-              {!isLoading && !user && (
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  borderRadius="xl"
-                  px={8}
-                  style={{
-                    borderColor: "var(--color-border-strong)",
-                    color: "var(--color-text-primary)",
-                  }}
-                >
-                  <Link href="/login">Se connecter</Link>
-                </Button>
-              )}
-            </HStack>
-          </VStack>
-
-          {/* Right: scene illustration */}
-          <Box
-            flex="1"
-            display={{ base: "none", md: "block" }}
-            position="relative"
-            height="320px"
-            borderRadius="2xl"
-            overflow="hidden"
-            borderWidth="1px"
-            borderColor="var(--color-border)"
-            background="var(--color-accent-soft)"
-          >
-            <InterviewSceneSVG />
-          </Box>
-        </Flex>
+            )}
+          </HStack>
+        </VStack>
       </Box>
 
       {/* ─── PERSONAS VITRINE ─── */}
