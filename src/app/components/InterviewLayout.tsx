@@ -423,6 +423,94 @@ export function InterviewLayout({
           ) : null}
         </Box>
       </Box>
+
+      <Box
+        display={{ base: "none", lg: "flex" }}
+        flexDirection="column"
+        width="260px"
+        minWidth="260px"
+        borderLeft="1px solid var(--color-border)"
+        backgroundColor="var(--color-surface)"
+        padding={4}
+        gap={4}
+        overflowY="auto"
+      >
+        {agentDisplayName ? (
+          <VStack align="stretch" gap={4}>
+            <Box
+              width="56px"
+              height="56px"
+              borderRadius="16px"
+              background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              boxShadow="0 4px 12px rgba(99,102,241,0.25)"
+            >
+              <Text fontSize="xl" fontWeight="700" color="white" lineHeight="1">
+                {agentDisplayName.charAt(0).toUpperCase()}
+              </Text>
+            </Box>
+
+            <VStack align="stretch" gap={1.5}>
+              <Badge
+                colorPalette="blue"
+                variant="subtle"
+                borderRadius="full"
+                width="fit-content"
+                px={2.5}
+                py={0.5}
+                fontSize="2xs"
+                fontWeight="700"
+              >
+                Persona active
+              </Badge>
+              <Text fontWeight="800" fontSize="md" color="var(--color-text-primary)" letterSpacing="-0.02em" lineHeight="1.3">
+                {agentDisplayName}
+              </Text>
+              {agentDescription ? (
+                <Text fontSize="xs" color="var(--color-text-muted)" lineHeight="1.65" mt={0.5}>
+                  {agentDescription}
+                </Text>
+              ) : null}
+            </VStack>
+
+            <Box height="1px" backgroundColor="var(--color-border)" />
+
+            <VStack align="stretch" gap={2}>
+              <Text fontSize="2xs" fontWeight="700" letterSpacing="0.1em" textTransform="uppercase" color="var(--color-text-muted)">
+                Export
+              </Text>
+              <Button
+                size="sm"
+                variant="outline"
+                borderRadius="10px"
+                onClick={onExportPdf}
+                loading={isExportingPdf}
+                disabled={disableExport}
+                fontWeight="600"
+                fontSize="xs"
+              >
+                Exporter en PDF
+              </Button>
+              {onExportGoogleDocs ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  borderRadius="10px"
+                  onClick={onExportGoogleDocs}
+                  loading={isExportingGoogleDocs}
+                  disabled={disableExport}
+                  fontWeight="600"
+                  fontSize="xs"
+                >
+                  Google Docs
+                </Button>
+              ) : null}
+            </VStack>
+          </VStack>
+        ) : null}
+      </Box>
     </Box>
   );
 }
