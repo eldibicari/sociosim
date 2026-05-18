@@ -163,6 +163,52 @@ export function InterviewLayout({
           maxWidth={{ base: "100%", lg: "4xl" }}
           marginX="auto"
         >
+          {agentDisplayName && (
+            <Box
+              px={5}
+              py={3}
+              borderBottom="1px solid var(--color-border)"
+              backgroundColor="var(--color-surface)"
+              display="flex"
+              alignItems="center"
+              gap={3}
+              flexShrink={0}
+            >
+              <Box
+                width="36px"
+                height="36px"
+                borderRadius="12px"
+                background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                boxShadow="0 2px 8px rgba(99,102,241,0.25)"
+                flexShrink={0}
+              >
+                <Text fontSize="sm" fontWeight="700" color="white" lineHeight="1">
+                  {agentDisplayName.charAt(0).toUpperCase()}
+                </Text>
+              </Box>
+              <Box flex={1} minWidth={0}>
+                <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)" lineHeight="1.2">
+                  {agentDisplayName}
+                </Text>
+                <HStack gap={1.5} mt="2px">
+                  <Box
+                    width="6px"
+                    height="6px"
+                    borderRadius="full"
+                    background={isStreaming ? "#f59e0b" : "#10b981"}
+                    flexShrink={0}
+                  />
+                  <Text fontSize="2xs" fontWeight="600" color="var(--color-text-muted)">
+                    {isStreaming ? "En train de répondre..." : "Disponible"}
+                  </Text>
+                </HStack>
+              </Box>
+            </Box>
+          )}
+
           <Box
             ref={messagesContainerRef}
             flex={1}
