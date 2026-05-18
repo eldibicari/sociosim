@@ -57,7 +57,7 @@ function SectionCard({
 }: {
   title: string;
   description: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   children: React.ReactNode;
   delay?: number;
 }) {

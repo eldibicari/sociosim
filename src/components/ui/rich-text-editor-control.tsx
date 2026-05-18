@@ -70,7 +70,7 @@ export function createBooleanControl(config: BooleanControlConfig) {
           variant={variant}
           onClick={() => command(editor)}
           disabled={disabled}
-          {...dynamicProps}
+          {...(dynamicProps as Partial<IconButtonProps>)}
           {...props}
         />
       )

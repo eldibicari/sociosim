@@ -61,7 +61,6 @@ export function InterviewGridPanel({ agentId }: Props) {
       <Dialog.Root
         open={isOpen}
         onOpenChange={({ open }) => setIsOpen(open)}
-        placement="end"
         size="md"
       >
         <Portal>

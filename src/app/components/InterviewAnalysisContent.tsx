@@ -100,11 +100,13 @@ export function InterviewAnalysisContent({
       </Stack>
 
       <Stack gap={3} direction={{ base: "column", md: "row" }} align="stretch">
-        {[
-          ["Ce qui est deja bien", analysis.strengths],
-          ["Ce qui manque encore", analysis.limits],
-          ["Comment ameliorer", analysis.next_steps],
-        ].map(([title, items]) => (
+        {(
+          [
+            ["Ce qui est deja bien", analysis.strengths],
+            ["Ce qui manque encore", analysis.limits],
+            ["Comment ameliorer", analysis.next_steps],
+          ] as [string, string[]][]
+        ).map(([title, items]) => (
           <Box
             key={title}
             flex={1}
