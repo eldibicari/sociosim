@@ -5,16 +5,17 @@ import type { BoxProps } from "@chakra-ui/react";
 import {
   Badge,
   Box,
-  Dialog,
+  Button,
   HStack,
   IconButton,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { Sparkles, X } from "lucide-react";
+import { BookOpen, FileDown, Menu as MenuIcon, Sparkles, User, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
+import { InterviewGridPanel } from "@/app/components/InterviewGridPanel";
 import { InterviewSidebar } from "@/app/components/InterviewSidebar";
 import { AssistantSkeleton } from "@/components/AssistantSkeleton";
 import { ChatMessage } from "@/components/ChatMessage";
@@ -27,6 +28,8 @@ type InterviewStats = {
   inputTokens: number;
   outputTokens: number;
 };
+
+type RightTab = "profil" | "grille" | "analyse" | "export";
 
 type InterviewLayoutProps = {
   agentDisplayName?: string;
@@ -96,7 +99,9 @@ export function InterviewLayout({
   isAnalysisLoading = false,
 }: InterviewLayoutProps) {
   const [draftMessage, setDraftMessage] = useState("");
-  const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
+  const [rightTab, setRightTab] = useState<RightTab>("profil");
 
   const showSuggestions =
     showInput && messages.length === 0 && !isStreaming && draftMessage.trim().length === 0;
@@ -114,7 +119,11 @@ export function InterviewLayout({
       : analysis?.material_quality === "partiel"
         ? "orange"
         : "red";
-  const analysisHref = currentInterviewId ? `/interview/${currentInterviewId}/analysis` : null;
+
+  const openRight = (tab: RightTab) => {
+    setRightTab(tab);
+    setRightOpen(true);
+  };
 
   const handleSuggestedQuestion = (question: string) => {
     setDraftMessage("");
@@ -126,98 +135,101 @@ export function InterviewLayout({
       flex={1}
       height="100%"
       display="flex"
-      flexDirection={{ base: "column", lg: "row" }}
-      backgroundColor="bg.surface"
+      flexDirection="column"
+      backgroundColor="var(--color-bg)"
       overflow="hidden"
     >
-      {/* ── LEFT: InterviewSidebar permanent ─────────────── */}
-      <InterviewSidebar
-        agentDisplayName={agentDisplayName}
-        agentId={agentId ?? null}
-        userId={userId ?? null}
-        agentDescription={agentDescription ?? null}
-        userName={userName}
-        dateDisplay={dateDisplay}
-        error={error}
-        stats={stats}
-        historyUserId={historyUserId ?? null}
-        currentInterviewId={currentInterviewId ?? null}
-        onExportPdf={onExportPdf}
-        onExportGoogleDocs={onExportGoogleDocs}
-        isExportingPdf={isExportingPdf}
-        isExportingGoogleDocs={isExportingGoogleDocs}
-        disableExport={disableExport}
-      />
-
-      {/* ── CENTER: Chat column ───────────────────────────── */}
+      {/* ── HEADER ─────────────────────────────────────── */}
       <Box
+        height="52px"
+        borderBottom="1px solid var(--color-border)"
+        backgroundColor="var(--color-surface)"
         display="flex"
-        flexDirection="column"
-        flex={1}
-        minHeight={0}
-        backgroundColor="var(--color-bg)"
-        overflow="hidden"
+        alignItems="center"
+        px={2}
+        gap={1}
+        flexShrink={0}
+        zIndex={10}
+        position="relative"
       >
-        {/* Chat header */}
-        <Box
-          height="52px"
-          borderBottom="1px solid var(--color-border)"
-          backgroundColor="var(--color-surface)"
-          display="flex"
-          alignItems="center"
-          px={4}
-          gap={3}
-          flexShrink={0}
+        {/* Left: hamburger → left drawer */}
+        <IconButton
+          aria-label="Ouvrir le menu"
+          size="sm"
+          variant="ghost"
+          borderRadius="lg"
+          color="var(--color-text-muted)"
+          _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
+          onClick={() => setSidebarOpen(s => !s)}
         >
-          <HStack flex={1} gap={2.5} justifyContent="center">
-            {agentDisplayName ? (
-              <>
-                <Box
-                  width="30px"
-                  height="30px"
-                  borderRadius="9px"
-                  background="linear-gradient(135deg, #6366f1, #8b5cf6)"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  flexShrink={0}
-                  boxShadow="0 2px 6px rgba(99,102,241,0.18)"
-                >
-                  <Text fontSize="xs" fontWeight="700" color="white" lineHeight="1">
-                    {agentDisplayName.charAt(0).toUpperCase()}
-                  </Text>
-                </Box>
-                <VStack gap={0} align="flex-start">
-                  <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)" lineHeight="1.2">
-                    {agentDisplayName}
-                  </Text>
-                  <HStack gap={1.5}>
-                    <Box
-                      width="6px"
-                      height="6px"
-                      borderRadius="full"
-                      background={isStreaming ? "#f59e0b" : "#10b981"}
-                      flexShrink={0}
-                    />
-                    <Text fontSize="2xs" fontWeight="500" color="var(--color-text-muted)">
-                      {isStreaming ? "En train de répondre…" : "Disponible"}
-                    </Text>
-                  </HStack>
-                </VStack>
-              </>
-            ) : (
-              <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">Entretien</Text>
-            )}
-          </HStack>
+          <MenuIcon size={18} />
+        </IconButton>
 
-          {/* Analysis badge — opens modal */}
+        {/* Center: persona identity */}
+        <HStack flex={1} gap={2.5} justifyContent="center">
+          {agentDisplayName ? (
+            <>
+              <Box
+                width="28px"
+                height="28px"
+                borderRadius="8px"
+                background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+                boxShadow="0 2px 6px rgba(99,102,241,0.18)"
+              >
+                <Text fontSize="xs" fontWeight="700" color="white" lineHeight="1">
+                  {agentDisplayName.charAt(0).toUpperCase()}
+                </Text>
+              </Box>
+              <VStack gap={0} align="flex-start">
+                <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)" lineHeight="1.2">
+                  {agentDisplayName}
+                </Text>
+                <HStack gap={1.5}>
+                  <Box
+                    width="6px"
+                    height="6px"
+                    borderRadius="full"
+                    background={isStreaming ? "#f59e0b" : "#10b981"}
+                    flexShrink={0}
+                  />
+                  <Text fontSize="2xs" fontWeight="500" color="var(--color-text-muted)">
+                    {isStreaming ? "En train de répondre…" : "Disponible"}
+                  </Text>
+                </HStack>
+              </VStack>
+            </>
+          ) : (
+            <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">Entretien</Text>
+          )}
+        </HStack>
+
+        {/* Right: action icons */}
+        <HStack gap={0.5}>
+          {/* Grille */}
+          <IconButton
+            aria-label="Grille d'entretien"
+            size="sm"
+            variant="ghost"
+            borderRadius="lg"
+            color="var(--color-text-muted)"
+            _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
+            onClick={() => openRight("grille")}
+          >
+            <BookOpen size={16} />
+          </IconButton>
+
+          {/* Analyse badge */}
           {hasAnalysis && messages.length > 0 ? (
             <Box
               as="button"
               display="flex"
               alignItems="center"
               gap={1.5}
-              px={2.5}
+              px={2}
               py={1}
               borderRadius="full"
               background={
@@ -240,8 +252,7 @@ export function InterviewLayout({
                   : "rgba(148,163,184,0.2)"
               }
               cursor="pointer"
-              onClick={() => setAnalysisOpen(true)}
-              transition="all 0.15s ease"
+              onClick={() => openRight("analyse")}
               _hover={{ opacity: 0.8 }}
             >
               <Box
@@ -265,9 +276,54 @@ export function InterviewLayout({
               </Text>
             </Box>
           ) : null}
-        </Box>
 
-        {/* Messages area */}
+          {/* Export */}
+          {!disableExport ? (
+            <IconButton
+              aria-label="Export"
+              size="sm"
+              variant="ghost"
+              borderRadius="lg"
+              color="var(--color-text-muted)"
+              _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
+              onClick={() => openRight("export")}
+            >
+              <FileDown size={16} />
+            </IconButton>
+          ) : null}
+
+          {/* Profil persona */}
+          {agentDisplayName ? (
+            <IconButton
+              aria-label="Profil du persona"
+              size="sm"
+              variant="ghost"
+              borderRadius="lg"
+              color="var(--color-text-muted)"
+              _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
+              onClick={() => openRight("profil")}
+            >
+              <User size={16} />
+            </IconButton>
+          ) : null}
+        </HStack>
+      </Box>
+
+      {/* ── CHAT AREA ─────────────────────────────────── */}
+      <Box
+        display="flex"
+        flexDirection="column"
+        flex={1}
+        minHeight={0}
+        backgroundColor="var(--color-bg)"
+        overflow="hidden"
+      >
+        {error ? (
+          <Box px={4} py={2} backgroundColor="red.50" borderBottom="1px solid" borderColor="red.200" flexShrink={0}>
+            <Text fontSize="sm" color="red.600">{error}</Text>
+          </Box>
+        ) : null}
+
         <Box
           display="flex"
           flexDirection="column"
@@ -277,12 +333,6 @@ export function InterviewLayout({
           maxWidth="820px"
           marginX="auto"
         >
-          {error ? (
-            <Box px={4} py={2} backgroundColor="red.50" borderBottom="1px solid" borderColor="red.200" flexShrink={0}>
-              <Text fontSize="sm" color="red.600">{error}</Text>
-            </Box>
-          ) : null}
-
           <Box
             ref={messagesContainerRef}
             flex={1}
@@ -431,78 +481,224 @@ export function InterviewLayout({
         </Box>
       </Box>
 
-      {/* ── ANALYSIS MODAL ───────────────────────────────── */}
-      <Dialog.Root
-        open={analysisOpen}
-        onOpenChange={({ open }) => setAnalysisOpen(open)}
-        size="lg"
-      >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content
-            borderRadius="20px"
-            overflow="hidden"
-            maxWidth="680px"
-            maxHeight="80vh"
-            display="flex"
-            flexDirection="column"
-          >
-            <Dialog.Header
-              borderBottom="1px solid var(--color-border)"
-              px={6}
-              py={4}
-              flexShrink={0}
-            >
-              <HStack justify="space-between" align="center" width="100%">
-                <HStack gap={3}>
-                  <Dialog.Title fontSize="md" fontWeight="700" color="var(--color-text-primary)">
-                    Analyse du matériau
-                  </Dialog.Title>
-                  {analysis ? (
-                    <Badge
-                      colorPalette={qualityPalette}
-                      variant="subtle"
-                      px={2.5}
-                      py={0.5}
-                      borderRadius="full"
-                      fontSize="2xs"
-                      fontWeight="700"
-                    >
-                      {qualityLabel}
-                    </Badge>
-                  ) : isAnalysisLoading ? (
-                    <Badge colorPalette="blue" variant="subtle" px={2.5} py={0.5} borderRadius="full" fontSize="2xs">
-                      En cours…
-                    </Badge>
-                  ) : null}
-                </HStack>
-                <IconButton
-                  aria-label="Fermer"
-                  size="sm"
-                  variant="ghost"
-                  borderRadius="full"
-                  onClick={() => setAnalysisOpen(false)}
-                  color="var(--color-text-muted)"
-                >
-                  <X size={16} />
-                </IconButton>
-              </HStack>
-            </Dialog.Header>
+      {/* ── LEFT DRAWER (InterviewSidebar) ─────────────── */}
+      <InterviewSidebar
+        agentDisplayName={agentDisplayName}
+        agentId={agentId ?? null}
+        userId={userId ?? null}
+        agentDescription={agentDescription ?? null}
+        userName={userName}
+        dateDisplay={dateDisplay}
+        error={error}
+        stats={stats}
+        historyUserId={historyUserId ?? null}
+        currentInterviewId={currentInterviewId ?? null}
+        onExportPdf={onExportPdf}
+        onExportGoogleDocs={onExportGoogleDocs}
+        isExportingPdf={isExportingPdf}
+        isExportingGoogleDocs={isExportingGoogleDocs}
+        disableExport={disableExport}
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(s => !s)}
+      />
 
-            <Dialog.Body px={6} py={5} overflowY="auto" flex={1} minHeight={0}>
+      {/* ── RIGHT DRAWER ───────────────────────────────── */}
+      {rightOpen ? (
+        <Box
+          position="fixed"
+          inset={0}
+          backgroundColor="rgba(15,23,42,0.12)"
+          zIndex={20}
+          onClick={() => setRightOpen(false)}
+        />
+      ) : null}
+
+      <Box
+        position="fixed"
+        top={0}
+        right={0}
+        width="min(88vw, 380px)"
+        height="100dvh"
+        backgroundColor="var(--color-surface)"
+        borderLeft="1px solid var(--color-border)"
+        zIndex={25}
+        display="flex"
+        flexDirection="column"
+        overflow="hidden"
+        boxShadow="var(--color-shadow-float)"
+        style={{
+          transform: rightOpen ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.22s cubic-bezier(0.22,1,0.36,1)",
+        }}
+      >
+        {/* Right drawer header */}
+        <Box
+          height="52px"
+          borderBottom="1px solid var(--color-border)"
+          display="flex"
+          alignItems="center"
+          px={4}
+          gap={2}
+          flexShrink={0}
+        >
+          <HStack gap={1} flex={1}>
+            {(["profil", "grille", "analyse", "export"] as RightTab[]).map((tab) => (
+              <Box
+                key={tab}
+                as="button"
+                px={2.5}
+                py={1}
+                borderRadius="lg"
+                fontSize="xs"
+                fontWeight="600"
+                cursor="pointer"
+                transition="all 0.15s ease"
+                background={rightTab === tab ? "var(--color-accent-muted)" : "transparent"}
+                color={rightTab === tab ? "var(--color-accent)" : "var(--color-text-muted)"}
+                _hover={{ background: "var(--color-accent-muted)", color: "var(--color-accent)" }}
+                onClick={() => setRightTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </Box>
+            ))}
+          </HStack>
+          <IconButton
+            aria-label="Fermer"
+            size="sm"
+            variant="ghost"
+            borderRadius="full"
+            color="var(--color-text-muted)"
+            onClick={() => setRightOpen(false)}
+          >
+            <X size={16} />
+          </IconButton>
+        </Box>
+
+        {/* Right drawer content */}
+        <Box flex={1} overflowY="auto" className="soft-scrollbar">
+
+          {/* PROFIL */}
+          {rightTab === "profil" ? (
+            <VStack alignItems="stretch" gap={0} p={5}>
+              {agentDisplayName ? (
+                <>
+                  <Box
+                    width="56px"
+                    height="56px"
+                    borderRadius="16px"
+                    background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    mb={3}
+                    boxShadow="0 4px 16px rgba(99,102,241,0.25)"
+                  >
+                    <Text fontSize="xl" fontWeight="800" color="white" lineHeight="1">
+                      {agentDisplayName.charAt(0).toUpperCase()}
+                    </Text>
+                  </Box>
+                  <Text fontWeight="800" fontSize="lg" color="var(--color-text-primary)" letterSpacing="-0.02em" mb={0.5}>
+                    {agentDisplayName}
+                  </Text>
+                  {dateDisplay ? (
+                    <Text fontSize="xs" color="var(--color-text-muted)" mb={4}>{dateDisplay}</Text>
+                  ) : null}
+                  {agentDescription ? (
+                    <Text fontSize="sm" color="var(--color-text-muted)" lineHeight="1.75" whiteSpace="pre-wrap">
+                      {agentDescription.replace(/\\n/g, "\n")}
+                    </Text>
+                  ) : null}
+                </>
+              ) : (
+                <Text fontSize="sm" color="var(--color-text-muted)">Aucune information de persona disponible.</Text>
+              )}
+            </VStack>
+          ) : null}
+
+          {/* GRILLE */}
+          {rightTab === "grille" ? (
+            <VStack alignItems="stretch" gap={4} p={5}>
+              <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">Grille d&apos;entretien</Text>
+              <Text fontSize="sm" color="var(--color-text-muted)" lineHeight="1.7">
+                Consultez les thèmes et questions de relance définis pour ce persona.
+              </Text>
+              <InterviewGridPanel agentId={agentId ?? null} />
+            </VStack>
+          ) : null}
+
+          {/* ANALYSE */}
+          {rightTab === "analyse" ? (
+            <VStack alignItems="stretch" gap={0} p={5}>
+              <HStack mb={4} gap={2}>
+                <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">Analyse du matériau</Text>
+                {analysis ? (
+                  <Badge colorPalette={qualityPalette} variant="subtle" px={2} py={0.5} borderRadius="full" fontSize="2xs" fontWeight="700">
+                    {qualityLabel}
+                  </Badge>
+                ) : isAnalysisLoading ? (
+                  <Badge colorPalette="blue" variant="subtle" px={2} py={0.5} borderRadius="full" fontSize="2xs">En cours…</Badge>
+                ) : null}
+              </HStack>
               {isAnalysisLoading ? (
-                <Text color="var(--color-text-muted)" fontSize="sm">
-                  Analyse du matériau en cours…
-                </Text>
+                <Text color="var(--color-text-muted)" fontSize="sm">Analyse du matériau en cours…</Text>
               ) : analysisError ? (
                 <Text color="red.600" fontSize="sm">{analysisError}</Text>
               ) : analysis ? (
-                <InterviewAnalysisContent analysis={analysis} analysisHref={analysisHref} />
+                <InterviewAnalysisContent
+                  analysis={analysis}
+                  analysisHref={currentInterviewId ? `/interview/${currentInterviewId}/analysis` : null}
+                />
+              ) : (
+                <Text color="var(--color-text-muted)" fontSize="sm">
+                  L&apos;analyse apparaîtra ici une fois l&apos;entretien commencé.
+                </Text>
+              )}
+            </VStack>
+          ) : null}
+
+          {/* EXPORT */}
+          {rightTab === "export" ? (
+            <VStack alignItems="stretch" gap={3} p={5}>
+              <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">Exporter l&apos;entretien</Text>
+              <Button
+                onClick={onExportPdf}
+                loading={isExportingPdf}
+                disabled={disableExport}
+                size="sm"
+                borderRadius="xl"
+                variant="outline"
+                width="100%"
+                justifyContent="flex-start"
+                gap={2}
+              >
+                <FileDown size={14} />
+                Exporter en PDF
+              </Button>
+              {onExportGoogleDocs ? (
+                <Button
+                  onClick={onExportGoogleDocs}
+                  loading={isExportingGoogleDocs}
+                  disabled={disableExport}
+                  size="sm"
+                  borderRadius="xl"
+                  variant="outline"
+                  width="100%"
+                  justifyContent="flex-start"
+                  gap={2}
+                >
+                  <FileDown size={14} />
+                  Exporter vers Google Docs
+                </Button>
               ) : null}
-            </Dialog.Body>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Dialog.Root>
+              {disableExport ? (
+                <Text fontSize="xs" color="var(--color-text-muted)">
+                  L&apos;export sera disponible une fois l&apos;entretien démarré.
+                </Text>
+              ) : null}
+            </VStack>
+          ) : null}
+        </Box>
+      </Box>
     </Box>
   );
 }

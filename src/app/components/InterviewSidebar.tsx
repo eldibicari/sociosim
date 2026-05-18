@@ -221,6 +221,8 @@ type InterviewSidebarProps = {
   dateDisplay?: string;
   error?: string | null;
   stats: InterviewStats;
+  isOpen?: boolean;
+  onToggle?: () => void;
   historyUserId?: string | null;
   currentInterviewId?: string | null;
   onExportPdf: () => void;
@@ -246,6 +248,8 @@ export function InterviewSidebar({
   isExportingPdf = false,
   isExportingGoogleDocs = false,
   disableExport = false,
+  isOpen,
+  onToggle,
 }: InterviewSidebarProps) {
   const [introHtml, setIntroHtml] = useState("");
   const [introPreview, setIntroPreview] = useState("");
@@ -262,6 +266,12 @@ export function InterviewSidebar({
   const [newInterviewError, setNewInterviewError] = useState<string | null>(null);
   const isCompact = true;
   const router = useRouter();
+
+  useEffect(() => {
+    if (isOpen !== undefined) {
+      setIsCollapsed(!isOpen);
+    }
+  }, [isOpen]);
   const prefsKey = useMemo(() => getSidebarPrefsKey(historyUserId, agentId), [historyUserId, agentId]);
 
   useEffect(() => {
@@ -545,38 +555,13 @@ export function InterviewSidebar({
 
   return (
     <>
-      {isCompact && isCollapsed ? (
-        <Tooltip.Root openDelay={150}>
-          <Tooltip.Trigger asChild>
-            <IconButton
-              aria-label="Ouvrir le panneau"
-              size="sm"
-              variant="ghost"
-              onClick={() => setIsCollapsed(false)}
-              position="fixed"
-              top="10px"
-              left={3}
-              borderRadius="lg"
-              zIndex={30}
-              color="var(--color-text-muted)"
-              _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
-            >
-              <MenuIcon size={16} />
-            </IconButton>
-          </Tooltip.Trigger>
-          <Tooltip.Positioner>
-            <Tooltip.Content px={3} py={2}>Ouvrir le panneau</Tooltip.Content>
-          </Tooltip.Positioner>
-        </Tooltip.Root>
-      ) : null}
-
       {isCompact && !isCollapsed ? (
         <Box
           position="fixed"
           inset={0}
           backgroundColor="rgba(15, 23, 42, 0.12)"
           zIndex={20}
-          onClick={() => setIsCollapsed(true)}
+          onClick={() => { if (onToggle) onToggle(); else setIsCollapsed(true); }}
         />
       ) : null}
 
@@ -697,7 +682,7 @@ export function InterviewSidebar({
                         size="sm"
                         variant="ghost"
                         borderRadius="full"
-                        onClick={() => setIsCollapsed(true)}
+                        onClick={() => { if (onToggle) onToggle(); else setIsCollapsed(true); }}
                       >
                         <ChevronsLeft size={16} />
                       </IconButton>
