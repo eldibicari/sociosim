@@ -19,7 +19,7 @@ import {
   type ShowcasePersona,
 } from "@/app/components/PersonaShowcaseCard";
 import { InterviewSceneSVG } from "@/app/components/InterviewSceneSVG";
-import { Reveal, FadeIn, AnimatedCounter } from "@/app/components/ScrollReveal";
+import { Reveal, FadeIn } from "@/app/components/ScrollReveal";
 
 const SHOWCASE_BASE: Omit<ShowcasePersona, "id">[] = [
   {
@@ -85,37 +85,6 @@ const STEPS = [
     body: "Transcription automatique, thèmes couverts, premières pistes de codage. Prenez du recul sur votre posture d'enquêteur.",
     color: "#e53e3e",
   },
-];
-
-const THEORIES = [
-  {
-    author: "Bourdieu",
-    title: "Capital & Habitus",
-    body: "Comment les pratiques numériques reproduisent-elles les inégalités ? Jade vous confronte à la logique des capitaux culturels et des dispositions incorporées.",
-    color: "#e53e3e",
-    persona: "Jade",
-  },
-  {
-    author: "Crozier & Friedberg",
-    title: "Pouvoir & Stratégie",
-    body: "Dans les organisations, tout usage est stratégique. Oriane révèle les jeux d'acteurs autour de l'adoption des outils IA.",
-    color: "#6366f1",
-    persona: "Oriane",
-  },
-  {
-    author: "Latour",
-    title: "Réseau & Inscription",
-    body: "Les technologies ne font pas que des outils. Théo vous entraîne dans la construction sociotechnique des usages quotidiens.",
-    color: "#059669",
-    persona: "Théo",
-  },
-];
-
-const STATS = [
-  { value: "∞", label: "Personas créables" },
-  { value: "3", label: "Cadres théoriques" },
-  { value: "Auto", label: "Analyse post-entretien" },
-  { value: "PDF", label: "Export disponible" },
 ];
 
 const TEACHER_FEATURES = [
@@ -282,55 +251,6 @@ export default function Home() {
         </VStack>
       </Box>
 
-      {/* ─── STATS STRIP ─── */}
-      <Box
-        py={8}
-        borderBottom="1px solid"
-        borderColor="border.subtle"
-        background="linear-gradient(90deg, #fafbff 0%, #f5f0ff 50%, #fafbff 100%)"
-      >
-        <Flex
-          maxW="760px"
-          mx="auto"
-          px={{ base: 4, md: 8 }}
-          gap={0}
-          direction={{ base: "column", sm: "row" }}
-          alignItems="stretch"
-        >
-          {STATS.map((s, i) => (
-            <FadeIn key={s.label} index={i} style={{ flex: 1 }}>
-              <Box
-                textAlign="center"
-                px={4}
-                py={{ base: 4, sm: 0 }}
-                borderLeft={i > 0 ? { base: "none", sm: "1px solid" } : "none"}
-                borderTop={i > 0 ? { base: "1px solid", sm: "none" } : "none"}
-                borderColor="border.subtle"
-              >
-                <Text
-                  fontSize={{ base: "2xl", md: "3xl" }}
-                  fontWeight="800"
-                  letterSpacing="-0.02em"
-                  lineHeight="1"
-                  mb={1}
-                  style={{
-                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  <AnimatedCounter value={s.value} />
-                </Text>
-                <Text fontSize="xs" color="fg.muted" fontWeight="500">
-                  {s.label}
-                </Text>
-              </Box>
-            </FadeIn>
-          ))}
-        </Flex>
-      </Box>
-
       {/* ─── PERSONAS VITRINE ─── */}
       <Box
         py={{ base: 14, md: 20 }}
@@ -479,127 +399,6 @@ export default function Home() {
                 </VStack>
               </FadeIn>
             ))}
-          </Flex>
-        </VStack>
-      </Box>
-
-      {/* ─── ANCRAGE THÉORIQUE ─── */}
-      <Box
-        py={{ base: 14, md: 20 }}
-        position="relative"
-        overflow="hidden"
-        style={{
-          background: "linear-gradient(160deg, #07071a 0%, #100d28 55%, #070f1e 100%)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        {/* Grille de points sombre */}
-        <Box className="dark-section-dots" />
-        {/* Blob central lumineux */}
-        <Box
-          position="absolute"
-          width="700px"
-          height="380px"
-          borderRadius="50%"
-          top="-60px"
-          left="50%"
-          style={{
-            transform: "translateX(-50%)",
-            background: "radial-gradient(ellipse, rgba(99,102,241,0.14) 0%, transparent 70%)",
-            filter: "blur(64px)",
-            pointerEvents: "none",
-          }}
-        />
-
-        <VStack gap={10} maxW="860px" mx="auto" px={{ base: 2, md: 4 }} position="relative" zIndex={1}>
-          <Reveal>
-            <VStack gap={3} textAlign="center">
-              <Text
-                fontSize="xs"
-                fontWeight="700"
-                letterSpacing="widest"
-                textTransform="uppercase"
-                style={{ color: "#818cf8" }}
-              >
-                Ancrage théorique
-              </Text>
-              <Heading
-                as="h2"
-                fontSize={{ base: "2xl", md: "3xl" }}
-                fontWeight="700"
-                letterSpacing="-0.02em"
-                color="white"
-              >
-                Trois grandes théories,<br />un terrain commun
-              </Heading>
-              <Text fontSize="sm" maxW="440px" lineHeight="1.8" style={{ color: "rgba(255,255,255,0.5)" }}>
-                Chaque persona est adossé à un cadre analytique de la sociologie
-                classique.
-              </Text>
-            </VStack>
-          </Reveal>
-
-          <Flex gap={5} direction={{ base: "column", md: "row" }} width="100%">
-              {THEORIES.map((t) => (
-                <FadeIn key={t.author} index={THEORIES.indexOf(t)} style={{ flex: 1 }}>
-                  <Box
-                    p={6}
-                    borderRadius="2xl"
-                    borderWidth="1px"
-                    className="theory-glass-card"
-                    position="relative"
-                    overflow="hidden"
-                    height="100%"
-                    style={{
-                      borderColor: `${t.color}30`,
-                      background: `linear-gradient(135deg, ${t.color}12 0%, ${t.color}05 100%)`,
-                    }}
-                    _hover={{
-                      transform: "translateY(-5px)",
-                      boxShadow: `0 20px 48px -8px ${t.color}44`,
-                    }}
-                  >
-                    <Box
-                      position="absolute"
-                      top={0}
-                      left={0}
-                      right={0}
-                      height="2px"
-                      style={{ background: `linear-gradient(90deg, ${t.color}, transparent)` }}
-                    />
-                    <VStack align="flex-start" gap={3} pt={2}>
-                      <Text
-                        fontSize="xs"
-                        fontWeight="800"
-                        letterSpacing="widest"
-                        textTransform="uppercase"
-                        style={{ color: t.color }}
-                      >
-                        {t.author}
-                      </Text>
-                      <Text fontWeight="700" fontSize="lg" lineHeight="1.25" letterSpacing="-0.01em" color="white">
-                        {t.title}
-                      </Text>
-                      <Text fontSize="sm" lineHeight="1.75" style={{ color: "rgba(255,255,255,0.55)" }}>
-                        {t.body}
-                      </Text>
-                      <Box
-                        display="inline-flex"
-                        alignItems="center"
-                        gap={1}
-                        px={2}
-                        py={0.5}
-                        borderRadius="full"
-                        style={{ backgroundColor: `${t.color}20` }}
-                      >
-                        <Text fontSize="xs" style={{ color: t.color }} fontWeight="600">
-                          → {t.persona}
-                        </Text>
-                      </Box>
-                    </VStack>
-                  </Box>
-                </FadeIn>
-              ))}
           </Flex>
         </VStack>
       </Box>
