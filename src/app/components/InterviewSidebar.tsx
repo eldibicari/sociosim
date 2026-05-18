@@ -12,7 +12,6 @@ import {
   Stack,
   Text,
   Tooltip,
-  useBreakpointValue,
   VStack,
 } from "@chakra-ui/react";
 import { InterviewGridPanel } from "@/app/components/InterviewGridPanel";
@@ -261,18 +260,9 @@ export function InterviewSidebar({
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [sidebarPrefs, setSidebarPrefs] = useState<SidebarPrefs>(EMPTY_PREFS);
   const [newInterviewError, setNewInterviewError] = useState<string | null>(null);
-  const isCompact = useBreakpointValue({ base: true, lg: false }) ?? false;
+  const isCompact = true;
   const router = useRouter();
   const prefsKey = useMemo(() => getSidebarPrefsKey(historyUserId, agentId), [historyUserId, agentId]);
-
-  useEffect(() => {
-    if (isCompact) {
-      setIsCollapsed(true);
-      setIsExpanded(false);
-    } else {
-      setIsCollapsed(false);
-    }
-  }, [isCompact]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -564,11 +554,12 @@ export function InterviewSidebar({
               variant="ghost"
               onClick={() => setIsCollapsed(false)}
               position="fixed"
-              top="5rem"
-              left={4}
-              borderRadius="full"
+              top="10px"
+              left={3}
+              borderRadius="lg"
               zIndex={30}
-              backgroundColor="bg.subtle"
+              color="var(--color-text-muted)"
+              _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
             >
               <MenuIcon size={16} />
             </IconButton>
