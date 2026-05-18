@@ -186,7 +186,7 @@ export function AgentCard({
                 Commencer un entretien
               </Button>
 
-              <HStack gap={1.5} flexWrap="wrap">
+              <HStack gap={1.5}>
                 <Button variant="subtle" size="xs" borderRadius="lg" onClick={() => onNavigateFiche(agent.id)} flex="1">
                   <BookOpen size={12} />Fiche
                 </Button>
@@ -200,21 +200,22 @@ export function AgentCard({
                     <Settings2 size={12} />Prompt
                   </Button>
                 )}
-                {userAdmin && (
-                  <Button
-                    variant="subtle"
-                    colorPalette={agent.active ? "red" : "green"}
-                    size="xs"
-                    borderRadius="lg"
-                    onClick={() => onToggleAgent(agent)}
-                    loading={togglingAgentId === agent.id}
-                    disabled={togglingAgentId === agent.id}
-                  >
-                    {agent.active ? <ToggleLeft size={12} /> : <ToggleRight size={12} />}
-                    {agent.active ? "Désactiver" : "Activer"}
-                  </Button>
-                )}
               </HStack>
+              {userAdmin && (
+                <Button
+                  variant="subtle"
+                  colorPalette={agent.active ? "red" : "green"}
+                  size="xs"
+                  borderRadius="lg"
+                  width="100%"
+                  onClick={() => onToggleAgent(agent)}
+                  loading={togglingAgentId === agent.id}
+                  disabled={togglingAgentId === agent.id}
+                >
+                  {agent.active ? <ToggleLeft size={12} /> : <ToggleRight size={12} />}
+                  {agent.active ? "Désactiver" : "Activer"}
+                </Button>
+              )}
             </VStack>
           </Box>
         </Box>
