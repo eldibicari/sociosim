@@ -8,17 +8,33 @@ import {
   Button,
   Collapsible,
   HStack,
+  IconButton,
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ChevronDown, Sparkles } from "lucide-react";
+import {
+  BookOpen,
+  ChevronDown,
+  Info,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Plus,
+  Settings,
+  Sparkles,
+  Users,
+  X,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
-import { InterviewSidebar } from "@/app/components/InterviewSidebar";
+import { InterviewGridPanel } from "@/app/components/InterviewGridPanel";
 import { AssistantSkeleton } from "@/components/AssistantSkeleton";
 import { ChatMessage } from "@/components/ChatMessage";
 import { MessageInput } from "@/components/MessageInput";
+import { authService } from "@/lib/authService";
+import { useAuthUser } from "@/hooks/useAuthUser";
 import type { InterviewAnalysis } from "@/lib/schemas";
 import type { UIMessage } from "@/types/ui";
 
@@ -65,6 +81,12 @@ const DEFAULT_SUGGESTED_QUESTIONS = [
   "Pouvez-vous me raconter une situation récente où vous avez utilisé ChatGPT ?",
 ];
 
+const NAV_ITEMS = [
+  { label: "Découvrir", href: "/personnas", icon: Users },
+  { label: "Mes entretiens", href: "/interviews", icon: MessageSquare },
+  { label: "Guide", href: "/guide-entretien", icon: BookOpen },
+];
+
 export function InterviewLayout({
   agentDisplayName,
   agentId,
@@ -74,7 +96,7 @@ export function InterviewLayout({
   dateDisplay,
   error,
   stats,
-  historyUserId,
+  historyUserId: _historyUserId,
   currentInterviewId,
   onExportPdf,
   onExportGoogleDocs,
@@ -95,11 +117,18 @@ export function InterviewLayout({
   analysisError,
   isAnalysisLoading = false,
 }: InterviewLayoutProps) {
+  const [leftOpen, setLeftOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
   const [draftMessage, setDraftMessage] = useState("");
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
+  const router = useRouter();
+  const { user, user_admin } = useAuthUser();
+
   const showSuggestions =
     showInput && messages.length === 0 && !isStreaming && draftMessage.trim().length === 0;
-  const showAnalysisPanel = messages.length > 0 && (isAnalysisLoading || !!analysis || !!analysisError);
+  const showAnalysisPanel =
+    messages.length > 0 && (isAnalysisLoading || !!analysis || !!analysisError);
+
   const qualityLabel =
     analysis?.material_quality === "exploitable"
       ? "Exploitable"
@@ -119,82 +148,79 @@ export function InterviewLayout({
     onSendMessage(question);
   };
 
+  async function handleLogout() {
+    await authService.signOutLocal();
+    router.push("/login");
+  }
+
+  const navItems = user_admin
+    ? [...NAV_ITEMS, { label: "Gestion utilisateurs", href: "/manage-users", icon: Settings }]
+    : NAV_ITEMS;
+
+  const displayUserName =
+    user?.user_metadata?.firstName ??
+    user?.user_metadata?.name ??
+    user?.email?.split("@")[0] ??
+    "Utilisateur";
+
   return (
     <Box
-      flex={1}
       height="100%"
+      flex={1}
+      minHeight={0}
       display="flex"
-      flexDirection={{ base: "column", lg: "row" }}
-      backgroundColor="bg.surface"
+      flexDirection="column"
       overflow="hidden"
-      paddingLeft={{ base: 0, lg: "220px" }}
+      backgroundColor="var(--color-bg)"
     >
-      <InterviewSidebar
-        agentDisplayName={agentDisplayName}
-        agentId={agentId ?? null}
-        userId={userId ?? null}
-        agentDescription={agentDescription ?? null}
-        userName={userName}
-        dateDisplay={dateDisplay}
-        error={error}
-        stats={stats}
-        historyUserId={historyUserId ?? null}
-        currentInterviewId={currentInterviewId ?? null}
-        onExportPdf={onExportPdf}
-        onExportGoogleDocs={onExportGoogleDocs}
-        isExportingPdf={isExportingPdf}
-        isExportingGoogleDocs={isExportingGoogleDocs}
-        disableExport={disableExport}
-      />
 
+      {/* ── HEADER ─────────────────────────────────────── */}
       <Box
+        height="52px"
+        borderBottom="1px solid var(--color-border)"
+        backgroundColor="var(--color-surface)"
         display="flex"
-        flexDirection="column"
-        flex={1}
-        minHeight={0}
-        backgroundColor="bg.surface"
-        overflow="hidden"
+        alignItems="center"
+        px={4}
+        gap={3}
+        flexShrink={0}
+        boxShadow="0 1px 0 rgba(26,26,46,0.04)"
       >
-        <Box
-          display="flex"
-          flexDirection="column"
-          flex={1}
-          minHeight={0}
-          width="100%"
-          maxWidth={{ base: "100%", lg: "4xl" }}
-          marginX="auto"
+        <IconButton
+          aria-label="Ouvrir le menu"
+          size="sm"
+          variant="ghost"
+          borderRadius="full"
+          onClick={() => setLeftOpen(true)}
+          color="var(--color-text-muted)"
+          _hover={{ backgroundColor: "var(--color-surface-muted)", color: "var(--color-text-primary)" }}
         >
-          {agentDisplayName && (
-            <Box
-              px={5}
-              py={3}
-              borderBottom="1px solid var(--color-border)"
-              backgroundColor="var(--color-surface)"
-              display="flex"
-              alignItems="center"
-              gap={3}
-              flexShrink={0}
-            >
+          <Menu size={18} />
+        </IconButton>
+
+        <HStack flex={1} gap={3} justifyContent="center">
+          {agentDisplayName ? (
+            <>
               <Box
-                width="36px"
-                height="36px"
-                borderRadius="12px"
+                width="32px"
+                height="32px"
+                borderRadius="10px"
                 background="linear-gradient(135deg, #6366f1, #8b5cf6)"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                boxShadow="0 2px 8px rgba(99,102,241,0.25)"
                 flexShrink={0}
+                boxShadow="0 2px 6px rgba(99,102,241,0.2)"
               >
-                <Text fontSize="sm" fontWeight="700" color="white" lineHeight="1">
+                <Text fontSize="xs" fontWeight="700" color="white" lineHeight="1">
                   {agentDisplayName.charAt(0).toUpperCase()}
                 </Text>
               </Box>
-              <Box flex={1} minWidth={0}>
+              <VStack gap={0} align="flex-start">
                 <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)" lineHeight="1.2">
                   {agentDisplayName}
                 </Text>
-                <HStack gap={1.5} mt="2px">
+                <HStack gap={1.5}>
                   <Box
                     width="6px"
                     height="6px"
@@ -202,13 +228,46 @@ export function InterviewLayout({
                     background={isStreaming ? "#f59e0b" : "#10b981"}
                     flexShrink={0}
                   />
-                  <Text fontSize="2xs" fontWeight="600" color="var(--color-text-muted)">
+                  <Text fontSize="2xs" fontWeight="500" color="var(--color-text-muted)">
                     {isStreaming ? "En train de répondre..." : "Disponible"}
                   </Text>
                 </HStack>
-              </Box>
-            </Box>
+              </VStack>
+            </>
+          ) : (
+            <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">Entretien</Text>
           )}
+        </HStack>
+
+        <IconButton
+          aria-label="Informations persona"
+          size="sm"
+          variant="ghost"
+          borderRadius="full"
+          onClick={() => setRightOpen(true)}
+          color="var(--color-text-muted)"
+          _hover={{ backgroundColor: "var(--color-surface-muted)", color: "var(--color-text-primary)" }}
+        >
+          <Info size={18} />
+        </IconButton>
+      </Box>
+
+      {/* ── CHAT AREA ──────────────────────────────────── */}
+      <Box flex={1} minHeight={0} overflow="hidden" display="flex" flexDirection="column">
+        <Box
+          display="flex"
+          flexDirection="column"
+          flex={1}
+          minHeight={0}
+          width="100%"
+          maxWidth="820px"
+          marginX="auto"
+        >
+          {error ? (
+            <Box px={4} py={3} backgroundColor="red.50" borderBottom="1px solid" borderColor="red.200">
+              <Text fontSize="sm" color="red.600">{error}</Text>
+            </Box>
+          ) : null}
 
           <Box
             ref={messagesContainerRef}
@@ -216,7 +275,7 @@ export function InterviewLayout({
             minHeight={0}
             overflowY="auto"
             data-scroll-container
-            backgroundColor="bg.surface"
+            backgroundColor="var(--color-bg)"
             paddingX={4}
             paddingY={4}
             width="100%"
@@ -227,9 +286,15 @@ export function InterviewLayout({
                   initial={{ opacity: 0, scale: 0.92 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", width: "100%", maxWidth: "600px" }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "24px",
+                    width: "100%",
+                    maxWidth: "600px",
+                  }}
                 >
-                  {/* Icon */}
                   <Box
                     width="64px"
                     height="64px"
@@ -245,13 +310,21 @@ export function InterviewLayout({
                     <Sparkles size={28} color="#6366f1" />
                   </Box>
 
-                  {/* Eyebrow + heading */}
                   <VStack gap={2} alignItems="center">
-                    <Badge colorPalette="orange" variant="subtle" borderRadius="full" px={4} py={1.5} fontSize="xs" fontWeight="700" letterSpacing="0.06em">
+                    <Badge
+                      colorPalette="orange"
+                      variant="subtle"
+                      borderRadius="full"
+                      px={4}
+                      py={1.5}
+                      fontSize="xs"
+                      fontWeight="700"
+                      letterSpacing="0.06em"
+                    >
                       Entretien semi-directif
                     </Badge>
                     <Text
-                      color="gray.800"
+                      color="var(--color-text-primary)"
                       fontSize={emptyStateTextSize ?? "xl"}
                       fontWeight="800"
                       textAlign="center"
@@ -263,10 +336,15 @@ export function InterviewLayout({
                     </Text>
                   </VStack>
 
-                  {/* Suggested questions */}
                   {showSuggestions ? (
                     <VStack gap={2.5} width="100%" maxWidth="520px">
-                      <Text fontSize="2xs" fontWeight="700" letterSpacing="0.1em" textTransform="uppercase" color="fg.muted">
+                      <Text
+                        fontSize="2xs"
+                        fontWeight="700"
+                        letterSpacing="0.1em"
+                        textTransform="uppercase"
+                        color="var(--color-text-muted)"
+                      >
                         Suggestions pour commencer
                       </Text>
                       {DEFAULT_SUGGESTED_QUESTIONS.map((question, i) => (
@@ -311,7 +389,12 @@ export function InterviewLayout({
                               >
                                 <Text fontSize="2xs" fontWeight="800" color="white">{i + 1}</Text>
                               </Box>
-                              <Text fontSize="sm" fontWeight="600" color="gray.700" lineHeight="1.5">
+                              <Text
+                                fontSize="sm"
+                                fontWeight="600"
+                                color="var(--color-text-primary)"
+                                lineHeight="1.5"
+                              >
                                 {question}
                               </Text>
                             </HStack>
@@ -358,7 +441,9 @@ export function InterviewLayout({
                       py={3}
                       cursor="pointer"
                       transition="all 0.2s ease"
-                      boxShadow={isAnalysisOpen ? "0 4px 16px rgba(99,102,241,0.08)" : "0 2px 8px rgba(15,23,42,0.04)"}
+                      boxShadow={isAnalysisOpen
+                        ? "0 4px 16px rgba(99,102,241,0.08)"
+                        : "0 2px 8px rgba(15,23,42,0.04)"}
                       _hover={{
                         borderColor: "rgba(99,102,241,0.25)",
                         background: "linear-gradient(135deg, rgba(239,246,255,0.9), rgba(237,233,254,0.7))",
@@ -366,20 +451,44 @@ export function InterviewLayout({
                     >
                       <HStack justify="space-between" align="center" width="100%">
                         <HStack gap={3} flexWrap="wrap">
-                          <Text fontWeight="700" fontSize="sm" letterSpacing="-0.01em" color="gray.800">
+                          <Text
+                            fontWeight="700"
+                            fontSize="sm"
+                            letterSpacing="-0.01em"
+                            color="var(--color-text-primary)"
+                          >
                             Analyse du matériau
                           </Text>
                           {analysis ? (
-                            <Badge colorPalette={qualityPalette} variant="subtle" px={2.5} py={0.5} borderRadius="full" fontSize="2xs" fontWeight="700">
+                            <Badge
+                              colorPalette={qualityPalette}
+                              variant="subtle"
+                              px={2.5}
+                              py={0.5}
+                              borderRadius="full"
+                              fontSize="2xs"
+                              fontWeight="700"
+                            >
                               {qualityLabel}
                             </Badge>
                           ) : isAnalysisLoading ? (
-                            <Badge colorPalette="blue" variant="subtle" px={2.5} py={0.5} borderRadius="full" fontSize="2xs">
+                            <Badge
+                              colorPalette="blue"
+                              variant="subtle"
+                              px={2.5}
+                              py={0.5}
+                              borderRadius="full"
+                              fontSize="2xs"
+                            >
                               En cours...
                             </Badge>
                           ) : null}
                         </HStack>
-                        <Box color="fg.muted" transition="transform 0.2s ease" style={{ transform: isAnalysisOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                        <Box
+                          color="var(--color-text-muted)"
+                          transition="transform 0.2s ease"
+                          style={{ transform: isAnalysisOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                        >
                           <ChevronDown size={15} />
                         </Box>
                       </HStack>
@@ -399,7 +508,9 @@ export function InterviewLayout({
                       boxShadow="0 8px 24px rgba(15,23,42,0.05)"
                     >
                       {isAnalysisLoading ? (
-                        <Text color="fg.muted" fontSize="sm">Analyse du matériau en cours...</Text>
+                        <Text color="var(--color-text-muted)" fontSize="sm">
+                          Analyse du matériau en cours...
+                        </Text>
                       ) : analysisError ? (
                         <Text color="red.600" fontSize="sm">{analysisError}</Text>
                       ) : analysis ? (
@@ -425,17 +536,198 @@ export function InterviewLayout({
         </Box>
       </Box>
 
+      {/* ── LEFT DRAWER ────────────────────────────────── */}
       <Box
-        display={{ base: "none", lg: "flex" }}
-        flexDirection="column"
-        width="260px"
-        minWidth="260px"
-        borderLeft="1px solid var(--color-border)"
+        position="fixed"
+        inset={0}
+        backgroundColor="rgba(0,0,0,0.35)"
+        zIndex={100}
+        opacity={leftOpen ? 1 : 0}
+        pointerEvents={leftOpen ? "auto" : "none"}
+        transition="opacity 0.2s ease"
+        onClick={() => setLeftOpen(false)}
+      />
+      <Box
+        position="fixed"
+        left={0}
+        top={0}
+        bottom={0}
+        width="280px"
         backgroundColor="var(--color-surface)"
-        padding={4}
-        gap={4}
-        overflowY="auto"
+        borderRight="1px solid var(--color-border)"
+        zIndex={105}
+        display="flex"
+        flexDirection="column"
+        padding="1.25rem 0.75rem"
+        style={{
+          transform: leftOpen ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.22s cubic-bezier(0.22,1,0.36,1)",
+        }}
       >
+        <HStack justify="space-between" align="center" px={2} mb={5}>
+          <Text
+            className="mimesis-wordmark"
+            fontSize="lg"
+            fontWeight="800"
+            letterSpacing="-0.03em"
+            cursor="pointer"
+            onClick={() => router.push("/")}
+          >
+            Mimesis
+          </Text>
+          <IconButton
+            aria-label="Fermer le menu"
+            size="sm"
+            variant="ghost"
+            borderRadius="full"
+            onClick={() => setLeftOpen(false)}
+            color="var(--color-text-muted)"
+          >
+            <X size={16} />
+          </IconButton>
+        </HStack>
+
+        <Box px={1} mb={4}>
+          <Button
+            width="100%"
+            size="sm"
+            background="var(--color-accent)"
+            color="white"
+            borderRadius="10px"
+            fontWeight="600"
+            fontSize="sm"
+            gap={2}
+            _hover={{ background: "var(--color-accent-hover)" }}
+            onClick={() => { setLeftOpen(false); router.push("/personnas"); }}
+          >
+            <Plus size={15} />
+            Nouvel entretien
+          </Button>
+        </Box>
+
+        <VStack gap={1} align="stretch" flex={1}>
+          {navItems.map(({ label, href, icon: Icon }) => (
+            <HStack
+              key={href}
+              gap={3}
+              px={3}
+              py="0.55rem"
+              borderRadius="10px"
+              cursor="pointer"
+              color="var(--color-text-muted)"
+              fontSize="sm"
+              transition="background 0.15s, color 0.15s"
+              _hover={{
+                background: "var(--color-surface-muted)",
+                color: "var(--color-text-primary)",
+              }}
+              onClick={() => { setLeftOpen(false); router.push(href); }}
+            >
+              <Icon size={16} />
+              <Text>{label}</Text>
+            </HStack>
+          ))}
+        </VStack>
+
+        {user ? (
+          <VStack gap={1} align="stretch" pt={3} borderTop="1px solid var(--color-border)">
+            <HStack
+              gap={3}
+              px={3}
+              py="0.55rem"
+              borderRadius="10px"
+              cursor="pointer"
+              fontSize="sm"
+              color="var(--color-text-muted)"
+              _hover={{ background: "var(--color-surface-muted)", color: "var(--color-text-primary)" }}
+              onClick={() => { setLeftOpen(false); router.push("/profile"); }}
+            >
+              <Box
+                width="24px"
+                height="24px"
+                borderRadius="50%"
+                background="var(--color-accent-muted)"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+              >
+                <Text fontSize="xs" fontWeight="700" color="var(--color-accent)">
+                  {displayUserName[0].toUpperCase()}
+                </Text>
+              </Box>
+              <Text
+                fontWeight="500"
+                overflow="hidden"
+                textOverflow="ellipsis"
+                whiteSpace="nowrap"
+              >
+                {displayUserName}
+              </Text>
+            </HStack>
+
+            <HStack
+              gap={3}
+              px={3}
+              py="0.5rem"
+              borderRadius="10px"
+              cursor="pointer"
+              fontSize="sm"
+              color="var(--color-text-muted)"
+              _hover={{ background: "var(--color-surface-muted)", color: "var(--color-text-primary)" }}
+              onClick={handleLogout}
+            >
+              <LogOut size={15} />
+              <Text>Déconnexion</Text>
+            </HStack>
+          </VStack>
+        ) : null}
+      </Box>
+
+      {/* ── RIGHT DRAWER ───────────────────────────────── */}
+      <Box
+        position="fixed"
+        inset={0}
+        backgroundColor="rgba(0,0,0,0.35)"
+        zIndex={100}
+        opacity={rightOpen ? 1 : 0}
+        pointerEvents={rightOpen ? "auto" : "none"}
+        transition="opacity 0.2s ease"
+        onClick={() => setRightOpen(false)}
+      />
+      <Box
+        position="fixed"
+        right={0}
+        top={0}
+        bottom={0}
+        width="300px"
+        backgroundColor="var(--color-surface)"
+        borderLeft="1px solid var(--color-border)"
+        zIndex={105}
+        display="flex"
+        flexDirection="column"
+        padding={5}
+        gap={5}
+        overflowY="auto"
+        style={{
+          transform: rightOpen ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.22s cubic-bezier(0.22,1,0.36,1)",
+        }}
+      >
+        <HStack justify="space-between" align="center">
+          <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">Persona</Text>
+          <IconButton
+            aria-label="Fermer"
+            size="sm"
+            variant="ghost"
+            borderRadius="full"
+            onClick={() => setRightOpen(false)}
+            color="var(--color-text-muted)"
+          >
+            <X size={16} />
+          </IconButton>
+        </HStack>
+
         {agentDisplayName ? (
           <VStack align="stretch" gap={4}>
             <Box
@@ -466,20 +758,79 @@ export function InterviewLayout({
               >
                 Persona active
               </Badge>
-              <Text fontWeight="800" fontSize="md" color="var(--color-text-primary)" letterSpacing="-0.02em" lineHeight="1.3">
+              <Text
+                fontWeight="800"
+                fontSize="md"
+                color="var(--color-text-primary)"
+                letterSpacing="-0.02em"
+                lineHeight="1.3"
+              >
                 {agentDisplayName}
               </Text>
               {agentDescription ? (
-                <Text fontSize="xs" color="var(--color-text-muted)" lineHeight="1.65" mt={0.5} whiteSpace="pre-wrap">
+                <Text
+                  fontSize="xs"
+                  color="var(--color-text-muted)"
+                  lineHeight="1.65"
+                  mt={0.5}
+                  whiteSpace="pre-wrap"
+                >
                   {agentDescription.replace(/\\n/g, "\n")}
                 </Text>
               ) : null}
             </VStack>
 
+            {(userName || dateDisplay) ? (
+              <HStack gap={3} flexWrap="wrap">
+                {userName ? (
+                  <Box flex="1">
+                    <Text
+                      fontSize="2xs"
+                      fontWeight="700"
+                      letterSpacing="0.08em"
+                      textTransform="uppercase"
+                      color="var(--color-text-muted)"
+                    >
+                      Enquêteur
+                    </Text>
+                    <Text fontSize="xs" fontWeight="600" color="var(--color-text-primary)" mt={0.5}>
+                      {userName}
+                    </Text>
+                  </Box>
+                ) : null}
+                {dateDisplay ? (
+                  <Box flex="1">
+                    <Text
+                      fontSize="2xs"
+                      fontWeight="700"
+                      letterSpacing="0.08em"
+                      textTransform="uppercase"
+                      color="var(--color-text-muted)"
+                    >
+                      Date
+                    </Text>
+                    <Text fontSize="xs" fontWeight="600" color="var(--color-text-primary)" mt={0.5}>
+                      {dateDisplay}
+                    </Text>
+                  </Box>
+                ) : null}
+              </HStack>
+            ) : null}
+
+            <Box height="1px" backgroundColor="var(--color-border)" />
+
+            <InterviewGridPanel agentId={agentId ?? null} />
+
             <Box height="1px" backgroundColor="var(--color-border)" />
 
             <VStack align="stretch" gap={2}>
-              <Text fontSize="2xs" fontWeight="700" letterSpacing="0.1em" textTransform="uppercase" color="var(--color-text-muted)">
+              <Text
+                fontSize="2xs"
+                fontWeight="700"
+                letterSpacing="0.1em"
+                textTransform="uppercase"
+                color="var(--color-text-muted)"
+              >
                 Export
               </Text>
               <Button
@@ -509,9 +860,73 @@ export function InterviewLayout({
                 </Button>
               ) : null}
             </VStack>
+
+            {stats.answeredQuestions > 0 || stats.inputTokens > 0 ? (
+              <>
+                <Box height="1px" backgroundColor="var(--color-border)" />
+                <HStack gap={3}>
+                  <Box
+                    flex="1"
+                    px={3}
+                    py={2}
+                    borderRadius="12px"
+                    background="rgba(99,102,241,0.05)"
+                    borderWidth="1px"
+                    borderColor="rgba(99,102,241,0.1)"
+                  >
+                    <Text
+                      fontSize="2xs"
+                      fontWeight="700"
+                      letterSpacing="0.08em"
+                      textTransform="uppercase"
+                      color="var(--color-text-muted)"
+                    >
+                      Réponses
+                    </Text>
+                    <Text
+                      fontWeight="900"
+                      fontSize="xl"
+                      letterSpacing="-0.03em"
+                      style={{
+                        background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                      }}
+                    >
+                      {stats.answeredQuestions}
+                    </Text>
+                  </Box>
+                  <Box
+                    flex="1"
+                    px={3}
+                    py={2}
+                    borderRadius="12px"
+                    background="rgba(16,185,129,0.05)"
+                    borderWidth="1px"
+                    borderColor="rgba(16,185,129,0.1)"
+                  >
+                    <Text
+                      fontSize="2xs"
+                      fontWeight="700"
+                      letterSpacing="0.08em"
+                      textTransform="uppercase"
+                      color="var(--color-text-muted)"
+                    >
+                      Tokens
+                    </Text>
+                    <Text fontSize="xs" fontWeight="700" color="var(--color-text-primary)" mt={0.5}>
+                      {stats.inputTokens + stats.outputTokens > 0
+                        ? `${stats.inputTokens + stats.outputTokens}`
+                        : "—"}
+                    </Text>
+                  </Box>
+                </HStack>
+              </>
+            ) : null}
           </VStack>
         ) : null}
       </Box>
+
     </Box>
   );
 }

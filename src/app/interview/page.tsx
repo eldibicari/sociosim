@@ -4,7 +4,6 @@ import { Container, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { InterviewLayout } from "@/app/components/InterviewLayout";
-import { MimesisAppSidebar } from "@/app/components/MimesisAppSidebar";
 import { useInterviewSession } from "@/hooks/useInterviewSession";
 import { UIMessage } from "@/types/ui";
 import { useAuthUser } from "@/hooks/useAuthUser";
@@ -205,7 +204,6 @@ function InterviewPageInner() {
 
   return (
     <>
-      <MimesisAppSidebar />
       <InterviewLayout
       agentDisplayName={agentDisplayName}
       agentId={interviewSummary?.agentId ?? null}
