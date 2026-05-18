@@ -68,22 +68,16 @@ export function ChatMessage({
         <Box
           padding={4}
           borderRadius={isUser ? "20px 4px 20px 20px" : "4px 20px 20px 20px"}
-          background={isUser
-            ? "linear-gradient(135deg, var(--color-accent), #8b5cf6)"
-            : "var(--color-surface)"
-          }
-          borderWidth={isUser ? "0" : "1px"}
-          borderColor="var(--color-border)"
-          boxShadow={isUser
-            ? "0 4px 16px rgba(91,91,214,0.22)"
-            : "var(--color-shadow-sm)"
-          }
+          background={isUser ? "#e8e7ff" : "var(--color-surface)"}
+          borderWidth="1px"
+          borderColor={isUser ? "rgba(99,102,241,0.18)" : "var(--color-border)"}
+          boxShadow="var(--color-shadow-sm)"
         >
           <Text
             fontSize="sm"
             lineHeight="1.75"
             whiteSpace="pre-wrap"
-            color={isUser ? "white" : "var(--color-text-primary)"}
+            color="var(--color-text-primary)"
           >
             {text}
             {!isUser && isStreaming && (
