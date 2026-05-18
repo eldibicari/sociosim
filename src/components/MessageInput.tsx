@@ -1,5 +1,5 @@
 import { Box, IconButton, Textarea, BoxProps, Tooltip } from "@chakra-ui/react";
-import { ArrowRight } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { useRef, useState } from "react";
 
 interface MessageInputProps {
@@ -11,13 +11,6 @@ interface MessageInputProps {
   onValueChange?: (value: string) => void;
 }
 
-/**
- * MessageInput Component
- * Textarea with send button for user messages
- * - Wrapped in a standardized Box for consistent dimensions
- * - Enter to send, Shift+Enter for new line
- * - Disabled while loading
- */
 export function MessageInput({
   onSendMessage,
   isLoading = false,
@@ -31,9 +24,7 @@ export function MessageInput({
   const message = value ?? internalMessage;
 
   const updateMessage = (nextValue: string) => {
-    if (value === undefined) {
-      setInternalMessage(nextValue);
-    }
+    if (value === undefined) setInternalMessage(nextValue);
     onValueChange?.(nextValue);
   };
 
@@ -49,7 +40,6 @@ export function MessageInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Send on Enter (unless Shift+Enter)
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -66,18 +56,35 @@ export function MessageInput({
     }
   };
 
+  const canSend = !isLoading && message.trim().length > 0;
+
   return (
     <Box width="100%" {...containerProps}>
       <Box
         width="100%"
-        padding={4}
-        borderTop="none"
-        backgroundColor="bg.surface"
+        px={4}
+        py={3}
+        borderTop="1px solid"
+        borderTopColor="var(--color-border)"
+        backgroundColor="var(--color-bg)"
         flexShrink={0}
         display="flex"
         justifyContent="center"
       >
-        <Box width="80%" position="relative">
+        <Box
+          width={{ base: "100%", md: "90%", lg: "80%" }}
+          position="relative"
+          borderRadius="2xl"
+          borderWidth="1.5px"
+          borderColor={canSend ? "var(--color-accent-border)" : "var(--color-border)"}
+          backgroundColor="var(--color-surface)"
+          boxShadow={canSend ? "0 4px 20px rgba(91,91,214,0.1)" : "var(--color-shadow-sm)"}
+          transition="border-color 0.15s ease, box-shadow 0.15s ease"
+          _focusWithin={{
+            borderColor: "var(--color-accent-border)",
+            boxShadow: "0 4px 20px rgba(91,91,214,0.12)",
+          }}
+        >
           <Textarea
             ref={textareaRef}
             value={message}
@@ -89,38 +96,46 @@ export function MessageInput({
             minHeight={10}
             maxHeight={32}
             resize="none"
-            flexGrow={1}
             overflow="hidden"
-            backgroundColor="bg.surface"
-            color="fg.default"
-            borderColor="border.muted"
-            borderRadius="2xl"
-            paddingRight="2.75rem"
-            _placeholder={{ color: "fg.subtle" }}
+            border="none"
+            outline="none"
+            backgroundColor="transparent"
+            color="var(--color-text-primary)"
+            paddingRight="3rem"
+            paddingY={3}
+            paddingX={4}
+            fontSize="sm"
+            lineHeight="1.65"
+            _placeholder={{ color: "var(--color-text-muted)" }}
+            _focus={{ outline: "none", boxShadow: "none" }}
           />
           <Tooltip.Root openDelay={150}>
             <Tooltip.Trigger asChild>
               <IconButton
                 aria-label="Envoyer"
                 onClick={handleSendMessage}
-                disabled={isLoading || !message.trim()}
-                colorPalette="blue"
+                disabled={!canSend}
                 position="absolute"
-                right={1}
-                top="50%"
-                transform="translateY(calc(-50% - 4px))"
-                borderRadius="full"
+                right={2}
+                bottom={2}
+                borderRadius="xl"
                 width={8}
                 height={8}
                 minWidth={8}
+                background={canSend
+                  ? "linear-gradient(135deg, var(--color-accent), #8b5cf6)"
+                  : "var(--color-border)"
+                }
+                color="white"
+                transition="background 0.15s ease, transform 0.1s ease"
+                _hover={canSend ? { transform: "scale(1.05)" } : {}}
+                _active={canSend ? { transform: "scale(0.97)" } : {}}
               >
-                <ArrowRight size={16} />
+                <ArrowUp size={15} />
               </IconButton>
             </Tooltip.Trigger>
             <Tooltip.Positioner>
-              <Tooltip.Content px={3} py={2}>
-                Envoyer
-              </Tooltip.Content>
+              <Tooltip.Content px={3} py={2}>Envoyer (Entrée)</Tooltip.Content>
             </Tooltip.Positioner>
           </Tooltip.Root>
         </Box>

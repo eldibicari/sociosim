@@ -11,28 +11,29 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
 import { useEditor } from "@tiptap/react";
-import { Markdown } from "@tiptap/markdown";
 import Bold from "@tiptap/extension-bold";
 import BulletList from "@tiptap/extension-bullet-list";
 import Document from "@tiptap/extension-document";
 import HeadingExtension from "@tiptap/extension-heading";
 import ListItem from "@tiptap/extension-list-item";
+import { Markdown } from "@tiptap/markdown";
 import Paragraph from "@tiptap/extension-paragraph";
 import TextExtension from "@tiptap/extension-text";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { toaster } from "@/components/ui/toaster";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { type FormEvent, useEffect, useState } from "react";
 import PersonnaLayout from "@/app/personnas/components/PersonnaLayout";
+import PersonaConfigBuilder from "@/app/personnas/components/PersonaConfigBuilder";
 import PersonnaLeftSidebar from "@/app/personnas/components/PersonnaLeftSidebar";
-import PersonnaRightSidebar from "@/app/personnas/components/PersonnaRightSidebar";
 import PersonnaPromptEditor from "@/app/personnas/components/PersonnaPromptEditor";
+import PersonnaRightSidebar from "@/app/personnas/components/PersonnaRightSidebar";
 import PromptReviewSidebar, {
   type CauldronReview,
 } from "@/app/personnas/components/PromptReviewSidebar";
+import { toaster } from "@/components/ui/toaster";
 import { useAuthUser } from "@/hooks/useAuthUser";
+import type { PersonaConfig } from "@/lib/personaConfig";
 import { withTimeout } from "@/lib/withTimeout";
 
 type NewPersonnaFormProps = {
@@ -46,6 +47,37 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
   const [description, setDescription] = useState("");
   const interviewGuide = "";
   const [systemPrompt, setSystemPrompt] = useState(templatePrompt);
+  const [personaConfig, setPersonaConfig] = useState<PersonaConfig>({
+    identity: {
+      firstName: "",
+      role: "",
+      socialEnvironment: "",
+      livingContext: "",
+      educationLevel: "",
+    },
+    subjectRelation: {
+      position: "ambivalent",
+      involvementLevel: "",
+      politicizationLevel: "",
+      keyTensions: [],
+    },
+    interactionStyle: {
+      verbosity: "equilibre",
+      stance: "prudent",
+      cooperation: "cooperatif",
+      consistency: "stable",
+      affect: "factuel",
+    },
+    difficulty: "intermediaire",
+    sensitiveZones: [],
+    language: {
+      register: "oral mais precis",
+      averageAnswerLength: "2 a 4 phrases",
+      tone: "nuance",
+      vocabularyLevel: "accessible",
+    },
+    additionalInstructions: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [review, setReview] = useState<CauldronReview | null>(null);
@@ -53,6 +85,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+
   const editor = useEditor({
     extensions: [
       Document,
@@ -157,7 +190,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
     const trimmedPrompt = systemPrompt.trim();
 
     if (!trimmedName) {
-      setError("Le nom du personna est requis.");
+      setError("Le nom du persona est requis.");
       return;
     }
 
@@ -167,7 +200,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
     }
 
     if (!trimmedPrompt) {
-      setError("Le prompt système est requis.");
+      setError("Le prompt systeme est requis.");
       return;
     }
 
@@ -178,7 +211,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
         return;
       }
       if (reviewResult.status === "invalid") {
-        setError("Le prompt a été refusé par la validation.");
+        setError("Le prompt a ete refuse par la validation.");
         return;
       }
 
@@ -204,19 +237,19 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
       if (!response.ok) {
         const payload = await response.json().catch(() => null);
         console.error("Error creating personna:", payload);
-        setError("Impossible de créer le personna.");
+        setError("Impossible de creer le persona.");
         return;
       }
 
       const payload = (await response.json().catch(() => null)) as { id?: string } | null;
       if (!payload?.id) {
-        setError("Impossible de créer le personna.");
+        setError("Impossible de creer le persona.");
         return;
       }
 
       toaster.create({
-        title: "Personna créé",
-        description: "Le prompt a été enregistré et peut maintenant être retravaillé.",
+        title: "Persona cree",
+        description: "Le prompt a ete enregistre et peut maintenant etre retravaille.",
         type: "success",
       });
       router.push(`/personnas/${payload.id}`);
@@ -234,8 +267,8 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
         <PersonnaLayout
           left={
             <PersonnaLeftSidebar
-              title="Créer un nouveau personna"
-              subtitle="Nommer le profil, clarifier son contexte et poser une première base de prompt."
+              title="Creer un nouveau persona"
+              subtitle="Nommer le profil, clarifier son contexte et poser une premiere base de prompt."
             >
               <VStack align="stretch" gap={4}>
                 <Button
@@ -261,16 +294,17 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       Avant de commencer
                     </Text>
                     <Text fontSize="sm" color="fg.muted">
-                      Cette page sert à poser une première version crédible du persona. Le prompt pourra ensuite être retravaillé dans sa fiche.
+                      Cette page sert a poser une premiere version credible du persona. Le prompt
+                      pourra ensuite etre retravaille dans sa fiche.
                     </Text>
                     <Text fontSize="sm" color="fg.muted">
                       - choisis un nom clair et reconnaissable
                     </Text>
                     <Text fontSize="sm" color="fg.muted">
-                      - résume en deux lignes le profil et le rapport à l&apos;IA
+                      - resume en deux lignes le profil et le rapport a l&apos;IA
                     </Text>
                     <Text fontSize="sm" color="fg.muted">
-                      - colle un prompt qui donne déjà une voix et des situations
+                      - utilise la configuration guidee pour generer une premiere base credible
                     </Text>
                   </VStack>
                 </Box>
@@ -285,7 +319,8 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                     paddingInlineStart={4}
                   />
                   <Field.HelperText fontSize="xs" color="fg.muted">
-                    Le nom doit aider a retrouver vite le persona dans la liste et dans l&apos;historique.
+                    Le nom doit aider a retrouver vite le persona dans la liste et dans
+                    l&apos;historique.
                   </Field.HelperText>
                 </Field.Root>
 
@@ -301,7 +336,8 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                     resize="none"
                   />
                   <Field.HelperText fontSize="xs" color="fg.muted">
-                    Decris le niveau, la posture et le contexte d&apos;usage en quelques mots tres lisibles.
+                    Decris le niveau, la posture et le contexte d&apos;usage en quelques mots tres
+                    lisibles.
                   </Field.HelperText>
                 </Field.Root>
 
@@ -313,9 +349,12 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                   padding={4}
                 >
                   <VStack align="stretch" gap={2}>
-                    <Text fontSize="sm" fontWeight="semibold">Grille d&apos;entretien</Text>
+                    <Text fontSize="sm" fontWeight="semibold">
+                      Grille d&apos;entretien
+                    </Text>
                     <Text fontSize="xs" color="fg.muted" lineHeight="1.6">
-                      La grille sera disponible depuis la fiche du persona après la création. Elle se configure séparément du prompt.
+                      La grille sera disponible depuis la fiche du persona apres la creation. Elle
+                      se configure separement du prompt.
                     </Text>
                   </VStack>
                 </Box>
@@ -331,14 +370,22 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       paddingInline={0}
                       color="fg.muted"
                     >
-                      <Text fontSize="xs">Comment générer un prompt système ?</Text>
+                      <Text fontSize="xs">Comment generer un prompt systeme ?</Text>
                       {helpOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </Button>
                   </Collapsible.Trigger>
                   <Collapsible.Content>
                     <VStack align="stretch" gap={2} paddingTop={2}>
                       <Text fontSize="xs" color="fg.muted">
-                        Le plus simple est de fournir a un chatbot (Claude, ChatGPT, etc.) :
+                        Le mode principal consiste maintenant a renseigner la configuration guidee,
+                        puis a laisser l&apos;app generer une premiere version du prompt.
+                      </Text>
+                      <Text fontSize="xs" color="fg.muted">
+                        Le texte ci-dessous reste utile si tu veux travailler en mode avance a
+                        partir d&apos;une interview reelle ou d&apos;un template plus technique.
+                      </Text>
+                      <Text fontSize="xs" color="fg.muted">
+                        Le plus simple est alors de fournir a un chatbot (Claude, ChatGPT, etc.) :
                         <br />- un PDF de l&apos;interview
                         <br />- un fichier de{" "}
                         <Button
@@ -358,23 +405,25 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                         </Button>
                       </Text>
                       <Text fontSize="xs" color="fg.muted">
-                        Ce prompt de départ sert surtout à poser une voix, des usages, des tensions et des scènes plausibles.
+                        Ce prompt de depart sert surtout a poser une voix, des usages, des tensions
+                        et des scenes plausibles.
                       </Text>
                       <Box fontFamily="mono" fontSize="2xs" color="fg.muted" paddingLeft={3}>
-                        Nous allons construire un prompt système pour une personna à partir d&apos;une interview
-                        sociologique de la personne réelle sur son usage de l&apos;IA.
+                        Nous allons construire un prompt systeme pour un persona a partir d&apos;une
+                        interview sociologique de la personne reelle sur son usage de l&apos;IA.
                         <br />
                         Voir le fichier PDF de l&apos;entretien
                         <br />
                         Le but est de generer un fichier markdown suivant le template fourni.
                         <br />
-                        Il faut renseigner tous les éléments entre accolades {"{"}{"}"}.
+                        Il faut renseigner tous les elements entre accolades {"{"}{"}"}.
                         <br />
-                        Ce fichier markdown servira de prompt système pour une personna dans une application de
-                        simulation d&apos;entretien sociologique.
+                        Ce fichier markdown servira de prompt systeme pour un persona dans une
+                        application de simulation d&apos;entretien sociologique.
                       </Box>
                       <Text fontSize="xs" color="fg.muted">
-                        Tu peux ensuite coller le résultat généré par l&apos;IA dans l&apos;éditeur central.
+                        Tu peux ensuite coller le resultat genere par l&apos;IA dans l&apos;editeur
+                        central.
                       </Text>
                     </VStack>
                   </Collapsible.Content>
@@ -385,38 +434,58 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
           center={
             <Box
               height="100%"
-              maxWidth="720px"
+              maxWidth="880px"
               marginX="auto"
               paddingX={{ base: 4, lg: 6 }}
               paddingTop={{ base: 4, lg: 5 }}
-              overflow="hidden"
+              overflowX="hidden"
+              overflowY="auto"
               minHeight={0}
               display="flex"
               flexDirection="column"
+              paddingBottom={{ base: 6, lg: 8 }}
             >
-              <Box flex="1" minHeight={0} display="flex">
-                <PersonnaPromptEditor
-                  editor={editor}
-                  subtitle="Redige ou colle ici le coeur du persona : sa voix, ses usages, ses tensions et ses reactions probables pendant l&apos;entretien."
-                  error={error}
-                  headingRight={
-                    <Button
-                      type="submit"
-                      size="sm"
-                      variant="subtle"
-                      loading={isSaving}
-                      disabled={!agentName.trim() || !description.trim() || isSaving}
-                      paddingInline={5}
-                    >
-                      Créer la personna
-                    </Button>
-                  }
+              <VStack align="stretch" gap={4} flex="1" minHeight={0}>
+                <PersonaConfigBuilder
+                  personaName={agentName}
+                  value={personaConfig}
+                  onChange={setPersonaConfig}
+                  onGenerate={(prompt) => {
+                    setSystemPrompt(prompt);
+                    setError(null);
+                    toaster.create({
+                      title: "Prompt genere",
+                      description:
+                        "Une premiere version du prompt interne a ete creee a partir de la configuration guidee.",
+                      type: "success",
+                    });
+                  }}
                 />
-              </Box>
+
+                <Box flex="1" minHeight={0} display="flex">
+                  <PersonnaPromptEditor
+                    editor={editor}
+                    subtitle="Le texte ci-dessous est le moteur interne du persona. Il peut etre genere automatiquement via la configuration guidee, puis affine ici en mode avance."
+                    error={error}
+                    headingRight={
+                      <Button
+                        type="submit"
+                        size="sm"
+                        variant="subtle"
+                        loading={isSaving}
+                        disabled={!agentName.trim() || !description.trim() || isSaving}
+                        paddingInline={5}
+                      >
+                        Creer la persona
+                      </Button>
+                    }
+                  />
+                </Box>
+              </VStack>
             </Box>
           }
           right={
-            <PersonnaRightSidebar subtitle="Cette validation concerne seulement le prompt du persona. Elle vérifie si sa voix, son contexte et ses tensions sont assez clairs pour être utilisés en entretien.">
+            <PersonnaRightSidebar subtitle="Cette validation concerne seulement le prompt du persona. Elle verifie si sa voix, son contexte et ses tensions sont assez clairs pour etre utilises en entretien.">
               <PromptReviewSidebar
                 review={review}
                 reviewError={reviewError}

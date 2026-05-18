@@ -59,4 +59,7 @@ styled-system-studio
 ## logs & docs
 
 logs
+codex-*.log
+.codex-*.log
+.playwright-cli/
 

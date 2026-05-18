@@ -61,9 +61,9 @@ export default function PromptReviewSidebar({
           Ce que nous vérifions
         </Text>
         <Text fontSize="sm" color="fg.muted" marginTop={2}>
-          Cette vérification analyse uniquement le prompt du persona : sa voix, son
-          contexte, ses usages et ses tensions. Elle ne vérifie pas encore la grille
-          d&apos;entretien.
+          Cette vérification analyse uniquement le prompt système actif : la voix du
+          persona, son contexte, ses usages, ses tensions et ses garde-fous internes.
+          Elle ne vérifie pas la grille d&apos;entretien ni le paramétrage guidé.
         </Text>
         <VStack alignItems="stretch" gap={1} marginTop={3}>
           <Text fontSize="sm" color="fg.muted">

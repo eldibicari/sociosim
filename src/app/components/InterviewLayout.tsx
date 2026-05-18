@@ -11,7 +11,8 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
 import { InterviewSidebar } from "@/app/components/InterviewSidebar";
@@ -59,9 +60,9 @@ type InterviewLayoutProps = {
 };
 
 const DEFAULT_SUGGESTED_QUESTIONS = [
-  "Pouvez-vous me parler de votre quotidien etudiant ?",
+  "Pouvez-vous me parler de votre quotidien étudiant ?",
   "Comment utilisez-vous l'IA dans votre travail universitaire ?",
-  "Pouvez-vous me raconter une situation recente ou vous avez utilise ChatGPT ?",
+  "Pouvez-vous me raconter une situation récente où vous avez utilisé ChatGPT ?",
 ];
 
 export function InterviewLayout({
@@ -174,37 +175,105 @@ export function InterviewLayout({
             width="100%"
           >
             {messages.length === 0 ? (
-              <VStack align="center" justify="center" height="100%" gap={5}>
-                <Badge colorPalette="orange" variant="subtle" borderRadius="full" px={4} py={1.5}>
-                  Entretien semi-directif
-                </Badge>
-                <Text
-                  color="fg.default"
-                  fontSize={emptyStateTextSize}
-                  fontWeight="700"
-                  textAlign="center"
-                  maxWidth="2xl"
+              <VStack align="center" justify="center" height="100%" gap={6} px={4}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", width: "100%", maxWidth: "600px" }}
                 >
-                  {emptyStateText}
-                </Text>
-                {showSuggestions ? (
-                  <HStack gap={3} flexWrap="wrap" justify="center" maxWidth="4xl">
-                    {DEFAULT_SUGGESTED_QUESTIONS.map((question) => (
-                      <Button
-                        key={question}
-                        variant="outline"
-                        borderRadius="full"
-                        backgroundColor="bg.surface"
-                        color="blue.900"
-                        borderColor="border.muted"
-                        boxShadow="0 8px 20px rgba(15, 23, 42, 0.05)"
-                        onClick={() => handleSuggestedQuestion(question)}
-                      >
-                        {question}
-                      </Button>
-                    ))}
-                  </HStack>
-                ) : null}
+                  {/* Icon */}
+                  <Box
+                    width="64px"
+                    height="64px"
+                    borderRadius="22px"
+                    background="linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12))"
+                    borderWidth="1px"
+                    borderColor="rgba(99,102,241,0.18)"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    boxShadow="0 8px 24px rgba(99,102,241,0.12)"
+                  >
+                    <Sparkles size={28} color="#6366f1" />
+                  </Box>
+
+                  {/* Eyebrow + heading */}
+                  <VStack gap={2} alignItems="center">
+                    <Badge colorPalette="orange" variant="subtle" borderRadius="full" px={4} py={1.5} fontSize="xs" fontWeight="700" letterSpacing="0.06em">
+                      Entretien semi-directif
+                    </Badge>
+                    <Text
+                      color="gray.800"
+                      fontSize={emptyStateTextSize ?? "xl"}
+                      fontWeight="800"
+                      textAlign="center"
+                      letterSpacing="-0.03em"
+                      lineHeight="1.25"
+                      maxWidth="400px"
+                    >
+                      {emptyStateText}
+                    </Text>
+                  </VStack>
+
+                  {/* Suggested questions */}
+                  {showSuggestions ? (
+                    <VStack gap={2.5} width="100%" maxWidth="520px">
+                      <Text fontSize="2xs" fontWeight="700" letterSpacing="0.1em" textTransform="uppercase" color="fg.muted">
+                        Suggestions pour commencer
+                      </Text>
+                      {DEFAULT_SUGGESTED_QUESTIONS.map((question, i) => (
+                        <motion.div
+                          key={question}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: 0.1 + i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                          style={{ width: "100%" }}
+                        >
+                          <Box
+                            as="button"
+                            width="100%"
+                            textAlign="left"
+                            px={4}
+                            py={3}
+                            borderRadius="16px"
+                            borderWidth="1px"
+                            borderColor="rgba(99,102,241,0.15)"
+                            background="rgba(255,255,255,0.9)"
+                            boxShadow="0 2px 8px rgba(15,23,42,0.04)"
+                            cursor="pointer"
+                            transition="all 0.18s ease"
+                            _hover={{
+                              borderColor: "rgba(99,102,241,0.35)",
+                              background: "rgba(239,246,255,0.9)",
+                              boxShadow: "0 6px 20px rgba(99,102,241,0.1)",
+                              transform: "translateY(-1px)",
+                            }}
+                            onClick={() => handleSuggestedQuestion(question)}
+                          >
+                            <HStack gap={3}>
+                              <Box
+                                width="24px"
+                                height="24px"
+                                borderRadius="8px"
+                                background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                flexShrink={0}
+                              >
+                                <Text fontSize="2xs" fontWeight="800" color="white">{i + 1}</Text>
+                              </Box>
+                              <Text fontSize="sm" fontWeight="600" color="gray.700" lineHeight="1.5">
+                                {question}
+                              </Text>
+                            </HStack>
+                          </Box>
+                        </motion.div>
+                      ))}
+                    </VStack>
+                  ) : null}
+                </motion.div>
               </VStack>
             ) : (
               <Box display="flex" flexDirection="column" gap={0}>
@@ -227,31 +296,47 @@ export function InterviewLayout({
           {showAnalysisPanel ? (
             <Box marginX={4} marginBottom={3}>
               <Collapsible.Root open={isAnalysisOpen} onOpenChange={({ open }) => setIsAnalysisOpen(open)}>
-                <Box display="flex" flexDirection="column" gap={3}>
+                <Box display="flex" flexDirection="column" gap={2}>
                   <Collapsible.Trigger asChild>
-                    <Button
-                      variant="outline"
-                      justifyContent="space-between"
+                    <Box
+                      as="button"
                       width="100%"
-                      borderRadius="xl"
-                      paddingX={4}
-                      paddingY={3}
-                      height="auto"
-                      backgroundColor="bg.subtle"
-                      boxShadow="0 8px 20px rgba(15, 23, 42, 0.04)"
+                      borderRadius="16px"
+                      borderWidth="1px"
+                      borderColor={isAnalysisOpen ? "rgba(99,102,241,0.22)" : "rgba(148,163,184,0.18)"}
+                      background={isAnalysisOpen
+                        ? "linear-gradient(135deg, rgba(239,246,255,0.95), rgba(237,233,254,0.8))"
+                        : "rgba(255,255,255,0.9)"}
+                      px={4}
+                      py={3}
+                      cursor="pointer"
+                      transition="all 0.2s ease"
+                      boxShadow={isAnalysisOpen ? "0 4px 16px rgba(99,102,241,0.08)" : "0 2px 8px rgba(15,23,42,0.04)"}
+                      _hover={{
+                        borderColor: "rgba(99,102,241,0.25)",
+                        background: "linear-gradient(135deg, rgba(239,246,255,0.9), rgba(237,233,254,0.7))",
+                      }}
                     >
                       <HStack justify="space-between" align="center" width="100%">
                         <HStack gap={3} flexWrap="wrap">
-                          <Text fontWeight="600">Retour sur l&apos;entretien</Text>
+                          <Text fontWeight="700" fontSize="sm" letterSpacing="-0.01em" color="gray.800">
+                            Analyse du matériau
+                          </Text>
                           {analysis ? (
-                            <Badge colorPalette={qualityPalette} variant="subtle" px={3} py={1} borderRadius="full">
+                            <Badge colorPalette={qualityPalette} variant="subtle" px={2.5} py={0.5} borderRadius="full" fontSize="2xs" fontWeight="700">
                               {qualityLabel}
+                            </Badge>
+                          ) : isAnalysisLoading ? (
+                            <Badge colorPalette="blue" variant="subtle" px={2.5} py={0.5} borderRadius="full" fontSize="2xs">
+                              En cours...
                             </Badge>
                           ) : null}
                         </HStack>
-                        {isAnalysisOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        <Box color="fg.muted" transition="transform 0.2s ease" style={{ transform: isAnalysisOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                          <ChevronDown size={15} />
+                        </Box>
                       </HStack>
-                    </Button>
+                    </Box>
                   </Collapsible.Trigger>
 
                   <Collapsible.Content>
@@ -260,16 +345,16 @@ export function InterviewLayout({
                       maxHeight={{ base: "42vh", lg: "38vh" }}
                       overflowY="auto"
                       paddingRight={4}
-                      borderRadius="2xl"
+                      borderRadius="16px"
                       borderWidth="1px"
-                      borderColor="border.muted"
-                      backgroundColor="bg.subtle"
-                      boxShadow="0 12px 28px rgba(15, 23, 42, 0.05)"
+                      borderColor="rgba(148,163,184,0.15)"
+                      background="rgba(248,250,252,0.95)"
+                      boxShadow="0 8px 24px rgba(15,23,42,0.05)"
                     >
                       {isAnalysisLoading ? (
-                        <Text color="fg.muted">Analyse du materiau en cours...</Text>
+                        <Text color="fg.muted" fontSize="sm">Analyse du matériau en cours...</Text>
                       ) : analysisError ? (
-                        <Text color="red.600">{analysisError}</Text>
+                        <Text color="red.600" fontSize="sm">{analysisError}</Text>
                       ) : analysis ? (
                         <InterviewAnalysisContent analysis={analysis} analysisHref={analysisHref} />
                       ) : null}

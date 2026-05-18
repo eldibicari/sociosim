@@ -4,11 +4,13 @@ import { Box, Heading, Text, VStack } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 
 type PersonnaRightSidebarProps = {
+  title?: string;
   subtitle?: string;
   children?: ReactNode;
 };
 
 export default function PersonnaRightSidebar({
+  title = "Validation du prompt",
   subtitle,
   children,
 }: PersonnaRightSidebarProps) {
@@ -18,8 +20,8 @@ export default function PersonnaRightSidebar({
       minWidth={{ base: "full", lg: "var(--personna-right-sidebar-width)" }}
       borderTop={{ base: "1px solid", lg: "none" }}
       borderLeft={{ base: "none", lg: "1px solid" }}
-      borderLeftColor={{ base: "transparent", lg: "rgba(15, 23, 42, 0.08)" }}
-      backgroundColor="bg.subtle"
+      borderLeftColor={{ base: "transparent", lg: "var(--color-border)" }}
+      backgroundColor="var(--color-bg)"
       padding={{ base: 4, lg: 5 }}
       position={{ base: "relative", lg: "fixed" }}
       top={{ base: 0, lg: "var(--app-header-height)" }}
@@ -31,7 +33,7 @@ export default function PersonnaRightSidebar({
     >
       <VStack align="stretch" gap={4}>
         <VStack align="stretch" gap={1}>
-          <Heading size="md">Validation du prompt</Heading>
+          <Heading size="md">{title}</Heading>
           {subtitle ? (
             <Text fontSize="sm" color="fg.muted" lineHeight="1.6">
               {subtitle}

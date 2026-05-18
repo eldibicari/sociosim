@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  Badge,
-  Button,
-  Text,
-  VStack,
-  HStack,
-  Card,
-  Box,
-} from "@chakra-ui/react";
+import { Badge, Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import { BookOpen, History, MessageSquarePlus, Settings2, ToggleLeft, ToggleRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { type Agent } from "@/lib/agents";
 
 interface AgentCardProps {
@@ -23,6 +17,22 @@ interface AgentCardProps {
   onNavigateHistory: (agentId: string) => void;
   onNavigateFiche: (agentId: string) => void;
   onNavigatePrompt: (agentId: string) => void;
+  index?: number;
+}
+
+// Deterministic color palette per persona initial
+const PALETTE = [
+  { from: "#6366f1", to: "#8b5cf6", bg: "rgba(99,102,241,0.08)", border: "rgba(99,102,241,0.18)" },
+  { from: "#0ea5e9", to: "#6366f1", bg: "rgba(14,165,233,0.08)", border: "rgba(14,165,233,0.18)" },
+  { from: "#8b5cf6", to: "#ec4899", bg: "rgba(139,92,246,0.08)", border: "rgba(139,92,246,0.18)" },
+  { from: "#10b981", to: "#0ea5e9", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.18)" },
+  { from: "#f59e0b", to: "#ef4444", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.18)" },
+  { from: "#ec4899", to: "#8b5cf6", bg: "rgba(236,72,153,0.08)", border: "rgba(236,72,153,0.18)" },
+];
+
+function getPalette(name: string) {
+  const idx = name.charCodeAt(0) % PALETTE.length;
+  return PALETTE[idx];
 }
 
 export function AgentCard({
@@ -37,166 +47,240 @@ export function AgentCard({
   onNavigateHistory,
   onNavigateFiche,
   onNavigatePrompt,
+  index = 0,
 }: AgentCardProps) {
-  const title =
-    agent.agent_name.charAt(0).toUpperCase() + agent.agent_name.slice(1);
+  const title = agent.agent_name.charAt(0).toUpperCase() + agent.agent_name.slice(1);
+  const initial = title.charAt(0).toUpperCase();
   const canEditPrompt = userAdmin || (!!currentUserId && agent.created_by === currentUserId);
+  const palette = getPalette(agent.agent_name);
+  const isReady = agent.active && agent.has_published_prompt !== false;
 
   return (
-    <Card.Root
-      backgroundColor={agent.active ? "white" : "bg.muted"}
-      borderWidth="1px"
-      borderColor={agent.active ? "border.subtle" : "border.muted"}
-      borderRadius="2xl"
-      overflow="hidden"
-      boxShadow={agent.active ? "sm" : "none"}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      style={{ height: "100%" }}
     >
-      <Card.Body
+      <Box
+        borderRadius="28px"
+        borderWidth="1px"
+        borderColor={agent.active ? "var(--color-border)" : "var(--color-border)"}
+        background={agent.active
+          ? "var(--color-surface)"
+          : "rgba(247,246,243,0.85)"
+        }
+        boxShadow={agent.active
+          ? "var(--color-shadow-md)"
+          : "var(--color-shadow-sm)"
+        }
+        overflow="hidden"
         display="flex"
         flexDirection="column"
-        alignItems="stretch"
-        gap={4}
-        py={5}
-        px={5}
+        height="100%"
+        position="relative"
+        transition="box-shadow 0.22s ease, transform 0.22s ease"
+        _hover={agent.active ? {
+          boxShadow: "0 20px 56px rgba(15,23,42,0.10), 0 1px 0 rgba(255,255,255,0.8) inset",
+          transform: "translateY(-3px)",
+        } : {}}
       >
-        <VStack gap={3} alignItems="flex-start">
-          <VStack gap={2} alignItems="flex-start" width="100%">
-            <HStack width="100%" justifyContent="space-between" alignItems="flex-start" gap={3}>
-              <VStack gap={1} alignItems="flex-start">
+        {/* Top accent */}
+        {agent.active && (
+          <Box
+            position="absolute"
+            insetX={0}
+            top={0}
+            height="3px"
+            background={`linear-gradient(90deg, ${palette.from}, ${palette.to})`}
+          />
+        )}
+
+        {/* Card body */}
+        <VStack alignItems="stretch" gap={0} flex="1">
+          {/* Header */}
+          <Box px={5} pt={6} pb={4}>
+            <HStack gap={4} alignItems="flex-start">
+              {/* Avatar */}
+              <Box
+                width="48px"
+                height="48px"
+                borderRadius="16px"
+                background={`linear-gradient(135deg, ${palette.from}, ${palette.to})`}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+                boxShadow={`0 6px 16px ${palette.from}35`}
+                opacity={agent.active ? 1 : 0.5}
+              >
                 <Text
-                  fontWeight="semibold"
-                  fontSize="2xl"
+                  fontSize="xl"
+                  fontWeight="800"
+                  color="white"
                   lineHeight="1"
-                  color={agent.active ? "blue.800" : "fg.subtle"}
+                >
+                  {initial}
+                </Text>
+              </Box>
+
+              {/* Name + creator */}
+              <VStack alignItems="flex-start" gap={0.5} flex="1" minWidth={0}>
+                <Text
+                  fontWeight="800"
+                  fontSize="xl"
+                  letterSpacing="-0.03em"
+                  lineHeight="1.15"
+                  color={agent.active ? "gray.900" : "fg.muted"}
+                  lineClamp={1}
                 >
                   {title}
                 </Text>
                 {agent.creator_name && (
-                  <Text fontSize="sm" color="fg.subtle">
+                  <Text fontSize="xs" color="fg.muted" letterSpacing="0.02em">
                     {agent.creator_name}
                   </Text>
                 )}
               </VStack>
+
+              {/* Status badge */}
               <Badge
-                colorPalette={agent.active ? "green" : "gray"}
+                colorPalette={isReady ? "green" : agent.active ? "orange" : "gray"}
                 variant="subtle"
                 borderRadius="full"
-                px={3}
-                py={1}
-                fontSize="xs"
+                px={2.5}
+                py={0.5}
+                fontSize="2xs"
+                fontWeight="700"
+                letterSpacing="0.06em"
+                flexShrink={0}
               >
-                {agent.active ? "Pret pour entretien" : "Inactif"}
+                {isReady ? "Prêt" : agent.active ? "En cours" : "Inactif"}
               </Badge>
             </HStack>
+          </Box>
 
+          {/* Description */}
+          <Box px={5} pb={4} flex="1">
             <Text
-              fontSize="lg"
-              color="fg.default"
-              textAlign="left"
-              lineHeight="1.45"
+              fontSize="sm"
+              color={agent.active ? "gray.700" : "fg.muted"}
+              lineHeight="1.8"
+              lineClamp={4}
               whiteSpace="pre-line"
-              minHeight="5.5rem"
             >
-              {(agent.description || "").replace(/\\n/g, "\n")}
+              {(agent.description || "Aucune description disponible.").replace(/\\n/g, "\n")}
             </Text>
-          </VStack>
+          </Box>
 
-          <HStack gap={2} flexWrap="wrap">
-            {agent.active ? (
-              <Badge colorPalette="green" variant="subtle" borderRadius="full" px={3}>
-                Actif
-              </Badge>
-            ) : (
-              <Badge colorPalette="gray" variant="subtle" borderRadius="full" px={3}>
-                Inactif
-              </Badge>
-            )}
-            <Badge
-              colorPalette={agent.has_published_prompt === false ? "orange" : "blue"}
-              variant="subtle"
-              borderRadius="full"
-              px={3}
-            >
-              {agent.has_published_prompt === false ? "Prompt a publier" : "Prompt publie"}
-            </Badge>
-            {hasInteracted && (
-              <Badge colorPalette="purple" variant="subtle" borderRadius="full" px={3}>
-                Deja utilise
-              </Badge>
-            )}
-            {agent.is_public && (
-              <Badge colorPalette="teal" variant="subtle" borderRadius="full" px={3}>
-                Public
-              </Badge>
-            )}
-          </HStack>
+          {/* Meta badges */}
+          <Box px={5} pb={3}>
+            <HStack gap={2} flexWrap="wrap">
+              {agent.has_published_prompt !== false ? (
+                <Badge colorPalette="blue" variant="subtle" borderRadius="full" px={2.5} fontSize="2xs">
+                  Prompt publié
+                </Badge>
+              ) : (
+                <Badge colorPalette="orange" variant="subtle" borderRadius="full" px={2.5} fontSize="2xs">
+                  Prompt à publier
+                </Badge>
+              )}
+              {hasInteracted && (
+                <Badge colorPalette="purple" variant="subtle" borderRadius="full" px={2.5} fontSize="2xs">
+                  Déjà utilisé
+                </Badge>
+              )}
+              {agent.is_public && (
+                <Badge colorPalette="teal" variant="subtle" borderRadius="full" px={2.5} fontSize="2xs">
+                  Public
+                </Badge>
+              )}
+            </HStack>
+          </Box>
+
+          {/* Divider */}
+          <Box
+            mx={5}
+            height="1px"
+            background="linear-gradient(90deg, var(--color-border-strong) 0%, transparent 100%)"
+          />
+
+          {/* Actions */}
+          <Box px={5} py={4}>
+            <VStack alignItems="stretch" gap={2.5}>
+              <Button
+                onClick={() => onSelectAgent(agent.id)}
+                colorPalette="blue"
+                size="sm"
+                borderRadius="xl"
+                fontWeight="700"
+                disabled={isCreatingSession || !isReady}
+                loading={isCreatingSession}
+              >
+                <MessageSquarePlus size={14} />
+                Commencer un entretien
+              </Button>
+
+              <HStack gap={2} flexWrap="wrap">
+                <Button
+                  variant="subtle"
+                  size="xs"
+                  borderRadius="lg"
+                  onClick={() => onNavigateFiche(agent.id)}
+                  flex="1"
+                >
+                  <BookOpen size={12} />
+                  Fiche
+                </Button>
+                {hasInteracted && (
+                  <Button
+                    variant="subtle"
+                    size="xs"
+                    borderRadius="lg"
+                    onClick={() => onNavigateHistory(agent.id)}
+                    flex="1"
+                  >
+                    <History size={12} />
+                    Historique
+                  </Button>
+                )}
+                {canEditPrompt && (
+                  <Button
+                    variant="subtle"
+                    size="xs"
+                    borderRadius="lg"
+                    onClick={() => onNavigatePrompt(agent.id)}
+                    flex="1"
+                  >
+                    <Settings2 size={12} />
+                    Prompt
+                  </Button>
+                )}
+                {userAdmin && (
+                  <Button
+                    variant="subtle"
+                    colorPalette={agent.active ? "red" : "green"}
+                    size="xs"
+                    borderRadius="lg"
+                    onClick={() => onToggleAgent(agent)}
+                    loading={togglingAgentId === agent.id}
+                    disabled={togglingAgentId === agent.id}
+                  >
+                    {agent.active ? <ToggleLeft size={12} /> : <ToggleRight size={12} />}
+                    {agent.active ? "Désactiver" : "Activer"}
+                  </Button>
+                )}
+              </HStack>
+
+              {agent.active && agent.has_published_prompt === false && (
+                <Text fontSize="2xs" color="fg.muted" lineHeight="1.6" textAlign="center">
+                  Ce persona ne peut pas encore être utilisé — prompt non publié.
+                </Text>
+              )}
+            </VStack>
+          </Box>
         </VStack>
-
-        <Box borderTopWidth="1px" borderTopColor="border.subtle" />
-
-        <VStack gap={3} alignItems="stretch">
-          <Button
-            onClick={() => onSelectAgent(agent.id)}
-            colorPalette="blue"
-            variant="solid"
-            size="sm"
-            disabled={isCreatingSession || !agent.active || agent.has_published_prompt === false}
-            loading={isCreatingSession}
-          >
-            Commencer un entretien
-          </Button>
-
-          <HStack gap={2} flexWrap="wrap" justifyContent="flex-start">
-            <Button
-              variant="subtle"
-              size="xs"
-              paddingInline={3}
-              onClick={() => onNavigateFiche(agent.id)}
-            >
-              Voir la fiche
-            </Button>
-            {hasInteracted && (
-              <Button
-                onClick={() => onNavigateHistory(agent.id)}
-                variant="subtle"
-                size="xs"
-                paddingInline={3}
-              >
-                Historique
-              </Button>
-            )}
-            {canEditPrompt && (
-              <Button
-                variant="subtle"
-                size="xs"
-                paddingInline={3}
-                onClick={() => onNavigatePrompt(agent.id)}
-              >
-                Modifier prompt
-              </Button>
-            )}
-            {userAdmin && (
-              <Button
-                variant={agent.active ? "outline" : "subtle"}
-                colorPalette={agent.active ? "red" : "green"}
-                size="xs"
-                paddingInline={3}
-                onClick={() => onToggleAgent(agent)}
-                loading={togglingAgentId === agent.id}
-                disabled={togglingAgentId === agent.id}
-              >
-                {agent.active ? "Desactiver" : "Activer"}
-              </Button>
-            )}
-          </HStack>
-
-          {agent.active && agent.has_published_prompt === false && (
-            <Text fontSize="xs" color="fg.muted">
-              Ce personna ne peut pas encore etre utilise tant que son prompt n&apos;est pas publie.
-            </Text>
-          )}
-        </VStack>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </motion.div>
   );
 }

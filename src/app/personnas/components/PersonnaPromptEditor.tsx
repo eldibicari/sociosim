@@ -7,6 +7,7 @@ import { RichTextEditor, Control } from "@/components/ui/rich-text-editor";
 
 type PersonnaPromptEditorProps = {
   editor: Editor | null;
+  title?: string;
   editorToolbarRight?: ReactNode;
   headingRight?: ReactNode;
   subtitle?: string;
@@ -15,6 +16,7 @@ type PersonnaPromptEditorProps = {
 
 export default function PersonnaPromptEditor({
   editor,
+  title = "Prompt du persona",
   editorToolbarRight,
   headingRight,
   subtitle,
@@ -36,7 +38,7 @@ export default function PersonnaPromptEditor({
       <Field.Root display="flex" flexDirection="column" flex="1" minHeight={0}>
         <HStack justify="space-between" align="center" width="full">
           <VStack align="stretch" gap={1}>
-            <Heading size="md">Prompt du personna</Heading>
+            <Heading size="md">{title}</Heading>
             {subtitle ? (
               <Text fontSize="sm" color="fg.muted" lineHeight="1.6">
                 {subtitle}

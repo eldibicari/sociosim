@@ -47,6 +47,9 @@ All notable changes to this project will be documented in this file.
 - **Agent Policy Module:** Centralize all agent visibility, toggle, and interview-start rules in `src/lib/agentPolicy.ts`, replacing duplicated `isAdminLike()` checks across 3 API routes.
 
 ### Changed
+- **Persona Guided Creation:** The new persona flow now starts with visible persona parameters (role, posture, style, difficulty, sensitive zones) that can generate a first internal prompt, while keeping the raw prompt editor as an advanced mode.
+- **Persona Fiche Redesign:** Rework the persona sheet into a stronger pedagogical dossier with a premium hero, methodological grid reading, simulation inspector, sticky action rail, clearer conduct tips, and a denser sociological framing.
+- **Persona Simulation Cleanup:** Clarify the separation between guided persona parameters, the visible interview grid, and the advanced full system prompt; remove the redundant raw prompt preview from the fiche and reframe `/personnas/[id]/edit` around guided configuration plus advanced system prompt editing for legacy personas and fine tuning.
 - **Layout lang:** Fix `lang="en"` to `lang="fr"` — all content is in French.
 - **Home Page:** Remove automatic redirect of authenticated users to `/personnas` — the home page is now shown to everyone and adapts CTAs based on auth state.
 - **Persona Creation Flow:** Redirect after creation goes to `/personnas/[id]` (fiche) instead of `/edit`, and the grid editing is removed from the creation form (available from the fiche after creation).

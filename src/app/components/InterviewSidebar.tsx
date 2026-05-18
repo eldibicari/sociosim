@@ -95,7 +95,7 @@ function getSidebarPrefsKey(historyUserId?: string | null, agentId?: string | nu
 }
 
 function formatRepliesLabel(count: number) {
-  return `${count} ${count > 1 ? "reponses" : "reponse"}`;
+  return `${count} ${count > 1 ? "réponses" : "réponse"}`;
 }
 
 function HistoryCard({
@@ -122,8 +122,8 @@ function HistoryCard({
       padding={3}
       borderRadius="2xl"
       borderWidth="1px"
-      borderColor={isCurrent ? "cyan.200" : "rgba(15, 23, 42, 0.08)"}
-      backgroundColor={isCurrent ? "cyan.50" : "bg.surface"}
+      borderColor={isCurrent ? "cyan.200" : "var(--color-border)"}
+      backgroundColor={isCurrent ? "cyan.50" : "var(--color-surface)"}
       boxShadow={
         isCurrent ? "0 12px 28px rgba(8, 145, 178, 0.10)" : "0 6px 18px rgba(15, 23, 42, 0.04)"
       }
@@ -594,8 +594,8 @@ export function InterviewSidebar({
         minWidth={sidebarWidth}
         borderBottom={{ base: "1px solid", lg: "none" }}
         borderRight={{ base: "none", lg: "1px solid" }}
-        borderRightColor={{ base: "transparent", lg: "rgba(15, 23, 42, 0.08)" }}
-        backgroundColor={{ base: "rgba(248, 250, 252, 0.98)", _dark: "bg.subtle" }}
+        borderRightColor={{ base: "transparent", lg: "var(--color-border)" }}
+        backgroundColor={{ base: "rgba(247,246,243,0.98)", _dark: "bg.subtle" }}
         padding={isCompact ? 4 : isCollapsed ? 2 : 4}
         position={isCompact ? "fixed" : "sticky"}
         top={0}
@@ -654,8 +654,9 @@ export function InterviewSidebar({
                   onClick={handleNewInterview}
                   loading={isCreatingSession}
                   disabled={isCreatingSession}
+                  fontWeight="700"
                 >
-                  <CirclePlus size={16} />
+                  <CirclePlus size={15} />
                   Nouvel entretien
                 </Button>
 
@@ -692,7 +693,7 @@ export function InterviewSidebar({
                       </Tooltip.Trigger>
                       <Tooltip.Positioner>
                         <Tooltip.Content px={3} py={2}>
-                          {isExpanded ? "Reduire la largeur" : "Agrandir le panneau"}
+                          {isExpanded ? "Réduire la largeur" : "Agrandir le panneau"}
                         </Tooltip.Content>
                       </Tooltip.Positioner>
                     </Tooltip.Root>
@@ -711,7 +712,7 @@ export function InterviewSidebar({
                       </IconButton>
                     </Tooltip.Trigger>
                     <Tooltip.Positioner>
-                      <Tooltip.Content px={3} py={2}>Reduire</Tooltip.Content>
+                      <Tooltip.Content px={3} py={2}>Réduire</Tooltip.Content>
                     </Tooltip.Positioner>
                   </Tooltip.Root>
                 </HStack>
@@ -738,90 +739,164 @@ export function InterviewSidebar({
               ) : (
                 <>
               <Box
-                padding={4}
-                borderRadius="3xl"
-                backgroundColor="bg.surface"
+                borderRadius="24px"
                 borderWidth="1px"
-                borderColor="rgba(15, 23, 42, 0.08)"
-                boxShadow="0 14px 36px rgba(15, 23, 42, 0.06)"
+                borderColor="rgba(99,102,241,0.16)"
+                overflow="hidden"
+                boxShadow="0 8px 28px rgba(99,102,241,0.08)"
               >
-                <Stack gap={3}>
-                  <HStack gap={2} flexWrap="wrap">
-                    <Badge colorPalette="blue" variant="subtle" borderRadius="full" px={3} py={1}>
+                {/* Gradient header */}
+                <Box
+                  position="relative"
+                  background="linear-gradient(135deg, rgba(239,246,255,0.95) 0%, rgba(237,233,254,0.8) 100%)"
+                  px={4}
+                  pt={4}
+                  pb={3}
+                >
+                  {/* 3px accent bar */}
+                  <Box
+                    position="absolute"
+                    insetX={0}
+                    top={0}
+                    height="3px"
+                    background="linear-gradient(90deg, #6366f1, #8b5cf6, #0ea5e9)"
+                  />
+                  <HStack gap={2} mb={2} flexWrap="wrap">
+                    <Badge colorPalette="blue" variant="subtle" borderRadius="full" px={2.5} py={0.5} fontSize="2xs" fontWeight="700">
                       Persona active
                     </Badge>
-                    <Badge variant="outline" borderRadius="full" px={3} py={1}>
-                      Entretien en cours
+                    <Badge colorPalette="green" variant="subtle" borderRadius="full" px={2.5} py={0.5} fontSize="2xs" fontWeight="700">
+                      En cours
                     </Badge>
                   </HStack>
-                  <Stack gap={1}>
-                    <Heading as="h2" size="lg" color={{ base: "blue.700", _dark: "blue.200" }}>
-                      {agentDisplayName ?? "Entretien"}
-                    </Heading>
-                    {agentDescription ? (
-                      <Text fontSize="sm" color="fg.muted" lineHeight="1.5">
-                        {agentDescription}
-                      </Text>
-                    ) : null}
-                  </Stack>
+                  <Text
+                    fontWeight="900"
+                    fontSize="lg"
+                    letterSpacing="-0.03em"
+                    lineHeight="1.2"
+                    style={{
+                      background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    {agentDisplayName ?? "Entretien"}
+                  </Text>
+                  {agentDescription ? (
+                    <Text fontSize="xs" color="fg.muted" lineHeight="1.6" mt={1} lineClamp={3}>
+                      {agentDescription}
+                    </Text>
+                  ) : null}
+                </Box>
 
-                  <Stack gap={1}>
-                    <Text fontSize="sm">par {userName ?? "..."}</Text>
-                    <Text fontSize="sm">le {dateDisplay ?? "..."}</Text>
-                  </Stack>
+                {/* Body */}
+                <Box
+                  background="var(--color-surface)"
+                  px={4}
+                  py={3}
+                >
+                  <Stack gap={3}>
+                    {/* User + date */}
+                    <HStack gap={3} flexWrap="wrap">
+                      <Box flex="1">
+                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="fg.muted">
+                          Enquêteur
+                        </Text>
+                        <Text fontSize="xs" fontWeight="600" color="gray.700" mt={0.5}>{userName ?? "—"}</Text>
+                      </Box>
+                      <Box flex="1">
+                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="fg.muted">
+                          Date
+                        </Text>
+                        <Text fontSize="xs" fontWeight="600" color="gray.700" mt={0.5}>{dateDisplay ?? "—"}</Text>
+                      </Box>
+                    </HStack>
 
-                  <InterviewGridPanel agentId={agentId ?? null} />
+                    <InterviewGridPanel agentId={agentId ?? null} />
 
-                  <HStack gap={2} flexWrap="wrap">
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      borderRadius="full"
-                      onClick={onExportPdf}
-                      loading={isExportingPdf}
-                      disabled={disableExport}
-                    >
-                      <FileDown size={14} />
-                      PDF
-                    </Button>
+                    {/* Divider */}
+                    <Box height="1px" background="linear-gradient(90deg, rgba(99,102,241,0.15) 0%, rgba(148,163,184,0.08) 100%)" />
 
-                    {onExportGoogleDocs ? (
+                    {/* Stats */}
+                    <HStack gap={3}>
+                      <Box
+                        flex="1"
+                        px={3}
+                        py={2}
+                        borderRadius="12px"
+                        background="rgba(99,102,241,0.05)"
+                        borderWidth="1px"
+                        borderColor="rgba(99,102,241,0.1)"
+                      >
+                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="fg.muted">
+                          Réponses
+                        </Text>
+                        <Text
+                          fontWeight="900"
+                          fontSize="xl"
+                          letterSpacing="-0.03em"
+                          style={{
+                            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                          }}
+                        >
+                          {stats.answeredQuestions}
+                        </Text>
+                      </Box>
+                      <Box
+                        flex="1"
+                        px={3}
+                        py={2}
+                        borderRadius="12px"
+                        background="rgba(16,185,129,0.05)"
+                        borderWidth="1px"
+                        borderColor="rgba(16,185,129,0.1)"
+                      >
+                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="fg.muted">
+                          Tokens
+                        </Text>
+                        <Text fontSize="xs" fontWeight="700" color="gray.700" mt={0.5}>
+                          {stats.inputTokens + stats.outputTokens > 0
+                            ? `${stats.inputTokens + stats.outputTokens}`
+                            : "—"}
+                        </Text>
+                      </Box>
+                    </HStack>
+
+                    {/* Export buttons */}
+                    <HStack gap={2} flexWrap="wrap">
                       <Button
                         size="xs"
-                        variant="outline"
-                        borderRadius="full"
-                        onClick={onExportGoogleDocs}
-                        loading={isExportingGoogleDocs}
+                        variant="subtle"
+                        borderRadius="lg"
+                        onClick={onExportPdf}
+                        loading={isExportingPdf}
                         disabled={disableExport}
+                        flex="1"
+                        fontWeight="700"
                       >
-                        <FileText size={14} />
-                        Google Docs
+                        <FileDown size={12} />
+                        PDF
                       </Button>
-                    ) : null}
-                  </HStack>
-
-                  <Box
-                    height="1px"
-                    backgroundColor={{ base: "rgba(226, 232, 240, 0.7)", _dark: "rgba(31, 41, 55, 0.6)" }}
-                  />
-
-                  <HStack gap={4} align="start">
-                    <Box flex="1">
-                      <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
-                        Reponses
-                      </Text>
-                      <Text fontWeight="700" fontSize="lg">{stats.answeredQuestions}</Text>
-                    </Box>
-                    <Box flex="1">
-                      <Text fontSize="xs" color="fg.muted" textTransform="uppercase" letterSpacing="0.08em">
-                        Tokens
-                      </Text>
-                      <Text fontWeight="700" fontSize="sm">
-                        {stats.inputTokens} → {stats.outputTokens}
-                      </Text>
-                    </Box>
-                  </HStack>
-                </Stack>
+                      {onExportGoogleDocs ? (
+                        <Button
+                          size="xs"
+                          variant="subtle"
+                          borderRadius="lg"
+                          onClick={onExportGoogleDocs}
+                          loading={isExportingGoogleDocs}
+                          disabled={disableExport}
+                          flex="1"
+                          fontWeight="700"
+                        >
+                          <FileText size={12} />
+                          Google Docs
+                        </Button>
+                      ) : null}
+                    </HStack>
+                  </Stack>
+                </Box>
               </Box>
 
               {newInterviewError ? (
@@ -840,12 +915,15 @@ export function InterviewSidebar({
               overflow="hidden"
               paddingTop={1}
               borderTop="1px solid"
-              borderTopColor="rgba(15, 23, 42, 0.06)"
+              borderTopColor="var(--color-border)"
             >
               <HStack justify="space-between" align="center">
-                <Heading as="h3" size="sm">
-                  Conversations
-                </Heading>
+                <HStack gap={2}>
+                  <Box height="1px" width="14px" background="rgba(99,102,241,0.4)" />
+                  <Text fontSize="2xs" fontWeight="700" letterSpacing="0.12em" textTransform="uppercase" color="fg.muted">
+                    Conversations
+                  </Text>
+                </HStack>
                 <HStack gap={1}>
                   {!isConversationFocus ? (
                     <Button
@@ -890,18 +968,18 @@ export function InterviewSidebar({
                   </Text>
                 ) : historyItems.length === 0 ? (
                   <Text fontSize="sm" color="fg.muted">
-                    Aucun entretien precedent.
+                    Aucun entretien précédent.
                   </Text>
                 ) : (
                   <>
                     {currentHistoryItem ? (
                       <Stack gap={2}>
                         <Text
-                          fontSize="xs"
+                          fontSize="2xs"
                           fontWeight="700"
                           color="fg.muted"
                           textTransform="uppercase"
-                          letterSpacing="0.08em"
+                          letterSpacing="0.1em"
                         >
                           Chat en cours
                         </Text>
@@ -921,13 +999,13 @@ export function InterviewSidebar({
                     {pinnedHistoryItems.length > 0 ? (
                       <Stack gap={2}>
                         <Text
-                          fontSize="xs"
+                          fontSize="2xs"
                           fontWeight="700"
                           color="fg.muted"
                           textTransform="uppercase"
-                          letterSpacing="0.08em"
+                          letterSpacing="0.1em"
                         >
-                          Epingles
+                          Épinglés
                         </Text>
                         <Stack gap={2}>
                           {pinnedHistoryItems.map((item) => (
@@ -948,17 +1026,17 @@ export function InterviewSidebar({
 
                     <Stack gap={2}>
                       <Text
-                        fontSize="xs"
+                        fontSize="2xs"
                         fontWeight="700"
                         color="fg.muted"
                         textTransform="uppercase"
-                        letterSpacing="0.08em"
+                        letterSpacing="0.1em"
                       >
-                        Recents
+                        Récents
                       </Text>
                       {recentHistoryItems.length === 0 ? (
                         <Text fontSize="sm" color="fg.muted">
-                          Aucun autre chat recent.
+                          Aucun autre chat récent.
                         </Text>
                       ) : (
                         <Stack gap={2}>

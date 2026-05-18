@@ -225,7 +225,9 @@ Etat :
 - implemente comme logique pure dans `src/lib/personaPromptComposer.ts`
 - `buildPersonaPromptBlueprint(config)` produit les blocs internes
 - `buildPersonaPromptFromConfig(config)` compose le prompt systeme final
-- pas encore branche dans l'UI creation / edition
+- branche dans la creation de persona via une configuration guidee V1
+- l'editeur de prompt reste disponible comme mode avance
+- reste a etendre cette logique a la page d'edition
 
 ### Phase 4
 

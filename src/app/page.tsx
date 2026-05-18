@@ -18,7 +18,7 @@ import {
   PersonaShowcaseCard,
   type ShowcasePersona,
 } from "@/app/components/PersonaShowcaseCard";
-import { InterviewScene3D } from "@/app/components/InterviewScene3D";
+import { InterviewSceneSVG } from "@/app/components/InterviewSceneSVG";
 import { Reveal, FadeIn, AnimatedCounter } from "@/app/components/ScrollReveal";
 
 const SHOWCASE_BASE: Omit<ShowcasePersona, "id">[] = [
@@ -189,7 +189,7 @@ export default function Home() {
         <Box className="hero-dot-grid" />
         {/* Scène 3D : deux entités en entretien */}
         <Box position="absolute" inset={0} opacity={0.55} pointerEvents="none">
-          <InterviewScene3D />
+          <InterviewSceneSVG />
         </Box>
 
         <VStack gap={6} maxW="720px" mx="auto" position="relative" zIndex={1}>
@@ -224,8 +224,9 @@ export default function Home() {
 
             <Heading
               as="h1"
+              className="display-heading"
               fontSize={{ base: "3xl", md: "4xl", lg: "5xl" }}
-              fontWeight="800"
+              fontWeight="400"
               lineHeight="1.1"
               letterSpacing="-0.03em"
             >
