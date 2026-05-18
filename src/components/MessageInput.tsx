@@ -118,14 +118,11 @@ export function MessageInput({
                 position="absolute"
                 right={2}
                 bottom={2}
-                borderRadius="xl"
+                borderRadius="full"
                 width={8}
                 height={8}
                 minWidth={8}
-                background={canSend
-                  ? "linear-gradient(135deg, var(--color-accent), #8b5cf6)"
-                  : "var(--color-border)"
-                }
+                background={canSend ? "var(--color-accent)" : "var(--color-border)"}
                 color="white"
                 transition="background 0.15s ease, transform 0.1s ease"
                 _hover={canSend ? { transform: "scale(1.05)" } : {}}
