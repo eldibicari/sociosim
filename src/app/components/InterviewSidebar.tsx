@@ -250,7 +250,7 @@ export function InterviewSidebar({
 }: InterviewSidebarProps) {
   const [introHtml, setIntroHtml] = useState("");
   const [introPreview, setIntroPreview] = useState("");
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isConversationFocus, setIsConversationFocus] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);

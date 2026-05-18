@@ -469,8 +469,8 @@ export function InterviewLayout({
                 {agentDisplayName}
               </Text>
               {agentDescription ? (
-                <Text fontSize="xs" color="var(--color-text-muted)" lineHeight="1.65" mt={0.5}>
-                  {agentDescription}
+                <Text fontSize="xs" color="var(--color-text-muted)" lineHeight="1.65" mt={0.5} whiteSpace="pre-wrap">
+                  {agentDescription.replace(/\\n/g, "\n")}
                 </Text>
               ) : null}
             </VStack>
