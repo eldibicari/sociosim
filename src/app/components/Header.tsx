@@ -103,6 +103,8 @@ export default function Header() {
     ? `${userInfo.firstName} ${userInfo.lastName}`.trim() || "Utilisateur"
     : "Utilisateur";
 
+  if (isInInterview) return null;
+
   return (
     <Box
       as="header"
