@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { BookOpen, FileDown, Menu as MenuIcon, Sparkles, User, X } from "lucide-react";
+import { ArrowRight, BookOpen, FileDown, Menu as MenuIcon, Sparkles, User, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
@@ -626,10 +626,11 @@ export function InterviewLayout({
             </VStack>
           ) : null}
 
-          {/* ANALYSE */}
+          {/* ANALYSE — vue condensée adaptée au drawer */}
           {rightTab === "analyse" ? (
-            <VStack alignItems="stretch" gap={0} p={5}>
-              <HStack mb={4} gap={2}>
+            <VStack alignItems="stretch" gap={4} p={5}>
+              {/* En-tête */}
+              <HStack gap={2} flexWrap="wrap">
                 <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)">Analyse du matériau</Text>
                 {analysis ? (
                   <Badge colorPalette={qualityPalette} variant="subtle" px={2} py={0.5} borderRadius="full" fontSize="2xs" fontWeight="700">
@@ -639,17 +640,124 @@ export function InterviewLayout({
                   <Badge colorPalette="blue" variant="subtle" px={2} py={0.5} borderRadius="full" fontSize="2xs">En cours…</Badge>
                 ) : null}
               </HStack>
+
               {isAnalysisLoading ? (
-                <Text color="var(--color-text-muted)" fontSize="sm">Analyse du matériau en cours…</Text>
+                <Text color="var(--color-text-muted)" fontSize="sm">Analyse en cours…</Text>
               ) : analysisError ? (
                 <Text color="red.600" fontSize="sm">{analysisError}</Text>
               ) : analysis ? (
-                <InterviewAnalysisContent
-                  analysis={analysis}
-                  analysisHref={currentInterviewId ? `/interview/${currentInterviewId}/analysis` : null}
-                />
+                <VStack alignItems="stretch" gap={4}>
+                  {/* Score */}
+                  <Badge
+                    colorPalette={analysis.material_quality === "exploitable" ? "green" : analysis.material_quality === "partiel" ? "orange" : "blue"}
+                    variant="subtle"
+                    alignSelf="flex-start"
+                    px={3}
+                    py={1}
+                    borderRadius="full"
+                    fontSize="xs"
+                  >
+                    Score {analysis.score_breakdown.total_score} / {analysis.score_breakdown.max_score}
+                  </Badge>
+
+                  {/* Feedback */}
+                  <VStack alignItems="stretch" gap={1}>
+                    <Text fontWeight="700" fontSize="sm" color="var(--color-text-primary)" lineHeight="1.4">
+                      {analysis.feedback_title}
+                    </Text>
+                    <Text fontSize="sm" color="var(--color-text-muted)" lineHeight="1.65">
+                      {analysis.summary_line}
+                    </Text>
+                  </VStack>
+
+                  {/* Indicateurs clés — 2 colonnes */}
+                  <VStack alignItems="stretch" gap={2}>
+                    <Text fontSize="2xs" fontWeight="700" textTransform="uppercase" letterSpacing="0.08em" color="var(--color-text-muted)">
+                      Indicateurs
+                    </Text>
+                    <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                      {([
+                        ["Messages", analysis.metrics.student_messages],
+                        ["Mots produits", analysis.metrics.student_words],
+                        ["Rép. longues", analysis.metrics.long_answers],
+                        ["Questions ouvertes", `${analysis.metrics.open_question_ratio_percent}%`],
+                      ] as [string, string | number][]).map(([label, value]) => (
+                        <Box
+                          key={label}
+                          p={3}
+                          borderRadius="12px"
+                          backgroundColor="var(--color-surface-muted)"
+                          borderWidth="1px"
+                          borderColor="var(--color-border)"
+                        >
+                          <Text fontSize="2xs" color="var(--color-text-muted)" mb={0.5}>{label}</Text>
+                          <Text fontSize="md" fontWeight="700" color="var(--color-text-primary)">{value}</Text>
+                        </Box>
+                      ))}
+                    </Box>
+                  </VStack>
+
+                  {/* Points forts / limites */}
+                  {analysis.strengths.length > 0 ? (
+                    <VStack alignItems="stretch" gap={1.5}>
+                      <Text fontSize="2xs" fontWeight="700" textTransform="uppercase" letterSpacing="0.08em" color="#10b981">
+                        Ce qui est déjà bien
+                      </Text>
+                      {analysis.strengths.map((s) => (
+                        <Text key={s} fontSize="sm" color="var(--color-text-muted)" lineHeight="1.6">
+                          · {s}
+                        </Text>
+                      ))}
+                    </VStack>
+                  ) : null}
+
+                  {analysis.limits.length > 0 ? (
+                    <VStack alignItems="stretch" gap={1.5}>
+                      <Text fontSize="2xs" fontWeight="700" textTransform="uppercase" letterSpacing="0.08em" color="#f59e0b">
+                        Ce qui manque encore
+                      </Text>
+                      {analysis.limits.map((l) => (
+                        <Text key={l} fontSize="sm" color="var(--color-text-muted)" lineHeight="1.6">
+                          · {l}
+                        </Text>
+                      ))}
+                    </VStack>
+                  ) : null}
+
+                  {/* Coaching tip */}
+                  <Box
+                    p={3}
+                    borderRadius="12px"
+                    backgroundColor="rgba(99,102,241,0.05)"
+                    borderWidth="1px"
+                    borderColor="rgba(99,102,241,0.12)"
+                  >
+                    <Text fontSize="2xs" fontWeight="700" textTransform="uppercase" letterSpacing="0.08em" color="var(--color-accent)" mb={1}>
+                      Prochain geste
+                    </Text>
+                    <Text fontSize="sm" color="var(--color-text-muted)" lineHeight="1.65">
+                      {analysis.coaching_tip}
+                    </Text>
+                  </Box>
+
+                  {/* Lien analyse complète */}
+                  {currentInterviewId ? (
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="outline"
+                      borderRadius="xl"
+                      width="100%"
+                    >
+                      <a href={`/interview/${currentInterviewId}/analysis`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                        Voir l&apos;analyse complète
+                        <ArrowRight size={14} />
+                      </a>
+                    </Button>
+                  ) : null}
+                </VStack>
               ) : (
-                <Text color="var(--color-text-muted)" fontSize="sm">
+                <Text color="var(--color-text-muted)" fontSize="sm" lineHeight="1.6">
                   L&apos;analyse apparaîtra ici une fois l&apos;entretien commencé.
                 </Text>
               )}
