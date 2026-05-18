@@ -127,6 +127,7 @@ export function InterviewLayout({
       flexDirection={{ base: "column", lg: "row" }}
       backgroundColor="bg.surface"
       overflow="hidden"
+      paddingLeft={{ base: 0, lg: "220px" }}
     >
       <InterviewSidebar
         agentDisplayName={agentDisplayName}
