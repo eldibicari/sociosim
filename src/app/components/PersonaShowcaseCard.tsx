@@ -5,6 +5,7 @@ import { MessageSquarePlus, BookOpen } from "lucide-react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { getPersonaVisual } from "@/lib/personaVisuals";
+import { PersonaSilhouette } from "@/app/personnas/components/PersonaSilhouette";
 
 export type ShowcasePersona = {
   id: string;
@@ -34,7 +35,6 @@ type Props = {
 export function PersonaShowcaseCard({ persona, index }: Props) {
   const router = useRouter();
   const title = persona.agent_name.charAt(0).toUpperCase() + persona.agent_name.slice(1);
-  const initial = title.charAt(0).toUpperCase();
   const ficheHref = persona.id.includes("-") ? `/personnas/${persona.id}` : "/personnas";
   const visual = getPersonaVisual(persona.agent_name);
 
@@ -111,21 +111,16 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
 
             {/* Avatar */}
             <Box
-              width="76px"
-              height="76px"
-              borderRadius="24px"
-              background={visual.gradient}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              boxShadow={`0 8px 24px ${visual.accent}40`}
               flexShrink={0}
+              style={{ filter: `drop-shadow(0 8px 22px ${visual.accent}70)` }}
             >
-              {visual.emoji !== "👤" ? (
-                <Text fontSize="2xl" lineHeight="1">{visual.emoji}</Text>
-              ) : (
-                <Text fontSize="3xl" fontWeight="800" color="white" lineHeight="1">{initial}</Text>
-              )}
+              <PersonaSilhouette
+                shapeIndex={visual.shapeIndex}
+                color1={visual.color1}
+                color2={visual.color2}
+                uid={persona.id}
+                size={68}
+              />
             </Box>
 
             {/* Name + role */}

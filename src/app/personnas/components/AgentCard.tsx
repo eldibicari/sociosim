@@ -5,6 +5,7 @@ import { BookOpen, History, MessageSquarePlus, Settings2, ToggleLeft, ToggleRigh
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { type Agent } from "@/lib/agents";
 import { getPersonaVisual } from "@/lib/personaVisuals";
+import { PersonaSilhouette } from "./PersonaSilhouette";
 
 interface AgentCardProps {
   agent: Agent;
@@ -36,7 +37,6 @@ export function AgentCard({
   index = 0,
 }: AgentCardProps) {
   const title = agent.agent_name.charAt(0).toUpperCase() + agent.agent_name.slice(1);
-  const initial = title.charAt(0).toUpperCase();
   const canEditPrompt = userAdmin || (!!currentUserId && agent.created_by === currentUserId);
   const visual = getPersonaVisual(agent.agent_name);
   const isReady = agent.active && agent.has_published_prompt !== false;
@@ -115,27 +115,21 @@ export function AgentCard({
 
             {/* Avatar */}
             <Box
-              width="76px"
-              height="76px"
-              borderRadius="24px"
-              background={visual.gradient}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              boxShadow={`0 8px 24px ${visual.accent}40`}
               flexShrink={0}
-              fontSize="2xl"
+              style={{ filter: `drop-shadow(0 8px 22px ${visual.accent}70)` }}
             >
-              {visual.emoji !== "👤" ? (
-                <Text fontSize="2xl" lineHeight="1">{visual.emoji}</Text>
-              ) : (
-                <Text fontSize="3xl" fontWeight="800" color="white" lineHeight="1">{initial}</Text>
-              )}
+              <PersonaSilhouette
+                shapeIndex={visual.shapeIndex}
+                color1={visual.color1}
+                color2={visual.color2}
+                uid={agent.id}
+                size={68}
+              />
             </Box>
 
             {/* Name */}
             <VStack gap={0.5} alignItems="center">
-              <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" lineHeight="1.2" color="gray.900" textAlign="center">
+              <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" lineHeight="1.2" color="var(--color-text-primary)" textAlign="center">
                 {title}
               </Text>
               {agent.creator_name && (
