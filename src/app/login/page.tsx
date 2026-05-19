@@ -131,7 +131,7 @@ function LoginPageInner() {
         {/* Top accent line */}
         <Box
           height="3px"
-          background="linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)"
+          background="linear-gradient(90deg, var(--color-accent), var(--color-accent-hover))"
         />
 
         <Stack gap={6} p={8}>
@@ -141,11 +141,11 @@ function LoginPageInner() {
               width="48px"
               height="48px"
               borderRadius="16px"
-              background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+              background="linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))"
               display="flex"
               alignItems="center"
               justifyContent="center"
-              boxShadow="0 6px 20px rgba(99,102,241,0.3)"
+              boxShadow="0 6px 20px rgba(109,93,246,0.25)"
             >
               <GraduationCap size={24} color="white" />
             </Box>
@@ -258,9 +258,9 @@ function LoginPageInner() {
               height="44px"
               fontWeight="700"
               fontSize="sm"
-              background="linear-gradient(135deg, var(--color-accent), #8b5cf6)"
+              background="linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))"
               color="white"
-              _hover={{ opacity: 0.92, transform: "translateY(-1px)", boxShadow: "0 8px 24px rgba(91,91,214,0.3)" }}
+              _hover={{ opacity: 0.92, transform: "translateY(-1px)", boxShadow: "0 8px 24px rgba(109,93,246,0.3)" }}
               _active={{ transform: "translateY(0)" }}
               transition="all 0.15s ease"
               mt={2}

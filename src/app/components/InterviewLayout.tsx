@@ -173,12 +173,12 @@ export function InterviewLayout({
                 width="28px"
                 height="28px"
                 borderRadius="8px"
-                background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+                background="linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
                 flexShrink={0}
-                boxShadow="0 2px 6px rgba(99,102,241,0.18)"
+                boxShadow="0 2px 6px rgba(109,93,246,0.18)"
               >
                 <Text fontSize="xs" fontWeight="700" color="white" lineHeight="1">
                   {agentDisplayName.charAt(0).toUpperCase()}
@@ -362,14 +362,14 @@ export function InterviewLayout({
                     width="60px"
                     height="60px"
                     borderRadius="20px"
-                    background="linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.1))"
+                    background="var(--color-accent-soft)"
                     borderWidth="1px"
-                    borderColor="rgba(99,102,241,0.15)"
+                    borderColor="var(--color-accent-border)"
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <Sparkles size={24} color="#6366f1" />
+                    <Sparkles size={24} color="var(--color-accent)" />
                   </Box>
 
                   <VStack gap={1.5} alignItems="center">
@@ -434,8 +434,8 @@ export function InterviewLayout({
                             cursor="pointer"
                             transition="all 0.15s ease"
                             _hover={{
-                              borderColor: "rgba(99,102,241,0.3)",
-                              background: "rgba(99,102,241,0.03)",
+                              borderColor: "var(--color-accent-border)",
+                              background: "var(--color-accent-muted)",
                               transform: "translateY(-1px)",
                             }}
                             onClick={() => handleSuggestedQuestion(question)}
@@ -586,12 +586,12 @@ export function InterviewLayout({
                     width="56px"
                     height="56px"
                     borderRadius="16px"
-                    background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+                    background="linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))"
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
                     mb={3}
-                    boxShadow="0 4px 16px rgba(99,102,241,0.25)"
+                    boxShadow="0 4px 16px rgba(109,93,246,0.22)"
                   >
                     <Text fontSize="xl" fontWeight="800" color="white" lineHeight="1">
                       {agentDisplayName.charAt(0).toUpperCase()}
@@ -637,7 +637,7 @@ export function InterviewLayout({
                     {qualityLabel}
                   </Badge>
                 ) : isAnalysisLoading ? (
-                  <Badge colorPalette="blue" variant="subtle" px={2} py={0.5} borderRadius="full" fontSize="2xs">En cours…</Badge>
+                  <Badge colorPalette="purple" variant="subtle" px={2} py={0.5} borderRadius="full" fontSize="2xs">En cours…</Badge>
                 ) : null}
               </HStack>
 
@@ -728,9 +728,9 @@ export function InterviewLayout({
                   <Box
                     p={3}
                     borderRadius="12px"
-                    backgroundColor="rgba(99,102,241,0.05)"
+                    backgroundColor="var(--color-accent-muted)"
                     borderWidth="1px"
-                    borderColor="rgba(99,102,241,0.12)"
+                    borderColor="var(--color-accent-border)"
                   >
                     <Text fontSize="2xs" fontWeight="700" textTransform="uppercase" letterSpacing="0.08em" color="var(--color-accent)" mb={1}>
                       Prochain geste

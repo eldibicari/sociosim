@@ -52,14 +52,14 @@ function SectionHeader({ eyebrow, title, description, count }: {
     <HStack justifyContent="space-between" alignItems="flex-end" gap={4}>
       <VStack alignItems="flex-start" gap={1.5}>
         <HStack gap={2} alignItems="center">
-          <Box width="16px" height="1.5px" background="linear-gradient(90deg, #6366f1, #8b5cf6)" borderRadius="full" />
-          <Text fontSize="2xs" textTransform="uppercase" letterSpacing="0.22em" color="blue.600" fontWeight="700">
+          <Box width="16px" height="1.5px" background="linear-gradient(90deg, var(--color-accent), var(--color-accent-hover))" borderRadius="full" />
+          <Text fontSize="2xs" textTransform="uppercase" letterSpacing="0.22em" color="var(--color-accent)" fontWeight="700">
             {eyebrow}
           </Text>
         </HStack>
         <Heading size="md" letterSpacing="-0.02em">{title}</Heading>
         {description && (
-          <Text color="fg.muted" fontSize="sm" lineHeight="1.7" maxWidth="2xl">{description}</Text>
+          <Text color="var(--color-text-muted)" fontSize="sm" lineHeight="1.7" maxWidth="2xl">{description}</Text>
         )}
       </VStack>
       {count !== undefined && (
@@ -68,11 +68,11 @@ function SectionHeader({ eyebrow, title, description, count }: {
           py={1}
           borderRadius="full"
           borderWidth="1px"
-          borderColor="rgba(99,102,241,0.18)"
-          background="rgba(99,102,241,0.06)"
+          borderColor="var(--color-accent-border)"
+          background="var(--color-accent-muted)"
           flexShrink={0}
         >
-          <Text fontSize="xs" fontWeight="700" color="blue.700">
+          <Text fontSize="xs" fontWeight="700" color="var(--color-accent)">
             {count} persona{count !== 1 ? "s" : ""}
           </Text>
         </Box>
@@ -309,10 +309,10 @@ export default function PersonnasPage() {
 
   if (isLoading) {
     return (
-      <Box minHeight="100vh" background="linear-gradient(180deg, #f8fafc 0%, #eef4ff 40%, #ffffff 100%)" display="flex" alignItems="center" justifyContent="center">
+      <Box minHeight="100vh" background="var(--color-bg)" display="flex" alignItems="center" justifyContent="center">
         <VStack gap={4}>
-          <Spinner size="lg" color="blue.500" />
-          <Text color="fg.muted">Chargement des personas...</Text>
+          <Spinner size="lg" color="var(--color-accent)" />
+          <Text color="var(--color-text-muted)">Chargement des personas...</Text>
         </VStack>
       </Box>
     );
@@ -321,14 +321,14 @@ export default function PersonnasPage() {
   return (
     <Box
       minHeight="100vh"
-      background="linear-gradient(180deg, #f8fafc 0%, #eef4ff 35%, #ffffff 100%)"
+      background="var(--color-bg)"
       position="relative"
       overflow="hidden"
     >
       <MimesisAppSidebar />
       {/* Background blobs */}
-      <Box position="absolute" top="-80px" right="-60px" width="360px" height="360px" borderRadius="full" background="rgba(99,102,241,0.07)" filter="blur(80px)" pointerEvents="none" />
-      <Box position="absolute" top="400px" left="-80px" width="280px" height="280px" borderRadius="full" background="rgba(14,165,233,0.07)" filter="blur(90px)" pointerEvents="none" />
+      <Box position="absolute" top="-80px" right="-60px" width="360px" height="360px" borderRadius="full" background="rgba(109,93,246,0.07)" filter="blur(80px)" pointerEvents="none" />
+      <Box position="absolute" top="400px" left="-80px" width="280px" height="280px" borderRadius="full" background="rgba(109,93,246,0.05)" filter="blur(90px)" pointerEvents="none" />
 
       <Container maxWidth="7xl" py={{ base: 6, md: 10 }} px={{ base: 4, md: 6 }} position="relative" paddingLeft={{ base: 4, lg: "236px" }}>
         <VStack gap={10} alignItems="stretch">
@@ -337,25 +337,25 @@ export default function PersonnasPage() {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <HStack justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={4}>
               <VStack alignItems="flex-start" gap={1}>
-                <Text fontSize="xs" color="fg.muted" fontWeight="500" letterSpacing="0.04em">
+                <Text fontSize="xs" color="var(--color-text-muted)" fontWeight="500" letterSpacing="0.04em">
                   {user?.user_metadata?.firstName
                     ? `Bonjour, ${user.user_metadata.firstName}`
                     : "Bienvenue"}
                 </Text>
-                <Heading fontSize={{ base: "2xl", md: "3xl" }} fontWeight="800" letterSpacing="-0.03em" color="gray.900">
+                <Heading fontSize={{ base: "2xl", md: "3xl" }} fontWeight="800" letterSpacing="-0.03em" color="var(--color-text-primary)">
                   Choisir un enquêté virtuel
                 </Heading>
               </VStack>
               <HStack gap={5} alignItems="center">
                 <HStack gap={4} display={{ base: "none", md: "flex" }}>
                   <VStack gap={0} alignItems="center">
-                    <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" color="gray.900">{agents.length}</Text>
-                    <Text fontSize="2xs" color="fg.muted">personas</Text>
+                    <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" color="var(--color-text-primary)">{agents.length}</Text>
+                    <Text fontSize="2xs" color="var(--color-text-muted)">personas</Text>
                   </VStack>
                   <Box width="1px" height="24px" background="var(--color-border)" />
                   <VStack gap={0} alignItems="center">
-                    <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" color="gray.900">{interactedCount}</Text>
-                    <Text fontSize="2xs" color="fg.muted">utilisés</Text>
+                    <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" color="var(--color-text-primary)">{interactedCount}</Text>
+                    <Text fontSize="2xs" color="var(--color-text-muted)">utilisés</Text>
                   </VStack>
                 </HStack>
                 {user_admin && (
@@ -388,7 +388,7 @@ export default function PersonnasPage() {
                     left={4}
                     top="50%"
                     transform="translateY(-50%)"
-                    color="fg.muted"
+                    color="var(--color-text-muted)"
                     pointerEvents="none"
                     zIndex={1}
                   >
@@ -402,7 +402,7 @@ export default function PersonnasPage() {
                     borderRadius="xl"
                     borderColor="rgba(148,163,184,0.2)"
                     background="rgba(248,250,252,0.8)"
-                    _focus={{ borderColor: "blue.400", boxShadow: "0 0 0 3px rgba(99,102,241,0.1)", background: "white" }}
+                    _focus={{ borderColor: "var(--color-accent)", boxShadow: "0 0 0 3px var(--color-accent-muted)", background: "white" }}
                     _placeholder={{ color: "fg.muted" }}
                   />
                 </Box>
@@ -416,7 +416,7 @@ export default function PersonnasPage() {
                         size="sm"
                         borderRadius="full"
                         variant={activeFilter === opt.key ? "solid" : "ghost"}
-                        colorPalette={activeFilter === opt.key ? "blue" : "gray"}
+                        colorPalette={activeFilter === opt.key ? "purple" : "gray"}
                         onClick={() => setActiveFilter(opt.key)}
                         fontWeight={activeFilter === opt.key ? "700" : "500"}
                         px={4}
@@ -428,8 +428,8 @@ export default function PersonnasPage() {
                     ))}
                   </HStack>
                   <HStack gap={1.5} alignItems="center">
-                    <Users size={12} color="var(--chakra-colors-fg-muted)" />
-                    <Text fontSize="xs" color="fg.muted" fontWeight="500">
+                    <Users size={12} color="var(--color-text-muted)" />
+                    <Text fontSize="xs" color="var(--color-text-muted)" fontWeight="500">
                       {filteredAgents.length} / {agents.length}
                     </Text>
                   </HStack>
@@ -466,16 +466,16 @@ export default function PersonnasPage() {
               textAlign="center"
             >
               <VStack gap={4} alignItems="center" maxWidth="360px" mx="auto">
-                <Box width="56px" height="56px" borderRadius="18px" background="linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08))" borderWidth="1px" borderColor="rgba(99,102,241,0.14)" display="flex" alignItems="center" justifyContent="center">
-                  <Users size={24} color="#6366f1" />
+                <Box width="56px" height="56px" borderRadius="18px" background="var(--color-accent-muted)" borderWidth="1px" borderColor="var(--color-accent-border)" display="flex" alignItems="center" justifyContent="center">
+                  <Users size={24} color="var(--color-accent)" />
                 </Box>
                 <VStack gap={1}>
                   <Heading size="md">Aucun persona disponible</Heading>
-                  <Text color="fg.muted" fontSize="sm" lineHeight="1.75">
+                  <Text color="var(--color-text-muted)" fontSize="sm" lineHeight="1.75">
                     Créez votre premier persona pour commencer les simulations d&apos;entretien.
                   </Text>
                 </VStack>
-                <Button colorPalette="blue" borderRadius="xl" fontWeight="700" onClick={() => router.push("/personnas/new")}>
+                <Button borderRadius="xl" fontWeight="700" onClick={() => router.push("/personnas/new")} background="var(--color-accent)" color="white" _hover={{ background: "var(--color-accent-hover)" }}>
                   <Plus size={15} />
                   Créer un persona
                 </Button>
@@ -485,7 +485,7 @@ export default function PersonnasPage() {
 
           {agents.length > 0 && filteredAgents.length === 0 && !error && (
             <Box borderRadius="2xl" background="rgba(248,250,252,0.9)" px={6} py={10} textAlign="center">
-              <Text color="fg.muted">Aucun persona ne correspond à cette recherche.</Text>
+              <Text color="var(--color-text-muted)">Aucun persona ne correspond à cette recherche.</Text>
             </Box>
           )}
 

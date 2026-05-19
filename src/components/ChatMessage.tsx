@@ -33,8 +33,8 @@ export function ChatMessage({
             px={4}
             py="11px"
             borderRadius="20px 4px 20px 20px"
-            background="rgba(91,91,214,0.1)"
-            boxShadow="0 1px 4px rgba(91,91,214,0.08)"
+            background="var(--color-accent-soft)"
+            boxShadow="0 1px 4px rgba(109,93,246,0.08)"
           >
             <Text
               fontSize="sm"
@@ -74,13 +74,13 @@ export function ChatMessage({
           width="32px"
           height="32px"
           borderRadius="10px"
-          background="linear-gradient(135deg, #6366f1, #8b5cf6)"
+          background="linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))"
           display="flex"
           alignItems="center"
           justifyContent="center"
           flexShrink={0}
           marginTop="2px"
-          boxShadow="0 2px 8px rgba(99,102,241,0.22)"
+          boxShadow="0 2px 8px rgba(109,93,246,0.22)"
         >
           <Text fontSize="xs" fontWeight="700" color="white" lineHeight="1">
             {(agentName ?? "A").charAt(0).toUpperCase()}

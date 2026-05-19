@@ -121,16 +121,16 @@ function HistoryCard({
       padding={3}
       borderRadius="2xl"
       borderWidth="1px"
-      borderColor={isCurrent ? "cyan.200" : "var(--color-border)"}
-      backgroundColor={isCurrent ? "cyan.50" : "var(--color-surface)"}
+      borderColor={isCurrent ? "var(--color-accent-border)" : "var(--color-border)"}
+      backgroundColor={isCurrent ? "var(--color-accent-soft)" : "var(--color-surface)"}
       boxShadow={
-        isCurrent ? "0 12px 28px rgba(8, 145, 178, 0.10)" : "0 6px 18px rgba(15, 23, 42, 0.04)"
+        isCurrent ? "0 12px 28px rgba(109, 93, 246, 0.10)" : "0 6px 18px rgba(15, 23, 42, 0.04)"
       }
       transition="transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease"
       _hover={{
         transform: "translateY(-1px)",
-        boxShadow: isCurrent ? "0 14px 30px rgba(8, 145, 178, 0.12)" : "0 10px 22px rgba(15, 23, 42, 0.08)",
-        borderColor: isCurrent ? "cyan.300" : "rgba(15, 23, 42, 0.16)",
+        boxShadow: isCurrent ? "0 14px 30px rgba(109, 93, 246, 0.14)" : "0 10px 22px rgba(15, 23, 42, 0.08)",
+        borderColor: isCurrent ? "var(--color-accent)" : "var(--color-border-strong)",
       }}
     >
       <HStack justify="space-between" align="start" gap={3}>
@@ -144,23 +144,23 @@ function HistoryCard({
           <Stack gap={1}>
             <HStack gap={2} flexWrap="wrap">
               {isCurrent ? (
-                <Badge colorPalette="cyan" variant="subtle" borderRadius="full">
+                <Badge colorPalette="purple" variant="subtle" borderRadius="full">
                   Actuel
                 </Badge>
               ) : null}
               {isPinned ? (
-                <Badge colorPalette="blue" variant="subtle" borderRadius="full">
+                <Badge colorPalette="purple" variant="subtle" borderRadius="full">
                   Epingle
                 </Badge>
               ) : null}
             </HStack>
-            <Text fontSize="sm" fontWeight="700" color="fg.default" lineClamp={2}>
+            <Text fontSize="sm" fontWeight="700" color="var(--color-text-primary)" lineClamp={2}>
               {title}
             </Text>
-            <Text fontSize="xs" color="fg.muted">
+            <Text fontSize="xs" color="var(--color-text-muted)">
               {item.agentName}
             </Text>
-            <Text fontSize="xs" color="fg.muted">
+            <Text fontSize="xs" color="var(--color-text-muted)">
               {item.date} · {formatRepliesLabel(item.qaCount)}
             </Text>
           </Stack>
@@ -173,8 +173,8 @@ function HistoryCard({
               size="2xs"
               variant="ghost"
               borderRadius="full"
-              color={isCurrent ? "cyan.900" : "fg.muted"}
-              _hover={{ backgroundColor: isCurrent ? "cyan.100" : "bg.muted" }}
+              color={isCurrent ? "var(--color-accent)" : "var(--color-text-muted)"}
+              _hover={{ backgroundColor: isCurrent ? "var(--color-accent-soft)" : "var(--color-surface-muted)" }}
             >
               <MoreHorizontal size={14} />
             </IconButton>
@@ -626,7 +626,7 @@ export function InterviewSidebar({
                   flex="1"
                   justifyContent="start"
                   borderRadius="full"
-                  colorPalette="blue"
+                  colorPalette="purple"
                   onClick={handleNewInterview}
                   loading={isCreatingSession}
                   disabled={isCreatingSession}
@@ -701,11 +701,11 @@ export function InterviewSidebar({
                   paddingX={3}
                   paddingY={2}
                   borderRadius="2xl"
-                  backgroundColor="rgba(59, 130, 246, 0.08)"
+                  backgroundColor="var(--color-accent-muted)"
                   borderWidth="1px"
-                  borderColor="rgba(59, 130, 246, 0.16)"
+                  borderColor="var(--color-accent-border)"
                 >
-                  <Text fontSize="sm" fontWeight="600" color={{ base: "blue.700", _dark: "blue.200" }}>
+                  <Text fontSize="sm" fontWeight="600" color="var(--color-accent)">
                     Mode focus conversations actif
                   </Text>
                   <Button size="xs" variant="ghost" borderRadius="full" onClick={() => setIsConversationFocus(false)}>
@@ -717,14 +717,14 @@ export function InterviewSidebar({
               <Box
                 borderRadius="24px"
                 borderWidth="1px"
-                borderColor="rgba(99,102,241,0.16)"
+                borderColor="var(--color-accent-border)"
                 overflow="hidden"
-                boxShadow="0 8px 28px rgba(99,102,241,0.08)"
+                boxShadow="var(--color-shadow-soft)"
               >
                 {/* Gradient header */}
                 <Box
                   position="relative"
-                  background="linear-gradient(135deg, rgba(239,246,255,0.95) 0%, rgba(237,233,254,0.8) 100%)"
+                  background="var(--color-accent-soft)"
                   px={4}
                   pt={4}
                   pb={3}
@@ -735,10 +735,10 @@ export function InterviewSidebar({
                     insetX={0}
                     top={0}
                     height="3px"
-                    background="linear-gradient(90deg, #6366f1, #8b5cf6, #0ea5e9)"
+                    background="linear-gradient(90deg, var(--color-accent), var(--color-accent-hover))"
                   />
                   <HStack gap={2} mb={2} flexWrap="wrap">
-                    <Badge colorPalette="blue" variant="subtle" borderRadius="full" px={2.5} py={0.5} fontSize="2xs" fontWeight="700">
+                    <Badge colorPalette="purple" variant="subtle" borderRadius="full" px={2.5} py={0.5} fontSize="2xs" fontWeight="700">
                       Persona active
                     </Badge>
                     <Badge colorPalette="green" variant="subtle" borderRadius="full" px={2.5} py={0.5} fontSize="2xs" fontWeight="700">
@@ -751,7 +751,7 @@ export function InterviewSidebar({
                     letterSpacing="-0.03em"
                     lineHeight="1.2"
                     style={{
-                      background: "linear-gradient(135deg, #4f46e5, #7c3aed)",
+                      background: "linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))",
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                     }}
@@ -759,7 +759,7 @@ export function InterviewSidebar({
                     {agentDisplayName ?? "Entretien"}
                   </Text>
                   {agentDescription ? (
-                    <Text fontSize="xs" color="fg.muted" lineHeight="1.6" mt={1} lineClamp={3}>
+                    <Text fontSize="xs" color="var(--color-text-muted)" lineHeight="1.6" mt={1} lineClamp={3}>
                       {agentDescription}
                     </Text>
                   ) : null}
@@ -775,23 +775,23 @@ export function InterviewSidebar({
                     {/* User + date */}
                     <HStack gap={3} flexWrap="wrap">
                       <Box flex="1">
-                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="fg.muted">
+                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="var(--color-text-muted)">
                           Enquêteur
                         </Text>
-                        <Text fontSize="xs" fontWeight="600" color="gray.700" mt={0.5}>{userName ?? "—"}</Text>
+                        <Text fontSize="xs" fontWeight="600" color="var(--color-text-primary)" mt={0.5}>{userName ?? "—"}</Text>
                       </Box>
                       <Box flex="1">
-                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="fg.muted">
+                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="var(--color-text-muted)">
                           Date
                         </Text>
-                        <Text fontSize="xs" fontWeight="600" color="gray.700" mt={0.5}>{dateDisplay ?? "—"}</Text>
+                        <Text fontSize="xs" fontWeight="600" color="var(--color-text-primary)" mt={0.5}>{dateDisplay ?? "—"}</Text>
                       </Box>
                     </HStack>
 
                     <InterviewGridPanel agentId={agentId ?? null} />
 
                     {/* Divider */}
-                    <Box height="1px" background="linear-gradient(90deg, rgba(99,102,241,0.15) 0%, rgba(148,163,184,0.08) 100%)" />
+                    <Box height="1px" background="var(--color-border)" />
 
                     {/* Stats */}
                     <HStack gap={3}>
@@ -800,11 +800,11 @@ export function InterviewSidebar({
                         px={3}
                         py={2}
                         borderRadius="12px"
-                        background="rgba(99,102,241,0.05)"
+                        background="var(--color-accent-muted)"
                         borderWidth="1px"
-                        borderColor="rgba(99,102,241,0.1)"
+                        borderColor="var(--color-accent-border)"
                       >
-                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="fg.muted">
+                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="var(--color-text-muted)">
                           Réponses
                         </Text>
                         <Text
@@ -812,7 +812,7 @@ export function InterviewSidebar({
                           fontSize="xl"
                           letterSpacing="-0.03em"
                           style={{
-                            background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                            background: "linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))",
                             WebkitBackgroundClip: "text",
                             WebkitTextFillColor: "transparent",
                           }}
@@ -829,10 +829,10 @@ export function InterviewSidebar({
                         borderWidth="1px"
                         borderColor="rgba(16,185,129,0.1)"
                       >
-                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="fg.muted">
+                        <Text fontSize="2xs" fontWeight="700" letterSpacing="0.08em" textTransform="uppercase" color="var(--color-text-muted)">
                           Tokens
                         </Text>
-                        <Text fontSize="xs" fontWeight="700" color="gray.700" mt={0.5}>
+                        <Text fontSize="xs" fontWeight="700" color="var(--color-text-primary)" mt={0.5}>
                           {stats.inputTokens + stats.outputTokens > 0
                             ? `${stats.inputTokens + stats.outputTokens}`
                             : "—"}
@@ -895,8 +895,8 @@ export function InterviewSidebar({
             >
               <HStack justify="space-between" align="center">
                 <HStack gap={2}>
-                  <Box height="1px" width="14px" background="rgba(99,102,241,0.4)" />
-                  <Text fontSize="2xs" fontWeight="700" letterSpacing="0.12em" textTransform="uppercase" color="fg.muted">
+                  <Box height="1px" width="14px" background="var(--color-accent)" opacity={0.4} />
+                  <Text fontSize="2xs" fontWeight="700" letterSpacing="0.12em" textTransform="uppercase" color="var(--color-text-muted)">
                     Conversations
                   </Text>
                 </HStack>
@@ -943,7 +943,7 @@ export function InterviewSidebar({
                     {historyError}
                   </Text>
                 ) : historyItems.length === 0 ? (
-                  <Text fontSize="sm" color="fg.muted">
+                  <Text fontSize="sm" color="var(--color-text-muted)">
                     Aucun entretien précédent.
                   </Text>
                 ) : (
@@ -953,7 +953,7 @@ export function InterviewSidebar({
                         <Text
                           fontSize="2xs"
                           fontWeight="700"
-                          color="fg.muted"
+                          color="var(--color-text-muted)"
                           textTransform="uppercase"
                           letterSpacing="0.1em"
                         >
@@ -977,7 +977,7 @@ export function InterviewSidebar({
                         <Text
                           fontSize="2xs"
                           fontWeight="700"
-                          color="fg.muted"
+                          color="var(--color-text-muted)"
                           textTransform="uppercase"
                           letterSpacing="0.1em"
                         >
@@ -1004,14 +1004,14 @@ export function InterviewSidebar({
                       <Text
                         fontSize="2xs"
                         fontWeight="700"
-                        color="fg.muted"
+                        color="var(--color-text-muted)"
                         textTransform="uppercase"
                         letterSpacing="0.1em"
                       >
                         Récents
                       </Text>
                       {recentHistoryItems.length === 0 ? (
-                        <Text fontSize="sm" color="fg.muted">
+                        <Text fontSize="sm" color="var(--color-text-muted)">
                           Aucun autre chat récent.
                         </Text>
                       ) : (
@@ -1055,9 +1055,9 @@ export function InterviewSidebar({
           right={0}
           height="100dvh"
           width={{ base: "100%", sm: "min(92vw, 520px)" }}
-          backgroundColor="bg.surface"
+          backgroundColor="var(--color-surface)"
           borderLeft="1px solid"
-          borderLeftColor="border.muted"
+          borderLeftColor="var(--color-border)"
           zIndex={45}
           padding={6}
           overflowY="auto"
@@ -1102,7 +1102,7 @@ export function InterviewSidebar({
                 dangerouslySetInnerHTML={{ __html: introHtml }}
               />
             ) : (
-              <Text color="fg.muted">Chargement du guide d&apos;entretien...</Text>
+              <Text color="var(--color-text-muted)">Chargement du guide d&apos;entretien...</Text>
             )}
           </VStack>
         </Box>
