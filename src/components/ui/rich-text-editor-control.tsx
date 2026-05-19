@@ -61,12 +61,13 @@ export function createBooleanControl(config: BooleanControlConfig) {
       const dynamicProps = getProps ? getProps(editor) : {}
       const variant =
         getVariant && !getProps ? getVariant(editor) : dynamicProps.variant
+      const IconComponent = Icon as React.ComponentType
 
       return (
         <ButtonControl
           ref={ref}
           label={label}
-          icon={<Icon />}
+          icon={<IconComponent />}
           variant={variant}
           onClick={() => command(editor)}
           disabled={disabled}
