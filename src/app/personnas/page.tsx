@@ -22,7 +22,6 @@ import { isAdminLike } from "@/lib/agentPolicy";
 import { type Agent } from "@/lib/agents";
 import { AgentCard } from "./components/AgentCard";
 import { groupAgentsByCreator } from "./groupAgents";
-import { MimesisAppSidebar } from "@/app/components/MimesisAppSidebar";
 
 interface InterviewWithDetails {
   agent_id?: string;
@@ -148,8 +147,8 @@ export default function PersonnasPage() {
   const deferredSearch = useDeferredValue(search);
 
   useEffect(() => {
-    document.body.classList.add("hide-footer", "hide-header");
-    return () => { document.body.classList.remove("hide-footer", "hide-header"); };
+    document.body.classList.add("hide-footer");
+    return () => { document.body.classList.remove("hide-footer"); };
   }, []);
 
   useEffect(() => {
@@ -325,12 +324,11 @@ export default function PersonnasPage() {
       position="relative"
       overflow="hidden"
     >
-      <MimesisAppSidebar />
       {/* Background blobs */}
       <Box position="absolute" top="-80px" right="-60px" width="360px" height="360px" borderRadius="full" background="rgba(109,93,246,0.07)" filter="blur(80px)" pointerEvents="none" />
       <Box position="absolute" top="400px" left="-80px" width="280px" height="280px" borderRadius="full" background="rgba(109,93,246,0.05)" filter="blur(90px)" pointerEvents="none" />
 
-      <Container maxWidth="7xl" py={{ base: 6, md: 10 }} px={{ base: 4, md: 6 }} position="relative" paddingLeft={{ base: 4, lg: "236px" }}>
+      <Container maxWidth="7xl" py={{ base: 6, md: 10 }} px={{ base: 4, md: 6 }} position="relative">
         <VStack gap={10} alignItems="stretch">
 
           {/* ── Hero header ── */}
