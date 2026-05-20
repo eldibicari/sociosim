@@ -30,10 +30,7 @@ function arrayToMultiline(values: string[]) {
 }
 
 function multilineToArray(value: string) {
-  return value
-    .split(/\r?\n|;/)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  return value.split(/\r?\n/);
 }
 
 function SectionBlock({
@@ -179,9 +176,14 @@ export default function PersonaConfigBuilder({
             <Grid templateColumns={{ base: "1fr", lg: "repeat(2, minmax(0, 1fr))" }} gap={4}>
               <Field.Root>
                 <Field.Label fontSize="sm">Nom utilisé pour la simulation</Field.Label>
-                <Input value={personaName} readOnly backgroundColor="white" />
+                <Input
+                  value={value.identity.firstName || personaName}
+                  onChange={(event) => updateIdentity({ firstName: event.target.value })}
+                  placeholder="Camille, Karim, Zoé..."
+                  backgroundColor="white"
+                />
                 <Field.HelperText fontSize="xs" color="fg.muted">
-                  Repris automatiquement depuis le nom du persona dans la colonne de gauche.
+                  Par défaut repris du nom du persona, mais modifiable indépendamment.
                 </Field.HelperText>
               </Field.Root>
 
