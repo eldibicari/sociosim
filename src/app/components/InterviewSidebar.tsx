@@ -624,7 +624,8 @@ export function InterviewSidebar({
                 <Button
                   size="sm"
                   flex="1"
-                  justifyContent="start"
+                  justifyContent="center"
+                  gap={2}
                   borderRadius="full"
                   colorPalette="purple"
                   onClick={handleNewInterview}
