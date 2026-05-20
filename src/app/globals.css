@@ -337,7 +337,15 @@ select {
 
 /* ─── SIDEBAR LAYOUT ─── */
 body.hide-footer footer { display: none !important; }
-body.hide-header header { display: none !important; }
+
+body.hide-header header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
 @media (min-width: 1024px) {
   :root { --sidebar-offset: 220px; }
   .personnas-with-sidebar { padding-left: 220px; }
