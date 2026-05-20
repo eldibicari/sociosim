@@ -83,7 +83,7 @@ function SectionHeader({ eyebrow, title, description, count }: {
 // ─── Agent grid ───────────────────────────────────────────────────────────────
 function AgentGrid({
   agents,
-  isCreatingSession,
+  creatingSessionAgentId,
   togglingAgentId,
   interactedAgents,
   userAdmin,
@@ -96,7 +96,7 @@ function AgentGrid({
   indexOffset = 0,
 }: {
   agents: Agent[];
-  isCreatingSession: boolean;
+  creatingSessionAgentId: string | null;
   togglingAgentId: string | null;
   interactedAgents: string[];
   userAdmin: boolean;
@@ -116,7 +116,7 @@ function AgentGrid({
           key={agent.id}
           agent={agent}
           index={indexOffset + i}
-          isCreatingSession={isCreatingSession}
+          isCreatingSession={creatingSessionAgentId === agent.id}
           togglingAgentId={togglingAgentId}
           hasInteracted={interactedAgents.includes(agent.id)}
           userAdmin={userAdmin}
@@ -140,7 +140,7 @@ export default function PersonnasPage() {
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState<PersonnaFilter>("all");
   const [isLoading, setIsLoading] = useState(true);
-  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [creatingSessionAgentId, setCreatingSessionAgentId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [interactedAgents, setInteractedAgents] = useState<string[]>([]);
   const [togglingAgentId, setTogglingAgentId] = useState<string | null>(null);
@@ -207,7 +207,7 @@ export default function PersonnasPage() {
 
   const handleSelectAgent = async (agentId: string) => {
     try {
-      setIsCreatingSession(true);
+      setCreatingSessionAgentId(agentId);
       if (!user?.id) { router.push("/login"); return; }
       const response = await fetch("/api/sessions", {
         method: "POST",
@@ -225,7 +225,7 @@ export default function PersonnasPage() {
       console.error("Error selecting agent:", err);
       setError("Une erreur est survenue lors de la création de la session");
     } finally {
-      setIsCreatingSession(false);
+      setCreatingSessionAgentId(null);
     }
   };
 
@@ -294,7 +294,7 @@ export default function PersonnasPage() {
   ];
 
   const gridProps = {
-    isCreatingSession,
+    creatingSessionAgentId,
     togglingAgentId,
     interactedAgents,
     userAdmin: user_admin,
