@@ -28,6 +28,7 @@ import {
   PanelLeftOpen,
   Pin,
   Pencil,
+  Settings2,
   Trash2,
   X,
 } from "lucide-react";
@@ -746,19 +747,39 @@ export function InterviewSidebar({
                       En cours
                     </Badge>
                   </HStack>
-                  <Text
-                    fontWeight="900"
-                    fontSize="lg"
-                    letterSpacing="-0.03em"
-                    lineHeight="1.2"
-                    style={{
-                      background: "linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    {agentDisplayName ?? "Entretien"}
-                  </Text>
+                  <HStack justify="space-between" align="center" gap={2}>
+                    <Text
+                      fontWeight="900"
+                      fontSize="lg"
+                      letterSpacing="-0.03em"
+                      lineHeight="1.2"
+                      style={{
+                        background: "linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                      }}
+                    >
+                      {agentDisplayName ?? "Entretien"}
+                    </Text>
+                    {agentId ? (
+                      <Tooltip.Root openDelay={150}>
+                        <Tooltip.Trigger asChild>
+                          <IconButton
+                            aria-label="Modifier ce persona"
+                            size="xs"
+                            variant="ghost"
+                            borderRadius="full"
+                            onClick={() => router.push(`/personnas/${agentId}/edit`)}
+                          >
+                            <Settings2 size={14} />
+                          </IconButton>
+                        </Tooltip.Trigger>
+                        <Tooltip.Positioner>
+                          <Tooltip.Content px={3} py={2}>Modifier ce persona</Tooltip.Content>
+                        </Tooltip.Positioner>
+                      </Tooltip.Root>
+                    ) : null}
+                  </HStack>
                   {agentDescription ? (
                     <Text fontSize="xs" color="var(--color-text-muted)" lineHeight="1.6" mt={1} lineClamp={3}>
                       {agentDescription}
