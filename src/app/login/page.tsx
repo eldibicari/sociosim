@@ -188,6 +188,8 @@ function LoginPageInner() {
                 Adresse e-mail
               </Field.Label>
               <Input
+                id="login-email"
+                name="email"
                 type="email"
                 value={form.email}
                 onChange={handleChange("email")}
@@ -238,6 +240,8 @@ function LoginPageInner() {
                 }
               >
                 <Input
+                  id="login-password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   value={form.password}
                   onChange={handleChange("password")}
