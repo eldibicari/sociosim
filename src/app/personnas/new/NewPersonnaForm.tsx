@@ -9,6 +9,8 @@ import {
   HStack,
   IconButton,
   Input,
+  Popover,
+  Portal,
   Textarea,
   VStack,
 } from "@chakra-ui/react";
@@ -377,14 +379,65 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                                 ? "Valide"
                                 : "Invalide"}
                         </Badge>
-                        <IconButton
-                          aria-label="Plus d'infos sur la validation"
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => setValidationInfoOpen((open) => !open)}
+                        <Popover.Root
+                          open={validationInfoOpen}
+                          onOpenChange={(e) => setValidationInfoOpen(e.open)}
+                          positioning={{ placement: "bottom-end" }}
                         >
-                          <Info size={14} />
-                        </IconButton>
+                          <Popover.Trigger asChild>
+                            <IconButton
+                              aria-label="Plus d'infos sur la validation"
+                              size="xs"
+                              variant="ghost"
+                            >
+                              <Info size={14} />
+                            </IconButton>
+                          </Popover.Trigger>
+                          <Portal>
+                            <Popover.Positioner>
+                              <Popover.Content
+                                maxWidth="340px"
+                                borderRadius="lg"
+                                boxShadow="lg"
+                                borderColor="var(--color-border)"
+                              >
+                                <Popover.Arrow>
+                                  <Popover.ArrowTip />
+                                </Popover.Arrow>
+                                <Popover.Body padding={4}>
+                                  <Box
+                                    fontSize="xs"
+                                    color="fg.muted"
+                                    lineHeight="1.7"
+                                  >
+                                    <Box
+                                      fontSize="sm"
+                                      fontWeight="semibold"
+                                      color="var(--color-text-primary)"
+                                      marginBottom={2}
+                                    >
+                                      Validation du prompt
+                                    </Box>
+                                    Cette vérification analyse uniquement le prompt
+                                    système actif : voix, contexte, usages, tensions et
+                                    garde-fous. Elle ne vérifie pas la grille
+                                    d&apos;entretien ni le paramétrage guidé.
+                                    <Box
+                                      as="ul"
+                                      marginTop={3}
+                                      paddingLeft={4}
+                                      style={{ listStyleType: "disc" }}
+                                    >
+                                      <li>Clarté du profil et de la voix</li>
+                                      <li>Situations, usages et tensions observables</li>
+                                      <li>Absence d&apos;incohérences bloquantes</li>
+                                    </Box>
+                                  </Box>
+                                </Popover.Body>
+                              </Popover.Content>
+                            </Popover.Positioner>
+                          </Portal>
+                        </Popover.Root>
                         <Button
                           type="submit"
                           size="sm"
@@ -398,29 +451,6 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       </HStack>
                     }
                   />
-                  {validationInfoOpen && (
-                    <Box
-                      marginTop={2}
-                      borderRadius="md"
-                      padding={3}
-                      backgroundColor={{ base: "blue.50", _dark: "gray.800" }}
-                      borderLeft="3px solid"
-                      borderLeftColor="blue.500"
-                    >
-                      <Box fontSize="xs" color="fg.muted" lineHeight="1.6">
-                        Cette vérification analyse uniquement le prompt système actif : voix,
-                        contexte, usages, tensions et garde-fous. Elle ne vérifie pas la grille
-                        d&apos;entretien ni le paramétrage guidé.
-                        <br />
-                        <br />
-                        - clarté du profil et de la voix
-                        <br />
-                        - situations, usages et tensions observables
-                        <br />
-                        - absence d&apos;incohérences bloquantes
-                      </Box>
-                    </Box>
-                  )}
                   {(review || reviewError) && (
                     <Box marginTop={2}>
                       <PromptReviewSidebar
