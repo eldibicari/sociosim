@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withTimeout } from "@/lib/withTimeout";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 const DEFAULT_BASE_URL = "http://localhost:8088";
 
 export async function POST(request: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json().catch(() => null);
     const content = body?.content?.trim();
 

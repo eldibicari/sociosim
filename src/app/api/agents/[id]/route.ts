@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { user } = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id: agentId } = await params;
     if (!agentId) {
       return NextResponse.json({ error: "Missing agent id" }, { status: 400 });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 /**
  * GET /api/interviews/agent?interviewId=...
@@ -7,6 +8,11 @@ import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
  */
 export async function GET(request: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const interviewId = searchParams.get("interviewId");
 

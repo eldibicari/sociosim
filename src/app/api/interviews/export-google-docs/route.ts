@@ -6,6 +6,7 @@ import {
   InterviewExportError,
 } from "@/lib/interviewExport";
 import { createGoogleOAuthClient } from "@/lib/googleOAuth";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 const GOOGLE_TOKEN_COOKIE = "google_access_token";
 
@@ -17,6 +18,11 @@ const isUnauthorizedError = (error: unknown) => {
 
 export async function POST(req: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const accessToken = req.cookies.get(GOOGLE_TOKEN_COOKIE)?.value;
     if (!accessToken) {
       return NextResponse.json(

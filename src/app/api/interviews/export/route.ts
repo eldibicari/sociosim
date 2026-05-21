@@ -5,6 +5,7 @@ import {
   fetchInterviewExportData,
   InterviewExportError,
 } from "@/lib/interviewExport";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 const escapeHtml = (value: string) =>
   value
@@ -17,6 +18,11 @@ const escapeHtml = (value: string) =>
 export async function GET(req: NextRequest) {
   let browser;
   try {
+    const { user } = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url);
     const interviewId = searchParams.get("interviewId");
 

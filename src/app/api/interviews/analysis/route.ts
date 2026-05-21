@@ -4,6 +4,7 @@ import { analyzeInterviewMessages } from "@/lib/interviewAnalysis";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
 import { parseInterviewGrid } from "@/lib/interviewGridParser";
 import type { GridTheme } from "@/lib/personaConfig";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 /**
  * GET /api/interviews/analysis?interviewId=...
@@ -11,6 +12,11 @@ import type { GridTheme } from "@/lib/personaConfig";
  */
 export async function GET(request: NextRequest) {
   try {
+    const { user } = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const interviewId = searchParams.get("interviewId");
 
