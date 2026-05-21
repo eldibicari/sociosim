@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         system_prompt: systemPrompt,
         edited_by: user.id,
         version: 1,
-        published: false,
+        published: true,
       });
 
     if (promptError) {
