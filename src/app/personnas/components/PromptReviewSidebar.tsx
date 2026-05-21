@@ -1,4 +1,8 @@
-import { Box, Text, VStack } from "@chakra-ui/react";
+"use client";
+
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import { Info } from "lucide-react";
+import { useState } from "react";
 
 type CauldronError = {
   code: string;
@@ -47,36 +51,50 @@ export default function PromptReviewSidebar({
   isCurrent = true,
 }: PromptReviewSidebarProps) {
   const status = statusCopy(review, isReviewing);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   return (
     <VStack alignItems="stretch" gap={4}>
-      <Box
-        borderRadius="md"
-        padding={3}
-        backgroundColor={{ base: "blue.50", _dark: "gray.800" }}
-        borderLeft="3px solid"
-        borderLeftColor="blue.500"
-      >
+      <HStack justify="space-between" align="center">
         <Text fontSize="sm" fontWeight="semibold">
-          Ce que nous vérifions
+          Validation du prompt
         </Text>
-        <Text fontSize="sm" color="fg.muted" marginTop={2}>
-          Cette vérification analyse uniquement le prompt système actif : la voix du
-          persona, son contexte, ses usages, ses tensions et ses garde-fous internes.
-          Elle ne vérifie pas la grille d&apos;entretien ni le paramétrage guidé.
-        </Text>
-        <VStack alignItems="stretch" gap={1} marginTop={3}>
-          <Text fontSize="sm" color="fg.muted">
-            - clarté du profil et de la voix
+        <Button
+          variant="ghost"
+          size="xs"
+          onClick={() => setInfoOpen((open) => !open)}
+          aria-label="Plus d'infos sur la validation"
+        >
+          <Info size={14} />
+        </Button>
+      </HStack>
+
+      {infoOpen && (
+        <Box
+          borderRadius="md"
+          padding={3}
+          backgroundColor={{ base: "blue.50", _dark: "gray.800" }}
+          borderLeft="3px solid"
+          borderLeftColor="blue.500"
+        >
+          <Text fontSize="xs" color="fg.muted">
+            Cette vérification analyse uniquement le prompt système actif : voix,
+            contexte, usages, tensions et garde-fous. Elle ne vérifie pas la grille
+            d&apos;entretien ni le paramétrage guidé.
           </Text>
-          <Text fontSize="sm" color="fg.muted">
-            - situations, usages et tensions observables
-          </Text>
-          <Text fontSize="sm" color="fg.muted">
-            - absence d&apos;incohérences bloquantes
-          </Text>
-        </VStack>
-      </Box>
+          <VStack alignItems="stretch" gap={1} marginTop={2}>
+            <Text fontSize="xs" color="fg.muted">
+              - clarté du profil et de la voix
+            </Text>
+            <Text fontSize="xs" color="fg.muted">
+              - situations, usages et tensions observables
+            </Text>
+            <Text fontSize="xs" color="fg.muted">
+              - absence d&apos;incohérences bloquantes
+            </Text>
+          </VStack>
+        </Box>
+      )}
 
       <Box borderRadius="md" padding={3} backgroundColor={status.bg}>
         <Text fontSize="sm" fontWeight="semibold" color={status.color}>

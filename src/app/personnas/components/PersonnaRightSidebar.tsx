@@ -32,14 +32,16 @@ export default function PersonnaRightSidebar({
       zIndex={10}
     >
       <VStack align="stretch" gap={4}>
-        <VStack align="stretch" gap={1}>
-          <Heading size="md">{title}</Heading>
-          {subtitle ? (
-            <Text fontSize="sm" color="fg.muted" lineHeight="1.6">
-              {subtitle}
-            </Text>
-          ) : null}
-        </VStack>
+        {title ? (
+          <VStack align="stretch" gap={1}>
+            <Heading size="md">{title}</Heading>
+            {subtitle ? (
+              <Text fontSize="sm" color="fg.muted" lineHeight="1.6">
+                {subtitle}
+              </Text>
+            ) : null}
+          </VStack>
+        ) : null}
         {children}
       </VStack>
     </Box>

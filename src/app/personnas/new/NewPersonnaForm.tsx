@@ -363,7 +363,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
             </Box>
           }
           right={
-            <PersonnaRightSidebar subtitle="Cette validation concerne seulement le prompt du persona. Elle verifie si sa voix, son contexte et ses tensions sont assez clairs pour etre utilises en entretien.">
+            <PersonnaRightSidebar title="">
               <PromptReviewSidebar
                 review={review}
                 reviewError={reviewError}
