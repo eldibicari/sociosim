@@ -93,6 +93,7 @@ All notable changes to this project will be documented in this file.
 - **Personnas Actions:** Align card actions with the interview sidebar styling and update prompt/admin controls.
 - **Personnas Validation:** Add Cauldron prompt review with sidebar feedback on create/edit and block publishing when invalid.
 ### Fixed
+- **PDF Export on Vercel:** Replace server-side Playwright PDF generation with printable browser pages for transcript and analysis exports.
 - **Persona Fiche:** Keep persona summary points readable without truncating lines and clarify that prompt validation only checks the persona prompt, not the interview guide.
 - **Chakra Buttons:** Replace invalid `variant="link"` usage with Chakra v3-compatible variants.
 - **Next Config:** Move `outputFileTracingIncludes` to the top-level Next.js config.

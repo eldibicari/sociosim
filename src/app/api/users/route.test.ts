@@ -2,20 +2,39 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import { GET, POST } from "./route";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 vi.mock("@/lib/supabaseServiceClient", () => ({
   createServiceSupabaseClient: vi.fn(),
 }));
+vi.mock("@/lib/supabaseAuthServer", () => ({
+  getAuthenticatedUser: vi.fn(),
+}));
 
 const mockCreateServiceSupabaseClient = vi.mocked(createServiceSupabaseClient);
+const mockGetAuthenticatedUser = vi.mocked(getAuthenticatedUser);
+
+const adminProfileClient = {
+  from: () => ({
+    select: () => ({
+      eq: () => ({
+        maybeSingle: vi.fn().mockResolvedValue({ data: { role: "admin" }, error: null }),
+      }),
+    }),
+  }),
+} as unknown as ReturnType<typeof createServiceSupabaseClient>;
 
 describe("GET /api/users", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetAuthenticatedUser.mockResolvedValue({
+      user: { id: "admin-1" } as Awaited<ReturnType<typeof getAuthenticatedUser>>["user"],
+      error: null,
+    });
   });
 
   it("returns users list", async () => {
-    mockCreateServiceSupabaseClient.mockReturnValue({
+    mockCreateServiceSupabaseClient.mockReturnValueOnce(adminProfileClient).mockReturnValueOnce({
       from: () => ({
         select: () => ({
           data: [
@@ -32,7 +51,7 @@ describe("GET /api/users", () => {
       }),
     } as unknown as ReturnType<typeof mockCreateServiceSupabaseClient>);
 
-    const response = await GET();
+    const response = await GET(new NextRequest("http://localhost/api/users"));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -50,7 +69,7 @@ describe("GET /api/users", () => {
   });
 
   it("returns 500 when profile query fails", async () => {
-    mockCreateServiceSupabaseClient.mockReturnValue({
+    mockCreateServiceSupabaseClient.mockReturnValueOnce(adminProfileClient).mockReturnValueOnce({
       from: () => ({
         select: () => ({
           data: null,
@@ -59,7 +78,7 @@ describe("GET /api/users", () => {
       }),
     } as unknown as ReturnType<typeof mockCreateServiceSupabaseClient>);
 
-    const response = await GET();
+    const response = await GET(new NextRequest("http://localhost/api/users"));
     const body = await response.json();
 
     expect(response.status).toBe(500);
@@ -73,7 +92,7 @@ describe("GET /api/users", () => {
     });
     const upsert = vi.fn().mockResolvedValue({ error: null });
 
-    mockCreateServiceSupabaseClient.mockReturnValue({
+    mockCreateServiceSupabaseClient.mockReturnValueOnce(adminProfileClient).mockReturnValueOnce({
       auth: {
         admin: {
           inviteUserByEmail,

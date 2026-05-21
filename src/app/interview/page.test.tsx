@@ -108,6 +108,12 @@ async function renderInterviewPage() {
   });
 }
 
+async function waitForAgentName() {
+  await waitFor(() => {
+    expect(screen.getAllByText(/^Oriane$/i).length).toBeGreaterThan(0);
+  });
+}
+
 describe("InterviewPage - Authentication & Session Setup", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -213,10 +219,7 @@ describe("InterviewPage - Agent Loading", () => {
 
     await renderInterviewPage();
 
-    // Agent name should be displayed in header (loaded asynchronously)
-    // The mock doesn't return agent data, so it will show "Chargement de l'agent..."
-    const header = screen.getByRole("heading", { level: 2 });
-    expect(header).toBeInTheDocument();
+    await waitForAgentName();
   });
 
   it("has session with sessionId for API requests", () => {
@@ -481,25 +484,24 @@ describe("InterviewPage - Exports", () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     await renderInterviewPage();
 
-    await screen.findByRole("heading", { name: /Oriane/i });
-    await user.click(screen.getByRole("button", { name: "Exporter en PDF" }));
+    await waitForAgentName();
+    await user.click(screen.getByRole("button", { name: "PDF" }));
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        "/api/interviews/export?interviewId=interview-123"
+      expect(window.open).toHaveBeenCalledWith(
+        "/api/interviews/export?interviewId=interview-123",
+        "_blank",
+        "noopener,noreferrer"
       );
     });
-    expect(URL.createObjectURL).toHaveBeenCalled();
-    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled();
-    expect(URL.revokeObjectURL).toHaveBeenCalled();
   });
 
   it("exports Google Docs and opens the document URL", async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     await renderInterviewPage();
 
-    await screen.findByRole("heading", { name: /Oriane/i });
-    await user.click(screen.getByRole("button", { name: "Exporter vers Google docs" }));
+    await waitForAgentName();
+    await user.click(screen.getByRole("button", { name: "Google Docs" }));
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(

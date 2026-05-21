@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chromium } from "playwright";
 import { analyzeInterviewMessages } from "@/lib/interviewAnalysis";
 import type { Message } from "@/lib/schemas";
 import {
   fetchInterviewExportData,
   InterviewExportError,
 } from "@/lib/interviewExport";
+import { withPrintableControls } from "@/lib/printableHtml";
 import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 const escapeHtml = (value: string) =>
@@ -34,7 +34,6 @@ const renderThemeList = (title: string, items: string[], emptyMessage: string) =
 `;
 
 export async function GET(req: NextRequest) {
-  let browser;
   try {
     const { user } = await getAuthenticatedUser(req);
     if (!user) {
@@ -383,25 +382,11 @@ export async function GET(req: NextRequest) {
       </html>
     `;
 
-    browser = await chromium.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
-    await page.setContent(html, { waitUntil: "networkidle" });
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "24px", bottom: "24px", left: "24px", right: "24px" },
-    });
-
-    const safeAgentName = exportData.agentName.replace(/\s+/g, "-").toLowerCase();
-    const fileName = `analyse-entretien-${safeAgentName}-${new Date().toISOString().slice(0, 10)}.pdf`;
-
-    return new NextResponse(new Uint8Array(pdfBuffer), {
+    return new NextResponse(withPrintableControls(html), {
       status: 200,
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
       },
     });
   } catch (error) {
@@ -414,9 +399,5 @@ export async function GET(req: NextRequest) {
       { error: "Impossible de generer le PDF d'analyse." },
       { status: 500 }
     );
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
   }
 }

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chromium } from "playwright";
 import { marked } from "marked";
 import {
   fetchInterviewExportData,
   InterviewExportError,
 } from "@/lib/interviewExport";
+import { withPrintableControls } from "@/lib/printableHtml";
 import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 const escapeHtml = (value: string) =>
@@ -16,7 +16,6 @@ const escapeHtml = (value: string) =>
     .replace(/'/g, "&#39;");
 
 export async function GET(req: NextRequest) {
-  let browser;
   try {
     const { user } = await getAuthenticatedUser(req);
     if (!user) {
@@ -172,26 +171,11 @@ export async function GET(req: NextRequest) {
       </html>
     `;
 
-    browser = await chromium.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    const page = await browser.newPage({ viewport: { width: 1200, height: 800 } });
-    await page.setContent(html, { waitUntil: "networkidle" });
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "24px", bottom: "24px", left: "24px", right: "24px" },
-    });
-
-    const safeAgentName = agentName.replace(/\s+/g, "-").toLowerCase();
-    const fileName = `entretien-${safeAgentName}-${new Date().toISOString().slice(0, 10)}.pdf`;
-
-    const pdfBody = new Uint8Array(pdfBuffer);
-    return new NextResponse(pdfBody, {
+    return new NextResponse(withPrintableControls(html), {
       status: 200,
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
       },
     });
   } catch (error) {
@@ -204,9 +188,5 @@ export async function GET(req: NextRequest) {
       { error: "Impossible de generer le PDF." },
       { status: 500 }
     );
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
   }
 }

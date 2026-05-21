@@ -36,3 +36,31 @@ if (!window.matchMedia) {
     dispatchEvent: vi.fn(),
   })) as typeof window.matchMedia;
 }
+
+class MockIntersectionObserver implements IntersectionObserver {
+  readonly root: Element | Document | null = null;
+  readonly rootMargin = "";
+  readonly thresholds: ReadonlyArray<number> = [];
+
+  constructor() {}
+
+  disconnect = vi.fn();
+  observe = vi.fn();
+  takeRecords = vi.fn(() => []);
+  unobserve = vi.fn();
+}
+
+if (!globalThis.IntersectionObserver) {
+  globalThis.IntersectionObserver =
+    MockIntersectionObserver as unknown as typeof IntersectionObserver;
+}
+
+class MockResizeObserver implements ResizeObserver {
+  disconnect = vi.fn();
+  observe = vi.fn();
+  unobserve = vi.fn();
+}
+
+if (!globalThis.ResizeObserver) {
+  globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
+}

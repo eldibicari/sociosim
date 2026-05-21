@@ -24,20 +24,12 @@ export function useInterviewExports({
     if (!interviewId || !interviewSummary || !user) return;
     setIsExportingPdf(true);
     try {
-      const response = await fetch(`/api/interviews/export?interviewId=${interviewId}`);
-      if (!response.ok) {
-        throw new Error("Export failed");
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const safeAgentName = interviewSummary.agentName.replace(/\s+/g, "-").toLowerCase();
-      const dateStamp = new Date().toISOString().slice(0, 10);
-      const fileName = `entretien-${safeAgentName}-${dateStamp}.pdf`;
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = fileName;
-      anchor.click();
-      window.URL.revokeObjectURL(url);
+      // Open the printable HTML in a new window; it auto-triggers print dialog
+      window.open(
+        `/api/interviews/export?interviewId=${interviewId}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
     } finally {
       setIsExportingPdf(false);
     }

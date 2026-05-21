@@ -43,6 +43,12 @@ function createHistoryResponse() {
   };
 }
 
+async function waitForAgentName() {
+  await waitFor(() => {
+    expect(screen.getAllByText(/^Oriane$/i).length).toBeGreaterThan(0);
+  });
+}
+
 describe("ResumeInterviewPage - Load Previous Messages", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -203,8 +209,8 @@ describe("ResumeInterviewPage - Admin view-only access", () => {
       expect(screen.queryByText("Chargement...")).not.toBeInTheDocument();
     });
 
-    expect(await screen.findByRole("heading", { name: /Oriane/i })).toBeInTheDocument();
-    expect(await screen.findByText("par User B")).toBeInTheDocument();
+    await waitForAgentName();
+    expect(await screen.findByText("User B")).toBeInTheDocument();
     expect(await screen.findByText("Bonjour, je suis Oriane.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Envoyer" })).not.toBeInTheDocument();
   });
@@ -297,7 +303,7 @@ describe("ResumeInterviewPage - Chat Interaction", () => {
       );
     });
 
-    await screen.findByRole("heading", { name: /Oriane/i });
+    await waitForAgentName();
 
     const input = screen.getByPlaceholderText(/Posez votre question/i);
     const sendButton = screen.getByRole("button", { name: /Envoyer/i });
@@ -393,6 +399,7 @@ describe("ResumeInterviewPage - Exports", () => {
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:pdf");
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+    vi.spyOn(window, "open").mockImplementation(() => null);
   });
 
   it("exports PDF using the interviewId", async () => {
@@ -403,17 +410,16 @@ describe("ResumeInterviewPage - Exports", () => {
       );
     });
 
-    await screen.findByRole("heading", { name: /Oriane/i });
+    await waitForAgentName();
 
-    await user.click(screen.getByRole("button", { name: "Exporter en PDF" }));
+    await user.click(screen.getByRole("button", { name: "PDF" }));
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith(
-        "/api/interviews/export?interviewId=interview-123"
+      expect(window.open).toHaveBeenCalledWith(
+        "/api/interviews/export?interviewId=interview-123",
+        "_blank",
+        "noopener,noreferrer"
       );
     });
-    expect(URL.createObjectURL).toHaveBeenCalled();
-    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled();
-    expect(URL.revokeObjectURL).toHaveBeenCalled();
   });
 });

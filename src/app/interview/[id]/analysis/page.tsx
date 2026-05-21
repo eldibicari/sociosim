@@ -84,20 +84,11 @@ export default function InterviewAnalysisPage({ params }: { params: Promise<{ id
     if (!interviewId || !interviewSummary || !user) return;
     setIsExportingPdf(true);
     try {
-      const response = await fetch(`/api/interviews/analysis/export?interviewId=${interviewId}`);
-      if (!response.ok) {
-        throw new Error("Analysis export failed");
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const safeAgentName = interviewSummary.agentName.replace(/\s+/g, "-").toLowerCase();
-      const dateStamp = new Date().toISOString().slice(0, 10);
-      const fileName = `analyse-entretien-${safeAgentName}-${dateStamp}.pdf`;
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = fileName;
-      anchor.click();
-      window.URL.revokeObjectURL(url);
+      window.open(
+        `/api/interviews/analysis/export?interviewId=${interviewId}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
     } finally {
       setIsExportingPdf(false);
     }

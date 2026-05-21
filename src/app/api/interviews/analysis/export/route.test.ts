@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { GET } from "./route";
 import { fetchInterviewExportData } from "@/lib/interviewExport";
 import { analyzeInterviewMessages } from "@/lib/interviewAnalysis";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 vi.mock("@/lib/interviewExport", () => ({
   InterviewExportError: class InterviewExportError extends Error {
@@ -19,24 +20,21 @@ vi.mock("@/lib/interviewAnalysis", () => ({
   analyzeInterviewMessages: vi.fn(),
 }));
 
-vi.mock("playwright", () => ({
-  chromium: {
-    launch: vi.fn().mockResolvedValue({
-      newPage: vi.fn().mockResolvedValue({
-        setContent: vi.fn(),
-        pdf: vi.fn().mockResolvedValue(Buffer.from("pdf")),
-      }),
-      close: vi.fn(),
-    }),
-  },
+vi.mock("@/lib/supabaseAuthServer", () => ({
+  getAuthenticatedUser: vi.fn(),
 }));
 
 const mockFetchInterviewExportData = vi.mocked(fetchInterviewExportData);
 const mockAnalyzeInterviewMessages = vi.mocked(analyzeInterviewMessages);
+const mockGetAuthenticatedUser = vi.mocked(getAuthenticatedUser);
 
 describe("GET /api/interviews/analysis/export", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetAuthenticatedUser.mockResolvedValue({
+      user: { id: "user-1" } as Awaited<ReturnType<typeof getAuthenticatedUser>>["user"],
+      error: null,
+    });
   });
 
   it("returns 400 when interviewId is missing", async () => {
@@ -47,7 +45,7 @@ describe("GET /api/interviews/analysis/export", () => {
     expect(body).toMatchObject({ error: "Missing 'interviewId' query parameter" });
   });
 
-  it("returns a pdf response", async () => {
+  it("returns a printable html response", async () => {
     mockFetchInterviewExportData.mockResolvedValue({
       interviewId: "interview-1",
       agentId: "agent-1",
@@ -138,6 +136,7 @@ describe("GET /api/interviews/analysis/export", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.headers.get("Content-Type")).toBe("application/pdf");
+    expect(response.headers.get("Content-Type")).toContain("text/html");
+    expect(await response.text()).toContain("Enregistrer en PDF");
   });
 });
