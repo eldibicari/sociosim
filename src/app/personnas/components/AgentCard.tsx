@@ -132,7 +132,7 @@ export function AgentCard({
               <Text fontWeight="800" fontSize="lg" letterSpacing="-0.03em" lineHeight="1.2" color="var(--color-text-primary)" textAlign="center">
                 {title}
               </Text>
-              {agent.creator_name && (
+              {agent.creator_name && !agent.is_public && (
                 <Text fontSize="xs" color="fg.muted">{agent.creator_name}</Text>
               )}
             </VStack>
