@@ -23,10 +23,10 @@ export function groupAgentsByCreator(
   const othersMap = new Map<string, { name: string; agents: Agent[] }>();
 
   for (const agent of agents) {
-    if (currentUserId && agent.created_by === currentUserId) {
-      myAgents.push(agent);
-    } else if (agent.is_public) {
+    if (agent.is_public) {
       publicAgents.push(agent);
+    } else if (currentUserId && agent.created_by === currentUserId) {
+      myAgents.push(agent);
     } else {
       const creatorId = agent.created_by ?? "unknown";
       const creatorName = agent.creator_name ?? "Inconnu";
