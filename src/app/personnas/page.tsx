@@ -273,7 +273,7 @@ export default function PersonnasPage() {
     }
   }), [activeFilter, agents, deferredSearch, interactedAgents, user?.id]);
 
-  const groups = useMemo(() => groupAgentsByCreator(filteredAgents), [filteredAgents]);
+  const groups = useMemo(() => groupAgentsByCreator(filteredAgents, user?.id ?? null), [filteredAgents, user?.id]);
   const staffGroup = useMemo(() => groups.find((g) => g.isStaff), [groups]);
   const studentGroups = useMemo(() => groups.filter((g) => !g.isStaff), [groups]);
   const allStudentActive = useMemo(() => studentGroups.flatMap((g) => g.activeAgents), [studentGroups]);
@@ -494,9 +494,9 @@ export default function PersonnasPage() {
                 <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
                   <VStack gap={5} alignItems="stretch">
                     <SectionHeader
-                      eyebrow="Personas institutionnels"
-                      title={staffGroup.label}
-                      description="Profils prêts à être utilisés dans le parcours pédagogique."
+                      eyebrow="Disponibles pour tous"
+                      title="Personas publics"
+                      description="Profils visibles par tous les utilisateurs du site."
                       count={staffGroup.activeAgents.length + staffGroup.inactiveAgents.length}
                     />
                     <AgentGrid agents={[...staffGroup.activeAgents, ...staffGroup.inactiveAgents]} {...gridProps} />
@@ -507,9 +507,9 @@ export default function PersonnasPage() {
                 <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }}>
                   <VStack gap={5} alignItems="stretch">
                     <SectionHeader
-                      eyebrow="Personas étudiants"
-                      title="Créations des étudiants"
-                      description="Personas créés par les étudiants, avec accès direct à leur historique d'entretiens."
+                      eyebrow="Personas privés"
+                      title="Mes personas et créations des étudiants"
+                      description="Vos créations personnelles et celles des étudiants (visible uniquement par vous en tant qu'admin)."
                       count={allStudentActive.length + allStudentInactive.length}
                     />
                     <AgentGrid agents={[...allStudentActive, ...allStudentInactive]} {...gridProps} indexOffset={staffGroup?.activeAgents.length ?? 0} />
