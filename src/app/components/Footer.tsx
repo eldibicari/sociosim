@@ -34,13 +34,23 @@ export default function Footer() {
           >
             {/* Brand: University logo + Mimesis icon + wordmark */}
             <HStack gap={3} alignItems="center" flexShrink={0}>
-              <Image
-                src="/logos/Logo_Universite_Gustave_Eiffel_2020.svg"
-                alt="Université Gustave Eiffel"
-                height="28px"
-                width="auto"
-                opacity={0.75}
-              />
+              <Link
+                href="https://www.univ-gustave-eiffel.fr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                _hover={{ opacity: 1 }}
+                transition="opacity 0.15s"
+              >
+                <Image
+                  src="/logos/Logo_Universite_Gustave_Eiffel_2020.svg"
+                  alt="Université Gustave Eiffel — site officiel"
+                  height="28px"
+                  width="auto"
+                  opacity={0.75}
+                  _hover={{ opacity: 1 }}
+                  transition="opacity 0.15s"
+                />
+              </Link>
               <Box
                 height="24px"
                 width="1px"
