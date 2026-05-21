@@ -1,10 +1,13 @@
 "use client";
 
 import {
+  Badge,
   Box,
   Button,
   Field,
   Heading,
+  HStack,
+  IconButton,
   Input,
   Textarea,
   VStack,
@@ -18,13 +21,12 @@ import ListItem from "@tiptap/extension-list-item";
 import { Markdown } from "@tiptap/markdown";
 import Paragraph from "@tiptap/extension-paragraph";
 import TextExtension from "@tiptap/extension-text";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import PersonnaLayout from "@/app/personnas/components/PersonnaLayout";
 import PersonaConfigBuilder from "@/app/personnas/components/PersonaConfigBuilder";
 import PersonnaPromptEditor from "@/app/personnas/components/PersonnaPromptEditor";
-import PersonnaRightSidebar from "@/app/personnas/components/PersonnaRightSidebar";
 import PromptReviewSidebar, {
   type CauldronReview,
 } from "@/app/personnas/components/PromptReviewSidebar";
@@ -81,6 +83,8 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
   const [reviewedContent, setReviewedContent] = useState("");
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
+  const [validationInfoOpen, setValidationInfoOpen] = useState(false);
+  const promptEditorRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
     extensions: [
@@ -270,12 +274,9 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
               paddingTop={{ base: 4, lg: 5 }}
               overflowX="hidden"
               overflowY="auto"
-              minHeight={0}
-              display="flex"
-              flexDirection="column"
               paddingBottom={{ base: 6, lg: 8 }}
             >
-              <VStack align="stretch" gap={4} flex="1" minHeight={0}>
+              <VStack align="stretch" gap={4}>
                 <Button
                   alignSelf="flex-start"
                   variant="ghost"
@@ -301,7 +302,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       <Input
                         value={agentName}
                         onChange={(event) => setAgentName(event.target.value)}
-                        placeholder="Camille, Karim, Zoé, Alexis, Bilel..."
+                        placeholder="Camille, Karim, Zoé, Léa, Maxime, Tom..."
                       />
                       <Field.HelperText fontSize="xs" color="fg.muted">
                         Le nom doit aider à retrouver vite le persona dans la liste et l&apos;historique.
@@ -337,40 +338,102 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                         "Une premiere version du prompt interne a ete creee a partir de la configuration guidee.",
                       type: "success",
                     });
+                    setTimeout(() => {
+                      promptEditorRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }, 100);
                   }}
                 />
 
-                <Box flex="1" minHeight={0} display="flex">
+                <Box ref={promptEditorRef}>
                   <PersonnaPromptEditor
                     editor={editor}
                     subtitle="Le texte ci-dessous est le moteur interne du persona. Il peut etre genere automatiquement via la configuration guidee, puis affine ici en mode avance."
                     error={error}
                     headingRight={
-                      <Button
-                        type="submit"
-                        size="sm"
-                        variant="subtle"
-                        loading={isSaving}
-                        disabled={!agentName.trim() || !description.trim() || isSaving}
-                        paddingInline={5}
-                      >
-                        Creer la persona
-                      </Button>
+                      <HStack gap={2}>
+                        <Badge
+                          colorPalette={
+                            isReviewing
+                              ? "orange"
+                              : !review
+                                ? "gray"
+                                : review.status === "valid"
+                                  ? "green"
+                                  : "red"
+                          }
+                          variant="subtle"
+                          borderRadius="full"
+                          paddingX={2.5}
+                          fontSize="xs"
+                        >
+                          {isReviewing
+                            ? "Analyse..."
+                            : !review
+                              ? "Non vérifié"
+                              : review.status === "valid"
+                                ? "Valide"
+                                : "Invalide"}
+                        </Badge>
+                        <IconButton
+                          aria-label="Plus d'infos sur la validation"
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => setValidationInfoOpen((open) => !open)}
+                        >
+                          <Info size={14} />
+                        </IconButton>
+                        <Button
+                          type="submit"
+                          size="sm"
+                          variant="subtle"
+                          loading={isSaving}
+                          disabled={!agentName.trim() || !description.trim() || isSaving}
+                          paddingInline={5}
+                        >
+                          Créer la persona
+                        </Button>
+                      </HStack>
                     }
                   />
+                  {validationInfoOpen && (
+                    <Box
+                      marginTop={2}
+                      borderRadius="md"
+                      padding={3}
+                      backgroundColor={{ base: "blue.50", _dark: "gray.800" }}
+                      borderLeft="3px solid"
+                      borderLeftColor="blue.500"
+                    >
+                      <Box fontSize="xs" color="fg.muted" lineHeight="1.6">
+                        Cette vérification analyse uniquement le prompt système actif : voix,
+                        contexte, usages, tensions et garde-fous. Elle ne vérifie pas la grille
+                        d&apos;entretien ni le paramétrage guidé.
+                        <br />
+                        <br />
+                        - clarté du profil et de la voix
+                        <br />
+                        - situations, usages et tensions observables
+                        <br />
+                        - absence d&apos;incohérences bloquantes
+                      </Box>
+                    </Box>
+                  )}
+                  {(review || reviewError) && (
+                    <Box marginTop={2}>
+                      <PromptReviewSidebar
+                        review={review}
+                        reviewError={reviewError}
+                        isReviewing={isReviewing}
+                        isCurrent={Boolean(isReviewCurrent)}
+                      />
+                    </Box>
+                  )}
                 </Box>
               </VStack>
             </Box>
-          }
-          right={
-            <PersonnaRightSidebar title="">
-              <PromptReviewSidebar
-                review={review}
-                reviewError={reviewError}
-                isReviewing={isReviewing}
-                isCurrent={Boolean(isReviewCurrent)}
-              />
-            </PersonnaRightSidebar>
           }
         />
       </form>
