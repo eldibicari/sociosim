@@ -3,11 +3,9 @@
 import {
   Box,
   Button,
-  Collapsible,
   Field,
+  Heading,
   Input,
-  Separator,
-  Text,
   Textarea,
   VStack,
 } from "@chakra-ui/react";
@@ -20,12 +18,11 @@ import ListItem from "@tiptap/extension-list-item";
 import { Markdown } from "@tiptap/markdown";
 import Paragraph from "@tiptap/extension-paragraph";
 import TextExtension from "@tiptap/extension-text";
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import PersonnaLayout from "@/app/personnas/components/PersonnaLayout";
 import PersonaConfigBuilder from "@/app/personnas/components/PersonaConfigBuilder";
-import PersonnaLeftSidebar from "@/app/personnas/components/PersonnaLeftSidebar";
 import PersonnaPromptEditor from "@/app/personnas/components/PersonnaPromptEditor";
 import PersonnaRightSidebar from "@/app/personnas/components/PersonnaRightSidebar";
 import PromptReviewSidebar, {
@@ -84,7 +81,6 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
   const [reviewedContent, setReviewedContent] = useState("");
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -265,12 +261,21 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
     <Box width="full" height="100%">
       <form onSubmit={handleSubmit} style={{ height: "100%" }}>
         <PersonnaLayout
-          left={
-            <PersonnaLeftSidebar
-              title="Creer un nouveau persona"
-              subtitle="Nommer le profil, clarifier son contexte et poser une premiere base de prompt."
+          center={
+            <Box
+              height="100%"
+              maxWidth="880px"
+              marginX="auto"
+              paddingX={{ base: 4, lg: 6 }}
+              paddingTop={{ base: 4, lg: 5 }}
+              overflowX="hidden"
+              overflowY="auto"
+              minHeight={0}
+              display="flex"
+              flexDirection="column"
+              paddingBottom={{ base: 6, lg: 8 }}
             >
-              <VStack align="stretch" gap={4}>
+              <VStack align="stretch" gap={4} flex="1" minHeight={0}>
                 <Button
                   alignSelf="flex-start"
                   variant="ghost"
@@ -287,165 +292,38 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                   borderWidth="1px"
                   borderColor="border.subtle"
                   backgroundColor="white"
-                  padding={4}
+                  padding={5}
                 >
-                  <VStack align="stretch" gap={2}>
-                    <Text fontSize="sm" fontWeight="semibold">
-                      Avant de commencer
-                    </Text>
-                    <Text fontSize="sm" color="fg.muted">
-                      Cette page sert a poser une premiere version credible du persona. Le prompt
-                      pourra ensuite etre retravaille dans sa fiche.
-                    </Text>
-                    <Text fontSize="sm" color="fg.muted">
-                      - choisis un nom clair et reconnaissable
-                    </Text>
-                    <Text fontSize="sm" color="fg.muted">
-                      - resume en deux lignes le profil et le rapport a l&apos;IA
-                    </Text>
-                    <Text fontSize="sm" color="fg.muted">
-                      - utilise la configuration guidee pour generer une premiere base credible
-                    </Text>
+                  <VStack align="stretch" gap={4}>
+                    <Heading size="md">Identité du persona</Heading>
+                    <Field.Root>
+                      <Field.Label fontSize="sm">Nom du persona</Field.Label>
+                      <Input
+                        value={agentName}
+                        onChange={(event) => setAgentName(event.target.value)}
+                        placeholder="Camille, Karim, Zoé, Alexis, Bilel..."
+                      />
+                      <Field.HelperText fontSize="xs" color="fg.muted">
+                        Le nom doit aider à retrouver vite le persona dans la liste et l&apos;historique.
+                      </Field.HelperText>
+                    </Field.Root>
+
+                    <Field.Root>
+                      <Field.Label fontSize="sm">Description courte</Field.Label>
+                      <Textarea
+                        rows={2}
+                        value={description}
+                        onChange={(event) => setDescription(event.target.value)}
+                        placeholder="Étudiant curieux, négociatrice prudente, usage ponctuel mais réflexif..."
+                        resize="none"
+                      />
+                      <Field.HelperText fontSize="xs" color="fg.muted">
+                        Décris le niveau, la posture et le contexte d&apos;usage en quelques mots très lisibles.
+                      </Field.HelperText>
+                    </Field.Root>
                   </VStack>
                 </Box>
 
-                <Field.Root>
-                  <Field.Label fontSize="sm">Nom du persona</Field.Label>
-                  <Input
-                    size="xs"
-                    value={agentName}
-                    onChange={(event) => setAgentName(event.target.value)}
-                    placeholder="Camille, Karim, Zoe, Alexis, Bilel..."
-                    paddingInlineStart={4}
-                  />
-                  <Field.HelperText fontSize="xs" color="fg.muted">
-                    Le nom doit aider a retrouver vite le persona dans la liste et dans
-                    l&apos;historique.
-                  </Field.HelperText>
-                </Field.Root>
-
-                <Field.Root>
-                  <Field.Label fontSize="sm">Description courte</Field.Label>
-                  <Textarea
-                    size="xs"
-                    rows={3}
-                    value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                    placeholder="Etudiant curieux, negociatrice prudente, usage ponctuel mais reflexif..."
-                    paddingInlineStart={4}
-                    resize="none"
-                  />
-                  <Field.HelperText fontSize="xs" color="fg.muted">
-                    Decris le niveau, la posture et le contexte d&apos;usage en quelques mots tres
-                    lisibles.
-                  </Field.HelperText>
-                </Field.Root>
-
-                <Box
-                  borderRadius="2xl"
-                  borderWidth="1px"
-                  borderColor="border.subtle"
-                  backgroundColor="bg.subtle"
-                  padding={4}
-                >
-                  <VStack align="stretch" gap={2}>
-                    <Text fontSize="sm" fontWeight="semibold">
-                      Grille d&apos;entretien
-                    </Text>
-                    <Text fontSize="xs" color="fg.muted" lineHeight="1.6">
-                      La grille sera disponible depuis la fiche du persona apres la creation. Elle
-                      se configure separement du prompt.
-                    </Text>
-                  </VStack>
-                </Box>
-
-                <Separator />
-
-                <Collapsible.Root open={helpOpen} onOpenChange={({ open }) => setHelpOpen(open)}>
-                  <Collapsible.Trigger asChild>
-                    <Button
-                      variant="plain"
-                      size="xs"
-                      alignSelf="flex-start"
-                      paddingInline={0}
-                      color="fg.muted"
-                    >
-                      <Text fontSize="xs">Comment generer un prompt systeme ?</Text>
-                      {helpOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </Button>
-                  </Collapsible.Trigger>
-                  <Collapsible.Content>
-                    <VStack align="stretch" gap={2} paddingTop={2}>
-                      <Text fontSize="xs" color="fg.muted">
-                        Le mode principal consiste maintenant a renseigner la configuration guidee,
-                        puis a laisser l&apos;app generer une premiere version du prompt.
-                      </Text>
-                      <Text fontSize="xs" color="fg.muted">
-                        Le texte ci-dessous reste utile si tu veux travailler en mode avance a
-                        partir d&apos;une interview reelle ou d&apos;un template plus technique.
-                      </Text>
-                      <Text fontSize="xs" color="fg.muted">
-                        Le plus simple est alors de fournir a un chatbot (Claude, ChatGPT, etc.) :
-                        <br />- un PDF de l&apos;interview
-                        <br />- un fichier de{" "}
-                        <Button
-                          asChild
-                          variant="plain"
-                          size="xs"
-                          colorPalette="blue"
-                          textDecoration="underline"
-                        >
-                          <a
-                            href="/docs/template_agent_system_prompt.md"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            template au format markdown
-                          </a>
-                        </Button>
-                      </Text>
-                      <Text fontSize="xs" color="fg.muted">
-                        Ce prompt de depart sert surtout a poser une voix, des usages, des tensions
-                        et des scenes plausibles.
-                      </Text>
-                      <Box fontFamily="mono" fontSize="2xs" color="fg.muted" paddingLeft={3}>
-                        Nous allons construire un prompt systeme pour un persona a partir d&apos;une
-                        interview sociologique de la personne reelle sur son usage de l&apos;IA.
-                        <br />
-                        Voir le fichier PDF de l&apos;entretien
-                        <br />
-                        Le but est de generer un fichier markdown suivant le template fourni.
-                        <br />
-                        Il faut renseigner tous les elements entre accolades {"{"}{"}"}.
-                        <br />
-                        Ce fichier markdown servira de prompt systeme pour un persona dans une
-                        application de simulation d&apos;entretien sociologique.
-                      </Box>
-                      <Text fontSize="xs" color="fg.muted">
-                        Tu peux ensuite coller le resultat genere par l&apos;IA dans l&apos;editeur
-                        central.
-                      </Text>
-                    </VStack>
-                  </Collapsible.Content>
-                </Collapsible.Root>
-              </VStack>
-            </PersonnaLeftSidebar>
-          }
-          center={
-            <Box
-              height="100%"
-              maxWidth="880px"
-              marginX="auto"
-              paddingX={{ base: 4, lg: 6 }}
-              paddingTop={{ base: 4, lg: 5 }}
-              overflowX="hidden"
-              overflowY="auto"
-              minHeight={0}
-              display="flex"
-              flexDirection="column"
-              paddingBottom={{ base: 6, lg: 8 }}
-            >
-              <VStack align="stretch" gap={4} flex="1" minHeight={0}>
                 <PersonaConfigBuilder
                   personaName={agentName}
                   value={personaConfig}

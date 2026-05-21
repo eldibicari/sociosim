@@ -4,7 +4,7 @@ import { Box } from "@chakra-ui/react";
 import type { ReactNode } from "react";
 
 type PersonnaLayoutProps = {
-  left: ReactNode;
+  left?: ReactNode;
   center: ReactNode;
   right?: ReactNode;
 };
@@ -30,8 +30,8 @@ export default function PersonnaLayout({ left, center, right }: PersonnaLayoutPr
         flexDirection={{ base: "column", lg: "row" }}
         height="100%"
         minHeight={0}
-        paddingLeft={{ base: 0, lg: "var(--personna-left-offset)" }}
-        paddingRight={{ base: 0, lg: "var(--personna-right-offset)" }}
+        paddingLeft={{ base: 0, lg: left ? "var(--personna-left-offset)" : 0 }}
+        paddingRight={{ base: 0, lg: right ? "var(--personna-right-offset)" : 0 }}
       >
         <Box flex="1" minHeight={0} overflow="hidden">
           {center}
