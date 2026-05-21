@@ -1,8 +1,7 @@
 "use client";
 
-import { Box, Container, HStack, Image, Link, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, Image, Link, Text, VStack } from "@chakra-ui/react";
 import NextLink from "next/link";
-import { MAX_CONTENT_WIDTH, CONTAINER_PADDING } from "@/constants/layout";
 
 export default function Footer() {
   return (
@@ -11,7 +10,7 @@ export default function Footer() {
       position="relative"
       borderTopWidth="1px"
       borderTopColor="rgba(148,163,184,0.14)"
-      mt={16}
+      mt={10}
       background="linear-gradient(180deg, rgba(248,250,252,0.6) 0%, rgba(255,255,255,0.98) 100%)"
       backdropFilter="blur(8px)"
     >
@@ -24,8 +23,8 @@ export default function Footer() {
         background="linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.25) 30%, rgba(139,92,246,0.25) 60%, transparent 100%)"
       />
 
-      <Container maxW={MAX_CONTENT_WIDTH} px={CONTAINER_PADDING} py={8}>
-        <VStack alignItems="stretch" gap={6}>
+      <Box maxW="7xl" mx="auto" px={{ base: 4, md: 6 }} py={6}>
+        <VStack alignItems="stretch" gap={4}>
           {/* Main row */}
           <HStack
             justifyContent="space-between"
@@ -117,7 +116,7 @@ export default function Footer() {
             alignItems="center"
             borderTopWidth="1px"
             borderTopColor="rgba(148,163,184,0.1)"
-            pt={4}
+            pt={3}
           >
             <Text fontSize="2xs" color="fg.muted" letterSpacing="0.04em">
               © 2026 Université Gustave Eiffel — Tous droits réservés
@@ -135,7 +134,7 @@ export default function Footer() {
             </HStack>
           </HStack>
         </VStack>
-      </Container>
+      </Box>
     </Box>
   );
 }
