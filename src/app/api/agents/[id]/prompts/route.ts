@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { user } = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id: agentId } = await params;
     if (!agentId) {
       return NextResponse.json({ error: "Missing agent id" }, { status: 400 });
@@ -56,6 +62,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { user } = await getAuthenticatedUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id: agentId } = await params;
     if (!agentId) {
       return NextResponse.json({ error: "Missing agent id" }, { status: 400 });
@@ -70,6 +81,11 @@ export async function POST(
         { error: "Missing required fields" },
         { status: 400 }
       );
+    }
+
+    // editedBy in body must match authenticated user
+    if (editedBy !== user.id) {
+      return NextResponse.json({ error: "Forbidden: user mismatch" }, { status: 403 });
     }
 
     const supabase = createServiceSupabaseClient();

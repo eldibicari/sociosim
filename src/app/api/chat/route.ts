@@ -15,13 +15,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { AdkClient } from "@/lib/adkClient";
 import { messages, usage } from "@/lib/data";
 import { getInterviewWithAgent } from "@/lib/data/agents";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 const adkClient = new AdkClient();
 
 export async function POST(req: NextRequest) {
   try {
+    // Authenticate user
+    const { user } = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Parse request body
     const { message, userId, sessionId, adkSessionId, interviewId, streaming } = await req.json();
+
+    // Verify userId in body matches authenticated user
+    if (userId !== user.id) {
+      return NextResponse.json({ error: "Forbidden: user mismatch" }, { status: 403 });
+    }
 
     console.log("[/api/chat POST] Received:", { message: message?.substring(0, 20), userId, sessionId, adkSessionId, interviewId, streaming });
 

@@ -1,12 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 type UserRole = "student" | "teacher" | "admin";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function GET() {
+async function requireAdmin(req: NextRequest) {
+  const { user } = await getAuthenticatedUser(req);
+  if (!user) return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+
+  const supabase = createServiceSupabaseClient();
+  const { data: profile } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profile?.role !== "admin") {
+    return { error: NextResponse.json({ error: "Forbidden: admin only" }, { status: 403 }) };
+  }
+  return { user };
+}
+
+export async function GET(req: NextRequest) {
   try {
+    const adminCheck = await requireAdmin(req);
+    if (adminCheck.error) return adminCheck.error;
+
     const supabase = createServiceSupabaseClient();
     const { data: profiles, error: profileError } = await supabase
       .from("users")
@@ -43,6 +64,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const adminCheck = await requireAdmin(req);
+    if (adminCheck.error) return adminCheck.error;
+
     const { email, name, isAdmin } = (await req.json()) as {
       email?: string;
       name?: string;

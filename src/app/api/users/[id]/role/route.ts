@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 type UserRole = "student" | "teacher" | "admin";
 
@@ -8,6 +9,20 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { user } = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const supabaseAdmin = createServiceSupabaseClient();
+    const { data: caller } = await supabaseAdmin
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (caller?.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden: admin only" }, { status: 403 });
+    }
+
     const { id } = await params;
     if (!id) {
       return NextResponse.json({ error: "Missing user id" }, { status: 400 });

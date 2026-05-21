@@ -8,15 +8,26 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { interviews, messages } from "@/lib/data";
+import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { user } = await getAuthenticatedUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id: interviewId } = await params;
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId") || undefined;
+    const userId = searchParams.get("userId") || user.id;
+
+    // Enforce that user can only request their own messages
+    if (userId !== user.id) {
+      return NextResponse.json({ error: "Forbidden: user mismatch" }, { status: 403 });
+    }
 
     if (!interviewId) {
       return NextResponse.json(
@@ -25,7 +36,6 @@ export async function GET(
       );
     }
 
-    // Verify interview exists (could add user_id check for security if needed)
     const interview = await interviews.getInterviewById(interviewId);
     if (!interview) {
       return NextResponse.json(
