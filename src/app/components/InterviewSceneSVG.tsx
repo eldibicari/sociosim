@@ -3,17 +3,17 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 export function InterviewSceneSVG() {
-  // Mouse-tracking for subtle interactive tilt
+  // Mouse-tracking for interactive tilt (amplified for visible effect)
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
 
   // Smooth spring physics for fluid motion
-  const springX = useSpring(mouseX, { stiffness: 80, damping: 20 });
-  const springY = useSpring(mouseY, { stiffness: 80, damping: 20 });
+  const springX = useSpring(mouseX, { stiffness: 60, damping: 15 });
+  const springY = useSpring(mouseY, { stiffness: 60, damping: 15 });
 
-  // Map mouse position to rotation values
-  const rotateY = useTransform(springX, [0, 1], [-12, 12]);
-  const rotateX = useTransform(springY, [0, 1], [6, -6]);
+  // Amplified mouse-driven tilt (±30° instead of ±12°)
+  const mouseRotateY = useTransform(springX, [0, 1], [-30, 30]);
+  const mouseRotateX = useTransform(springY, [0, 1], [18, -18]);
 
   function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -36,26 +36,43 @@ export function InterviewSceneSVG() {
         width: "100%",
         height: "100%",
         pointerEvents: "auto",
-        perspective: 1200,
+        perspective: 1400,
       }}
     >
+      {/* Outer wrapper: continuous Y-axis oscillation (the carousel rotation) */}
       <motion.div
         style={{
           width: "100%",
           height: "100%",
-          rotateX,
-          rotateY,
           transformStyle: "preserve-3d",
         }}
         animate={{
-          rotateZ: [0, 1.5, 0, -1.5, 0],
+          rotateY: [-25, 25, -25],
+          translateZ: [-30, 30, -30],
         }}
         transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
+          rotateY: { duration: 9, repeat: Infinity, ease: "easeInOut" },
+          translateZ: { duration: 7, repeat: Infinity, ease: "easeInOut" },
         }}
       >
+        {/* Inner wrapper: mouse-driven tilt + slow Z-spin */}
+        <motion.div
+          style={{
+            width: "100%",
+            height: "100%",
+            rotateX: mouseRotateX,
+            rotateY: mouseRotateY,
+            transformStyle: "preserve-3d",
+          }}
+          animate={{
+            rotateZ: [0, 3, 0, -3, 0],
+          }}
+          transition={{
+            duration: 11,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
         <svg
           viewBox="0 0 520 400"
           xmlns="http://www.w3.org/2000/svg"
@@ -210,6 +227,7 @@ export function InterviewSceneSVG() {
         <animate attributeName="cy" values="330;320;330" dur="6s" repeatCount="indefinite" />
       </circle>
         </svg>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
