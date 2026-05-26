@@ -1,12 +1,66 @@
 "use client";
 
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+
 export function InterviewSceneSVG() {
+  // Mouse-tracking for subtle interactive tilt
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.5);
+
+  // Smooth spring physics for fluid motion
+  const springX = useSpring(mouseX, { stiffness: 80, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 80, damping: 20 });
+
+  // Map mouse position to rotation values
+  const rotateY = useTransform(springX, [0, 1], [-12, 12]);
+  const rotateX = useTransform(springY, [0, 1], [6, -6]);
+
+  function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    mouseX.set((event.clientX - rect.left) / rect.width);
+    mouseY.set((event.clientY - rect.top) / rect.height);
+  }
+
+  function handleMouseLeave() {
+    mouseX.set(0.5);
+    mouseY.set(0.5);
+  }
+
   return (
-    <svg
-      viewBox="0 0 520 400"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+    <motion.div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "auto",
+        perspective: 1200,
+      }}
     >
+      <motion.div
+        style={{
+          width: "100%",
+          height: "100%",
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+        }}
+        animate={{
+          rotateZ: [0, 1.5, 0, -1.5, 0],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      >
+        <svg
+          viewBox="0 0 520 400"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+        >
       <defs>
         {/* Gradients */}
         <radialGradient id="grad-left" cx="50%" cy="40%" r="55%">
@@ -155,6 +209,8 @@ export function InterviewSceneSVG() {
       <circle cx="472" cy="330" r="2.5" fill="#7C6AF5" opacity="0.4">
         <animate attributeName="cy" values="330;320;330" dur="6s" repeatCount="indefinite" />
       </circle>
-    </svg>
+        </svg>
+      </motion.div>
+    </motion.div>
   );
 }

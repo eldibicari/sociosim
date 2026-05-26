@@ -168,14 +168,13 @@ export default function Home() {
           }} />
         </Box>
 
-        {/* SVG scene — right side, decorative */}
+        {/* SVG scene — right side, decorative + interactive 3D */}
         <Box
           position="absolute"
           right={{ base: "-60px", md: "0" }}
           top="0"
           bottom="0"
           width={{ base: "320px", md: "480px" }}
-          pointerEvents="none"
           display={{ base: "none", md: "block" }}
           opacity={0.9}
         >
