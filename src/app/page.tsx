@@ -107,7 +107,11 @@ const TEACHER_FEATURES = [
   },
 ];
 
-type FeaturedPersona = { id: string; agent_name: string };
+type FeaturedPersona = {
+  id: string;
+  agent_name: string;
+  preview_audio_url?: string | null;
+};
 
 export default function Home() {
   const { user, isLoading } = useAuthUser();
@@ -119,19 +123,33 @@ export default function Home() {
       .then(({ personas: featured }: { personas?: FeaturedPersona[] }) => {
         const merged = SHOWCASE_BASE.map((base) => {
           const found = featured?.find((f) => f.agent_name === base.agent_name);
-          return { ...base, id: found?.id ?? base.agent_name };
+          return {
+            ...base,
+            id: found?.id ?? base.agent_name,
+            preview_audio_url: found?.preview_audio_url ?? null,
+          };
         });
         setPersonas(merged);
       })
       .catch(() => {
-        setPersonas(SHOWCASE_BASE.map((b) => ({ ...b, id: b.agent_name })));
+        setPersonas(
+          SHOWCASE_BASE.map((b) => ({
+            ...b,
+            id: b.agent_name,
+            preview_audio_url: null,
+          }))
+        );
       });
   }, []);
 
   const displayPersonas =
     personas.length > 0
       ? personas
-      : SHOWCASE_BASE.map((b) => ({ ...b, id: b.agent_name }));
+      : SHOWCASE_BASE.map((b) => ({
+          ...b,
+          id: b.agent_name,
+          preview_audio_url: null,
+        }));
 
   return (
     <VStack gap={0} width="100%" align="stretch">

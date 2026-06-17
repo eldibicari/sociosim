@@ -16,4 +16,5 @@ export interface Agent {
   created_by?: string | null;
   creator_name?: string | null;
   creator_role?: string | null;
+  preview_audio_url?: string | null;
 }

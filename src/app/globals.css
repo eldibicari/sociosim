@@ -274,6 +274,14 @@ select {
   50%       { transform: translate(4%, 8%) scale(1.06); }
 }
 
+@keyframes voicePlayerSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.voice-player-spin {
+  animation: voicePlayerSpin 0.9s linear infinite;
+}
+
 .hero-blob-1 {
   position: absolute;
   width: 560px;

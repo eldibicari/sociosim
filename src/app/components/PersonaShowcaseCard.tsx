@@ -6,6 +6,7 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { getPersonaVisual } from "@/lib/personaVisuals";
 import { PersonaSilhouette } from "@/app/personnas/components/PersonaSilhouette";
+import { VoicePlayer } from "@/components/VoicePlayer";
 
 export type ShowcasePersona = {
   id: string;
@@ -19,6 +20,7 @@ export type ShowcasePersona = {
   color: string;
   accent: string;
   avatarBg: string;
+  preview_audio_url?: string | null;
 };
 
 const DIFFICULTY_PALETTE: Record<ShowcasePersona["difficulty"], string> = {
@@ -130,6 +132,31 @@ export function PersonaShowcaseCard({ persona, index }: Props) {
               </Text>
               <Text fontSize="xs" color="var(--color-text-muted)" textAlign="center">{persona.role}</Text>
             </VStack>
+
+            {/* Voice preview */}
+            <Box mt={1}>
+              {persona.preview_audio_url ? (
+                <VoicePlayer
+                  mode="preview"
+                  audioUrl={persona.preview_audio_url}
+                  label="Écouter la voix"
+                  size="sm"
+                  variant="subtle"
+                />
+              ) : (
+                <Badge
+                  variant="subtle"
+                  colorPalette="gray"
+                  borderRadius="full"
+                  px={2.5}
+                  py={0.5}
+                  fontSize="2xs"
+                  fontWeight="600"
+                >
+                  Voix bientôt
+                </Badge>
+              )}
+            </Box>
           </Box>
 
           {/* Greeting */}
