@@ -35,6 +35,6 @@ export interface TTSResponseBody {
 
 export const VOICE_CACHE_BUCKET = "voice-cache";
 
-export const MAX_TTS_TEXT_LENGTH = 600;
+export const MAX_TTS_TEXT_LENGTH = 2000;
 
 export const DEFAULT_ELEVENLABS_MODEL_ID = "eleven_multilingual_v2";

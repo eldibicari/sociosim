@@ -85,9 +85,10 @@ L'objectif n'est PAS de tout livrer en une fois. L'objectif de la **Phase 1** es
   ```
 
 ### Garde-fous coûts
-- **Limite 600 caractères** par requête TTS (route renvoie 400 si dépassement)
+- **Limite 2000 caractères** par requête TTS (route renvoie 400 si dépassement)
 - **Autoplay OFF par défaut** dans `/interview` (toggle persistant en localStorage)
 - **Preview Jade pré-généré** une seule fois, jamais re-généré (option A)
+- **Historique des limites** : initial à 600 chars (trop strict, refusait les réponses longues de Jade), augmenté à 2000 le 2026-06-17
 
 ### Schéma DB
 Ajout d'une colonne `voice_profile` (jsonb, nullable) à la table `agents`.
