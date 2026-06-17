@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { ArrowRight, BookOpen, FileDown, Menu as MenuIcon, Sparkles, User, Volume2, VolumeX, X } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
 import { InterviewGridPanel } from "@/app/components/InterviewGridPanel";
 import { InterviewSidebar } from "@/app/components/InterviewSidebar";
@@ -107,12 +107,10 @@ export function InterviewLayout({
   const [rightOpen, setRightOpen] = useState(false);
   const [rightTab, setRightTab] = useState<RightTab>("profil");
 
-  const [autoplayVoice, setAutoplayVoice] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(AUTOPLAY_STORAGE_KEY);
-    if (stored === "1") setAutoplayVoice(true);
-  }, []);
+  const [autoplayVoice, setAutoplayVoice] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(AUTOPLAY_STORAGE_KEY) === "1";
+  });
   const toggleAutoplay = () => {
     setAutoplayVoice((prev) => {
       const next = !prev;

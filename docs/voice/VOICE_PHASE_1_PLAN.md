@@ -160,17 +160,18 @@ Ajout d'une colonne `voice_profile` (jsonb, nullable) à la table `agents`.
 | E | Créer le bucket `voice-cache` dans Supabase Storage (interface web) | Utilisateur | ✅ Fait |
 | F | Écrire la route `/api/voice/tts` + helpers `elevenlabs.ts` + `cache.ts` + types | Claude | ✅ Fait |
 | G1 | Audition des voix candidates pour Jade (script + écoute) | Utilisateur (script fourni) | ⏳ En cours |
-| G2 | Set voice_profile de Jade en DB (SQL UPDATE) | Utilisateur (SQL fourni) | Pending |
-| G3 | Générer le preview officiel de Jade + uploader dans le bucket | Utilisateur (script fourni) | Pending |
-| H | Écrire le composant `<VoicePlayer />` | Claude | Pending |
-| I | Intégrer `<VoicePlayer />` dans `PersonaShowcaseCard` (accueil) | Claude | Pending |
-| J | Intégrer `<VoicePlayer />` dans `AgentCard` (`/personnas`) | Claude | Pending |
-| K | Ajouter bouton ▶️ dans `ChatMessage` + appel TTS | Claude | Pending |
-| L | Ajouter toggle "Lecture automatique" dans `InterviewLayout` | Claude | Pending |
-| M | `npm run typecheck` + `npm run lint` + `npm run build` | Claude | Pending |
-| N | Tests manuels bout-en-bout (vérifier que rien n'est cassé) | Utilisateur | Pending |
-| O | Mise à jour du CHANGELOG.md | Claude | Pending |
-| P | Commit + push (si validation utilisateur) | Claude | Pending |
+| G2 | Set voice_profile de Jade en DB (SQL UPDATE) | Utilisateur (SQL fourni) | ✅ Fait |
+| G3 | Générer le preview officiel de Jade + uploader dans le bucket | Utilisateur (script fourni) | ✅ Fait |
+| H | Écrire le composant `<VoicePlayer />` | Claude | ✅ Fait |
+| I | Intégrer `<VoicePlayer />` dans `PersonaShowcaseCard` (accueil) | Claude | ✅ Fait |
+| J | Intégrer `<VoicePlayer />` dans `AgentCard` (`/personnas`) | Claude | ✅ Fait |
+| K | Ajouter bouton ▶️ dans `ChatMessage` + appel TTS | Claude | ✅ Fait |
+| L | Ajouter toggle "Lecture automatique" dans `InterviewLayout` | Claude | ✅ Fait |
+| M | `npm run typecheck` + `npm run lint` (build local OOM, non bloquant — Vercel OK) | Claude | ✅ Fait |
+| N | Tests manuels bout-en-bout (preview Vercel) | Utilisateur | ✅ Fait |
+| O | Mise à jour du CHANGELOG.md | Claude | ✅ Fait |
+| P | Commit + push sur `feat/voice-phase-1` (preview Vercel à jour) | Claude | ✅ Fait |
+| Q | Variables Vercel : `ELEVENLABS_API_KEY` ajoutée en Production + Preview | Utilisateur | ✅ Fait |
 
 ---
 
@@ -276,17 +277,18 @@ Si tu reprends ce chantier :
 
 ## 14. État courant
 
-**Dernière mise à jour : 2026-06-17.**
+**Dernière mise à jour : 2026-06-17. Phase 1 voix livrée bout-en-bout sur la preview Vercel.**
 
-- Branche active : `feat/voice-phase-1`
-- Sous-étapes A → F terminées ✅
-- Sous-étape en cours : **G1** (audition des 3 voix candidates pour Jade)
-- Code voix backend : entièrement en place (route + helpers + types), bloqué par l'absence de `voice_profile` pour Jade en DB
-- Bucket Supabase Storage `voice-cache` : créé
-- Migration `voice_profile` : appliquée
-- Clé ElevenLabs : configurée dans `.env.local`
-- Script d'audition prêt : [scripts/audition-jade-voices.mjs](../../scripts/audition-jade-voices.mjs)
-- Doc de la décision : [JADE_VOICE_DECISION.md](JADE_VOICE_DECISION.md)
+- Branche active : `feat/voice-phase-1` (préparée pour merge dans `main` quand validé par utilisateur)
+- **Toutes les sous-étapes A → L terminées** ✅
+- Jade a une voix configurée et fonctionnelle : Victoria — Content Creator (`O31r762Gb3WFygrEOGh0`)
+- Théo et Oriane affichent "Voix bientôt"
+- Backend voix opérationnel sur Vercel (clé `ELEVENLABS_API_KEY` ajoutée en Production + Preview)
+- Cache audio Supabase Storage opérationnel
+- Toggle autoplay fonctionnel et persistant
+- typecheck ✅ / lint ✅ (0 erreurs, 4 warnings pré-existants non liés à la voix)
+- Build local impossible (RAM insuffisante PC Windows) — non bloquant, Vercel build réussit
+- **Prochaine étape utilisateur** : décider quand merger `feat/voice-phase-1` dans `main`
 - Aucun code voix encore livré
 - Migration SQL prête à appliquer
 
