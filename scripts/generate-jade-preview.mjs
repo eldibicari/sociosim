@@ -40,8 +40,10 @@ const BUCKET = "voice-cache";
 const PREVIEW_PATH = "previews/jade.mp3";
 const DEFAULT_MODEL_ID = "eleven_multilingual_v2";
 
+// Note: "Jad" (sans le 'e') aide la voix Victoria à le prononcer en français /ʒad/
+// au lieu de l'anglais /dʒeɪd/. Le nom affiché reste "Jade" partout dans l'UI.
 const JADE_PREVIEW_TEXT = [
-  "Bonjour, je m'appelle Jade.",
+  "Bonjour, je m'appelle Jad.",
   "J'ai vingt-six ans, je suis en master de droit.",
   "Je lis tout ce qui sort sur ces outils.",
   "Le vrai problème, c'est que personne ne réfléchit vraiment à ce qu'il fait avec.",

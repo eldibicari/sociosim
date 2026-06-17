@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const supabase = createServiceSupabaseClient();
     const { data: interview, error: interviewError } = await supabase
       .from("interviews")
-      .select("id, started_at, created_at, agent_id, agents(agent_name, description), interview_usage(total_input_tokens, total_output_tokens)")
+      .select("id, started_at, created_at, agent_id, agents(agent_name, description, voice_profile), interview_usage(total_input_tokens, total_output_tokens)")
       .eq("id", interviewId)
       .single();
 
@@ -36,14 +36,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: message }, { status: 404 });
     }
 
-    const agent = (interview as { agents?: { agent_name?: string; description?: string | null } })
-      .agents;
+    const agent = (interview as {
+      agents?: {
+        agent_name?: string;
+        description?: string | null;
+        voice_profile?: { voiceId?: string } | null;
+      };
+    }).agents;
     if (!agent?.agent_name) {
       return NextResponse.json(
         { error: "Agent information missing from interview" },
         { status: 404 }
       );
     }
+    const agentHasVoice = Boolean(agent.voice_profile?.voiceId);
 
     const { data: userLink, error: userLinkError } = await supabase
       .from("user_interview_session")
@@ -76,6 +82,7 @@ export async function GET(request: NextRequest) {
           agent_id: interview.agent_id,
           agent_name: agent.agent_name,
           description: agent.description ?? null,
+          has_voice: agentHasVoice,
         },
         user: {
           id: linkedUser?.id ?? userLink?.user_id ?? null,

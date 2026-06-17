@@ -11,9 +11,9 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ArrowRight, BookOpen, FileDown, Menu as MenuIcon, Sparkles, User, X } from "lucide-react";
+import { ArrowRight, BookOpen, FileDown, Menu as MenuIcon, Sparkles, User, Volume2, VolumeX, X } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
 import { InterviewGridPanel } from "@/app/components/InterviewGridPanel";
 import { InterviewSidebar } from "@/app/components/InterviewSidebar";
@@ -36,6 +36,7 @@ type InterviewLayoutProps = {
   agentId?: string | null;
   userId?: string | null;
   agentDescription?: string | null;
+  agentHasVoice?: boolean;
   userName?: string;
   dateDisplay?: string;
   error?: string | null;
@@ -68,11 +69,14 @@ const DEFAULT_SUGGESTED_QUESTIONS = [
   "Pouvez-vous me raconter une situation récente où vous avez utilisé ChatGPT ?",
 ];
 
+const AUTOPLAY_STORAGE_KEY = "mimesis.voice.autoplay";
+
 export function InterviewLayout({
   agentDisplayName,
   agentId,
   userId,
   agentDescription,
+  agentHasVoice = false,
   userName,
   dateDisplay,
   error,
@@ -102,6 +106,32 @@ export function InterviewLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const [rightTab, setRightTab] = useState<RightTab>("profil");
+
+  const [autoplayVoice, setAutoplayVoice] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(AUTOPLAY_STORAGE_KEY);
+    if (stored === "1") setAutoplayVoice(true);
+  }, []);
+  const toggleAutoplay = () => {
+    setAutoplayVoice((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(AUTOPLAY_STORAGE_KEY, next ? "1" : "0");
+      }
+      return next;
+    });
+  };
+
+  // Identify the latest non-streaming assistant message — only that one
+  // receives autoplay=true when the toggle is on.
+  const lastAssistantIndex = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (m.role === "assistant" && !m.isStreaming) return i;
+    }
+    return -1;
+  })();
 
   const showSuggestions =
     showInput && messages.length === 0 && !isStreaming && draftMessage.trim().length === 0;
@@ -209,6 +239,30 @@ export function InterviewLayout({
 
         {/* Right: action icons */}
         <HStack gap={0.5}>
+          {/* Autoplay voice toggle (only if persona has a voice) */}
+          {agentHasVoice ? (
+            <IconButton
+              aria-label={
+                autoplayVoice
+                  ? "Désactiver la lecture automatique"
+                  : "Activer la lecture automatique"
+              }
+              title={
+                autoplayVoice
+                  ? "Lecture auto activée"
+                  : "Lecture auto désactivée"
+              }
+              size="sm"
+              variant="ghost"
+              borderRadius="lg"
+              color={autoplayVoice ? "var(--color-accent)" : "var(--color-text-muted)"}
+              _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
+              onClick={toggleAutoplay}
+            >
+              {autoplayVoice ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            </IconButton>
+          ) : null}
+
           {/* Grille */}
           <IconButton
             aria-label="Grille d'entretien"
@@ -452,7 +506,7 @@ export function InterviewLayout({
               </VStack>
             ) : (
               <Box display="flex" flexDirection="column">
-                {messages.map((msg) => (
+                {messages.map((msg, index) => (
                   <ChatMessage
                     key={msg.id}
                     role={msg.role}
@@ -461,6 +515,9 @@ export function InterviewLayout({
                     userName={userName}
                     agentName={agentNameForMessages}
                     timestamp={msg.timestamp}
+                    agentId={agentId ?? null}
+                    voiceEnabled={agentHasVoice}
+                    autoplayVoice={autoplayVoice && index === lastAssistantIndex}
                   />
                 ))}
                 {showAssistantSkeleton ? <AssistantSkeleton /> : null}
