@@ -63,3 +63,6 @@ codex-*.log
 .codex-*.log
 .playwright-cli/
 
+## scratch / auditions
+/tmp/
+

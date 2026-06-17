@@ -209,6 +209,7 @@ function InterviewPageInner() {
       agentId={interviewSummary?.agentId ?? null}
       userId={user?.id ?? null}
       agentDescription={interviewSummary?.agentDescription ?? null}
+      agentHasVoice={interviewSummary?.agentHasVoice ?? false}
       userName={interviewSummary?.userName}
       dateDisplay={dateDisplay}
       error={summaryError}

@@ -1,4 +1,5 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
+import { VoicePlayer } from "@/components/VoicePlayer";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -7,6 +8,9 @@ interface ChatMessageProps {
   agentName?: string;
   timestamp?: string;
   isStreaming?: boolean;
+  agentId?: string | null;
+  voiceEnabled?: boolean;
+  autoplayVoice?: boolean;
 }
 
 export function ChatMessage({
@@ -16,8 +20,13 @@ export function ChatMessage({
   agentName,
   timestamp,
   isStreaming = false,
+  agentId,
+  voiceEnabled = false,
+  autoplayVoice = false,
 }: ChatMessageProps) {
   const isUser = role === "user";
+  const showVoiceButton =
+    !isUser && voiceEnabled && !!agentId && !isStreaming && text.trim().length > 0;
 
   if (isUser) {
     return (
@@ -127,6 +136,19 @@ export function ChatMessage({
               )}
             </Text>
           </Box>
+
+          {showVoiceButton ? (
+            <Box mt="6px">
+              <VoicePlayer
+                mode="tts"
+                agentId={agentId as string}
+                text={text}
+                size="2xs"
+                variant="ghost"
+                autoplay={autoplayVoice}
+              />
+            </Box>
+          ) : null}
 
           {timestamp && (
             <Text

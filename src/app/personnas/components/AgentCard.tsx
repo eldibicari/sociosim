@@ -5,6 +5,7 @@ import { BookOpen, History, MessageSquarePlus, Settings2, ToggleLeft, ToggleRigh
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { type Agent } from "@/lib/agents";
 import { getPersonaVisual } from "@/lib/personaVisuals";
+import { VoicePlayer } from "@/components/VoicePlayer";
 import { PersonaSilhouette } from "./PersonaSilhouette";
 
 interface AgentCardProps {
@@ -136,6 +137,31 @@ export function AgentCard({
                 <Text fontSize="xs" color="fg.muted">{agent.creator_name}</Text>
               )}
             </VStack>
+
+            {/* Voice preview */}
+            <Box mt={1}>
+              {agent.preview_audio_url ? (
+                <VoicePlayer
+                  mode="preview"
+                  audioUrl={agent.preview_audio_url}
+                  label="Écouter la voix"
+                  size="sm"
+                  variant="subtle"
+                />
+              ) : (
+                <Badge
+                  variant="subtle"
+                  colorPalette="gray"
+                  borderRadius="full"
+                  px={2.5}
+                  py={0.5}
+                  fontSize="2xs"
+                  fontWeight="600"
+                >
+                  Voix bientôt
+                </Badge>
+              )}
+            </Box>
           </Box>
 
           {/* Description */}

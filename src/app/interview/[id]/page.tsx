@@ -270,6 +270,7 @@ export default function ResumeInterviewPage({ params }: { params: Promise<{ id: 
       agentId={interviewSummary?.agentId ?? null}
       userId={user?.id ?? null}
       agentDescription={interviewSummary?.agentDescription ?? null}
+      agentHasVoice={interviewSummary?.agentHasVoice ?? false}
       userName={interviewSummary?.userName}
       dateDisplay={dateDisplay}
       error={summaryError ?? viewOnlyError}

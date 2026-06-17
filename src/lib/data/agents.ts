@@ -1,4 +1,5 @@
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
+import { VOICE_CACHE_BUCKET, type VoiceProfile } from "@/lib/voice/types";
 import { throwIfError, ensureRecordFound } from "./errors";
 
 /**
@@ -17,10 +18,22 @@ export interface AgentRecord {
   created_by: string | null;
   creator_name: string | null;
   creator_role: string | null;
+  preview_audio_url?: string | null;
 }
 
 export interface AgentRecordWithPromptStatus extends AgentRecord {
   has_published_prompt: boolean;
+}
+
+function computePreviewAudioUrl(
+  supabase: ReturnType<typeof createServiceSupabaseClient>,
+  voiceProfile: unknown
+): string | null {
+  const profile = voiceProfile as VoiceProfile | null | undefined;
+  const path = profile?.previewAudioPath;
+  if (!path) return null;
+  return supabase.storage.from(VOICE_CACHE_BUCKET).getPublicUrl(path).data
+    .publicUrl;
 }
 
 /**
@@ -31,13 +44,14 @@ export async function getAgents(): Promise<AgentRecord[]> {
 
   const { data, error } = await supabase
     .from("agents")
-    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
+    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, voice_profile, users!agents_created_by_fkey(name, role)")
     .order("agent_name");
 
   throwIfError(error, "Failed to load agents");
 
   const agents = (data || []) as Array<
-    Omit<AgentRecord, "creator_name" | "creator_role"> & {
+    Omit<AgentRecord, "creator_name" | "creator_role" | "preview_audio_url"> & {
+      voice_profile?: unknown;
       users?: { name?: string; role?: string } | null;
     }
   >;
@@ -53,6 +67,7 @@ export async function getAgents(): Promise<AgentRecord[]> {
     created_by: agent.created_by,
     creator_name: agent.users?.name ?? null,
     creator_role: agent.users?.role ?? null,
+    preview_audio_url: computePreviewAudioUrl(supabase, agent.voice_profile),
   }));
 }
 
@@ -67,7 +82,7 @@ export async function getAgentsWithPromptStatus(
   let query = supabase
     .from("agents")
     .select(
-      "id, agent_name, description, interview_guide, active, is_template, is_public, created_by, agent_prompts(published), users!agents_created_by_fkey(name, role)"
+      "id, agent_name, description, interview_guide, active, is_template, is_public, created_by, voice_profile, agent_prompts(published), users!agents_created_by_fkey(name, role)"
     )
     .order("agent_name");
 
@@ -82,7 +97,8 @@ export async function getAgentsWithPromptStatus(
   throwIfError(error, "Failed to load agents with prompt status");
 
   const agents = (data || []) as Array<
-    Omit<AgentRecord, "creator_name" | "creator_role"> & {
+    Omit<AgentRecord, "creator_name" | "creator_role" | "preview_audio_url"> & {
+      voice_profile?: unknown;
       agent_prompts?: Array<{ published?: boolean | null }> | null;
       users?: { name?: string; role?: string } | null;
     }
@@ -99,6 +115,7 @@ export async function getAgentsWithPromptStatus(
     created_by: agent.created_by,
     creator_name: agent.users?.name ?? null,
     creator_role: agent.users?.role ?? null,
+    preview_audio_url: computePreviewAudioUrl(supabase, agent.voice_profile),
     has_published_prompt: (agent.agent_prompts || []).some((prompt) => prompt.published),
   }));
 }
@@ -114,7 +131,7 @@ export async function getPublishedAgents(
   let query = supabase
     .from("agents")
     .select(
-      "id, agent_name, description, interview_guide, active, is_template, is_public, created_by, agent_prompts!inner(published), users!agents_created_by_fkey(name, role)"
+      "id, agent_name, description, interview_guide, active, is_template, is_public, created_by, voice_profile, agent_prompts!inner(published), users!agents_created_by_fkey(name, role)"
     )
     .eq("agent_prompts.published", true)
     .order("agent_name");
@@ -130,7 +147,8 @@ export async function getPublishedAgents(
   throwIfError(error, "Failed to load published agents");
 
   const agents = (data || []) as Array<
-    Omit<AgentRecord, "creator_name" | "creator_role"> & {
+    Omit<AgentRecord, "creator_name" | "creator_role" | "preview_audio_url"> & {
+      voice_profile?: unknown;
       users?: { name?: string; role?: string } | null;
     }
   >;
@@ -146,6 +164,7 @@ export async function getPublishedAgents(
     created_by: agent.created_by,
     creator_name: agent.users?.name ?? null,
     creator_role: agent.users?.role ?? null,
+    preview_audio_url: computePreviewAudioUrl(supabase, agent.voice_profile),
   }));
 }
 
@@ -157,7 +176,7 @@ export async function getAgentByName(name: string): Promise<AgentRecord | null> 
 
   const { data, error } = await supabase
     .from("agents")
-    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
+    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, voice_profile, users!agents_created_by_fkey(name, role)")
     .eq("agent_name", name)
     .maybeSingle();
 
@@ -165,7 +184,10 @@ export async function getAgentByName(name: string): Promise<AgentRecord | null> 
 
   if (!data) return null;
 
-  const row = data as typeof data & { users?: { name?: string; role?: string } | null };
+  const row = data as typeof data & {
+    voice_profile?: unknown;
+    users?: { name?: string; role?: string } | null;
+  };
   return {
     id: row.id,
     agent_name: row.agent_name,
@@ -177,6 +199,7 @@ export async function getAgentByName(name: string): Promise<AgentRecord | null> 
     created_by: row.created_by,
     creator_name: row.users?.name ?? null,
     creator_role: row.users?.role ?? null,
+    preview_audio_url: computePreviewAudioUrl(supabase, row.voice_profile),
   };
 }
 
@@ -188,7 +211,7 @@ export async function getAgentById(agentId: string): Promise<AgentRecord | null>
 
   const { data, error } = await supabase
     .from("agents")
-    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, users!agents_created_by_fkey(name, role)")
+    .select("id, agent_name, description, interview_guide, active, is_template, is_public, created_by, voice_profile, users!agents_created_by_fkey(name, role)")
     .eq("id", agentId)
     .maybeSingle();
 
@@ -196,7 +219,10 @@ export async function getAgentById(agentId: string): Promise<AgentRecord | null>
 
   if (!data) return null;
 
-  const row = data as typeof data & { users?: { name?: string; role?: string } | null };
+  const row = data as typeof data & {
+    voice_profile?: unknown;
+    users?: { name?: string; role?: string } | null;
+  };
   return {
     id: row.id,
     agent_name: row.agent_name,
@@ -208,6 +234,7 @@ export async function getAgentById(agentId: string): Promise<AgentRecord | null>
     created_by: row.created_by,
     creator_name: row.users?.name ?? null,
     creator_role: row.users?.role ?? null,
+    preview_audio_url: computePreviewAudioUrl(supabase, row.voice_profile),
   };
 }
 

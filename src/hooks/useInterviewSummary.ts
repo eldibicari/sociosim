@@ -4,6 +4,7 @@ type InterviewSummary = {
   agentId: string | null;
   agentName: string;
   agentDescription?: string | null;
+  agentHasVoice: boolean;
   userName: string;
   startedAt: string;
   starterUserId?: string | null;
@@ -42,7 +43,12 @@ export function useInterviewSummary({
         }
         const payload = (await response.json().catch(() => null)) as
           | {
-              agent?: { agent_id?: string | null; agent_name?: string; description?: string | null };
+              agent?: {
+                agent_id?: string | null;
+                agent_name?: string;
+                description?: string | null;
+                has_voice?: boolean;
+              };
               user?: { id?: string | null; name?: string };
               interview?: { started_at?: string };
               usage?: { total_input_tokens?: number; total_output_tokens?: number };
@@ -55,6 +61,7 @@ export function useInterviewSummary({
           agentId: payload.agent.agent_id ?? null,
           agentName: payload.agent.agent_name,
           agentDescription: payload.agent.description ?? null,
+          agentHasVoice: Boolean(payload.agent.has_voice),
           userName: payload.user.name,
           startedAt: payload.interview.started_at,
         };
