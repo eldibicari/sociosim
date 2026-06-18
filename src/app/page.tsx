@@ -38,14 +38,14 @@ const SHOWCASE_BASE: Omit<ShowcasePersona, "id">[] = [
   },
   {
     agent_name: "oriane",
-    role: "Chargée de mission RH, 34 ans",
+    role: "Étudiante M1 sciences sociales, 22 ans",
     posture: "Utilisatrice réflexive",
     difficulty: "Intermédiaire",
     greeting:
-      "Je m'en sers pour les comptes-rendus, la prépa de réunions... Pratique, mais je garde toujours un œil dessus.",
-    sampleQuestion: "Est-ce que vous le trouvez fiable ?",
+      "Je l'utilise, en fait. Mais c'est ambivalent quoi. Je passe mon temps à reformuler ce qu'il sort pour que ça me ressemble.",
+    sampleQuestion: "Vous vous en servez pour quoi en général ?",
     sampleAnswer:
-      "Ça dépend pour quoi. Pour reformuler un texte, oui. Pour analyser des situations humaines... pas vraiment.",
+      "Surtout pour des résumés d'articles longs, ou pour rattraper un cours que j'ai pas eu le temps de bosser. Mais j'ai toujours peur que ce soit pas pertinent, quoi.",
     color: "#6366f1",
     accent: "#8b5cf6",
     avatarBg: "#4f46e5",
