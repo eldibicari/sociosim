@@ -172,14 +172,27 @@ export function VoiceAudition({
                   ) : null}
                 </VStack>
                 <HStack gap={1.5} alignItems="center">
-                  <VoicePlayer
-                    mode="tts"
-                    voiceId={c.voiceId}
-                    text={auditionText}
-                    size="sm"
-                    variant="subtle"
-                    ariaLabel={`Écouter la voix de ${c.name}`}
-                  />
+                  {c.previewUrl ? (
+                    // Use the static preview URL from ElevenLabs CDN — instant
+                    // playback, no TTS call required.
+                    <VoicePlayer
+                      mode="preview"
+                      audioUrl={c.previewUrl}
+                      size="sm"
+                      variant="subtle"
+                      ariaLabel={`Écouter la voix de ${c.name}`}
+                    />
+                  ) : (
+                    // Fallback: generate on-demand if no preview URL available.
+                    <VoicePlayer
+                      mode="tts"
+                      voiceId={c.voiceId}
+                      text={auditionText}
+                      size="sm"
+                      variant="subtle"
+                      ariaLabel={`Écouter la voix de ${c.name}`}
+                    />
+                  )}
                 </HStack>
               </HStack>
 
