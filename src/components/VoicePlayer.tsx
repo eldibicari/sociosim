@@ -12,7 +12,9 @@ type PreviewProps = {
 
 type TtsProps = {
   mode: "tts";
-  agentId: string;
+  /** Provide either agentId (looks up voice_profile in DB) OR voiceId (audition mode). */
+  agentId?: string;
+  voiceId?: string;
   text: string;
 };
 
@@ -61,7 +63,7 @@ export function VoicePlayer(props: VoicePlayerProps) {
   const playKey =
     props.mode === "preview"
       ? `preview:${props.audioUrl}`
-      : `tts:${props.agentId}:${props.text}`;
+      : `tts:${props.agentId ?? props.voiceId ?? ""}:${props.text}`;
 
   // Reset state whenever the audio source identity changes.
   useEffect(() => {
@@ -92,10 +94,16 @@ export function VoicePlayer(props: VoicePlayerProps) {
     if (props.mode !== "tts") {
       throw new Error("Audio URL missing");
     }
+    if (!props.agentId && !props.voiceId) {
+      throw new Error("VoicePlayer tts mode requires agentId or voiceId");
+    }
+    const body: Record<string, string> = { text: props.text };
+    if (props.agentId) body.agentId = props.agentId;
+    if (props.voiceId) body.voiceId = props.voiceId;
     const response = await fetch("/api/voice/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ agentId: props.agentId, text: props.text }),
+      body: JSON.stringify(body),
     });
     if (!response.ok) {
       const detail = (await response.json().catch(() => null)) as

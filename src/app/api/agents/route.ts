@@ -3,6 +3,57 @@ import { getAgentsWithPromptStatus, getPublishedAgents } from "@/lib/data/agents
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
 import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
 import { canViewAgent } from "@/lib/agentPolicy";
+import type { VoiceProfile } from "@/lib/voice/types";
+
+function sanitizeVoiceProfile(input: unknown): VoiceProfile | null {
+  if (!input || typeof input !== "object") return null;
+  const raw = input as Record<string, unknown>;
+  const voiceId = typeof raw.voiceId === "string" ? raw.voiceId.trim() : "";
+  if (!voiceId) return null;
+  const provider = raw.provider === "elevenlabs" ? "elevenlabs" : "elevenlabs";
+  const displayName =
+    typeof raw.displayName === "string" && raw.displayName.trim()
+      ? raw.displayName.trim()
+      : "Voix";
+  const language =
+    typeof raw.language === "string" && raw.language.trim()
+      ? raw.language.trim()
+      : "fr";
+  const modelId =
+    typeof raw.modelId === "string" && raw.modelId.trim()
+      ? raw.modelId.trim()
+      : undefined;
+  const settingsRaw =
+    raw.settings && typeof raw.settings === "object"
+      ? (raw.settings as Record<string, unknown>)
+      : {};
+  const settings = {
+    stability: typeof settingsRaw.stability === "number" ? settingsRaw.stability : 0.5,
+    similarity_boost:
+      typeof settingsRaw.similarity_boost === "number"
+        ? settingsRaw.similarity_boost
+        : 0.75,
+    style: typeof settingsRaw.style === "number" ? settingsRaw.style : undefined,
+    use_speaker_boost:
+      typeof settingsRaw.use_speaker_boost === "boolean"
+        ? settingsRaw.use_speaker_boost
+        : undefined,
+    speed: typeof settingsRaw.speed === "number" ? settingsRaw.speed : undefined,
+  };
+  const previewAudioPath =
+    typeof raw.previewAudioPath === "string" && raw.previewAudioPath.trim()
+      ? raw.previewAudioPath.trim()
+      : undefined;
+  return {
+    provider,
+    voiceId,
+    displayName,
+    language,
+    modelId,
+    settings,
+    previewAudioPath,
+  };
+}
 
 /**
  * GET /api/agents?published=true&template=false
@@ -74,6 +125,7 @@ export async function POST(request: NextRequest) {
     const interviewGuide =
       typeof body?.interview_guide === "string" ? body.interview_guide.trim() : "";
     const systemPrompt = body?.system_prompt?.trim();
+    const voiceProfile = sanitizeVoiceProfile(body?.voice_profile);
 
     if (!agentName || !description || !systemPrompt) {
       return NextResponse.json(
@@ -90,6 +142,7 @@ export async function POST(request: NextRequest) {
         description,
         interview_guide: interviewGuide || null,
         created_by: user.id,
+        voice_profile: voiceProfile,
       })
       .select("id")
       .single();
