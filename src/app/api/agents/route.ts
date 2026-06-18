@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAgentsWithPromptStatus, getPublishedAgents } from "@/lib/data/agents";
 import { createServiceSupabaseClient } from "@/lib/supabaseServiceClient";
 import { getAuthenticatedUser } from "@/lib/supabaseAuthServer";
@@ -16,6 +17,64 @@ function slugifyName(name: string): string {
     .replace(/^-|-$/g, "")
     .slice(0, 60);
   return slug || "persona";
+}
+
+/**
+ * Generate and store the persona's preview audio. Runs in the background
+ * after the agent has been created so the client response is not blocked.
+ * Never throws — failures are logged but invisible to the user.
+ */
+async function generateAndStorePersonaPreview(opts: {
+  supabase: SupabaseClient;
+  agentId: string;
+  agentName: string;
+  voiceProfile: VoiceProfile;
+  apiKey: string;
+}): Promise<void> {
+  const { supabase, agentId, agentName, voiceProfile, apiKey } = opts;
+  try {
+    const slug = slugifyName(agentName);
+    const previewPath = `previews/${slug}.mp3`;
+    const previewText = `Bonjour, je m'appelle ${agentName}.`;
+    const audioBuffer = await generateSpeech({
+      apiKey,
+      voiceId: voiceProfile.voiceId,
+      text: previewText,
+      modelId: voiceProfile.modelId,
+      voiceSettings: voiceProfile.settings,
+    });
+    const { error: uploadError } = await supabase.storage
+      .from(VOICE_CACHE_BUCKET)
+      .upload(previewPath, Buffer.from(audioBuffer), {
+        contentType: "audio/mpeg",
+        upsert: true,
+      });
+    if (uploadError) {
+      console.error(
+        "[/api/agents POST] preview upload failed:",
+        uploadError.message
+      );
+      return;
+    }
+    const updatedVoiceProfile = {
+      ...voiceProfile,
+      previewAudioPath: previewPath,
+    };
+    const { error: updateError } = await supabase
+      .from("agents")
+      .update({ voice_profile: updatedVoiceProfile })
+      .eq("id", agentId);
+    if (updateError) {
+      console.error(
+        "[/api/agents POST] preview path update failed:",
+        updateError.message
+      );
+    }
+  } catch (previewError) {
+    const msg =
+      previewError instanceof Error ? previewError.message : "unknown";
+    console.error("[/api/agents POST] preview generation failed:", msg);
+  }
 }
 
 function sanitizeVoiceProfile(input: unknown): VoiceProfile | null {
@@ -188,57 +247,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ─── Generate the persona's preview audio (best-effort) ─────────
-    // Run after agent + prompt are persisted. Failures are logged but
-    // never block the response: the persona will simply show "Voix
-    // bientôt" on its card until the preview is generated later.
+    // ─── Generate the persona's preview audio in the background ───
+    // We defer this with after() so the client gets its response as soon
+    // as the agent + prompt are saved. The preview will be available a
+    // few seconds later when the user lands on /personnas (a refresh may
+    // be needed if the user is very quick).
     if (voiceProfile) {
       const apiKey = process.env.ELEVENLABS_API_KEY;
       if (apiKey) {
-        try {
-          const slug = slugifyName(agentName);
-          const previewPath = `previews/${slug}.mp3`;
-          const previewText = `Bonjour, je m'appelle ${agentName}.`;
-          const audioBuffer = await generateSpeech({
+        after(() =>
+          generateAndStorePersonaPreview({
+            supabase,
+            agentId: agentData.id,
+            agentName,
+            voiceProfile,
             apiKey,
-            voiceId: voiceProfile.voiceId,
-            text: previewText,
-            modelId: voiceProfile.modelId,
-            voiceSettings: voiceProfile.settings,
-          });
-          const { error: uploadError } = await supabase.storage
-            .from(VOICE_CACHE_BUCKET)
-            .upload(previewPath, Buffer.from(audioBuffer), {
-              contentType: "audio/mpeg",
-              upsert: true,
-            });
-          if (uploadError) {
-            console.error(
-              "[/api/agents POST] preview upload failed:",
-              uploadError.message
-            );
-          } else {
-            // Persist the preview path so the cards can display the button.
-            const updatedVoiceProfile = {
-              ...voiceProfile,
-              previewAudioPath: previewPath,
-            };
-            const { error: updateError } = await supabase
-              .from("agents")
-              .update({ voice_profile: updatedVoiceProfile })
-              .eq("id", agentData.id);
-            if (updateError) {
-              console.error(
-                "[/api/agents POST] preview path update failed:",
-                updateError.message
-              );
-            }
-          }
-        } catch (previewError) {
-          const msg =
-            previewError instanceof Error ? previewError.message : "unknown";
-          console.error("[/api/agents POST] preview generation failed:", msg);
-        }
+          })
+        );
       } else {
         console.warn(
           "[/api/agents POST] ELEVENLABS_API_KEY missing — skipping preview generation"
