@@ -9,8 +9,10 @@ import {
   HStack,
   IconButton,
   Input,
+  NativeSelect,
   Popover,
   Portal,
+  Text,
   Textarea,
   VStack,
 } from "@chakra-ui/react";
@@ -25,7 +27,7 @@ import Paragraph from "@tiptap/extension-paragraph";
 import TextExtension from "@tiptap/extension-text";
 import { ArrowLeft, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import PersonnaLayout from "@/app/personnas/components/PersonnaLayout";
 import PersonaConfigBuilder from "@/app/personnas/components/PersonaConfigBuilder";
 import PersonnaPromptEditor from "@/app/personnas/components/PersonnaPromptEditor";
@@ -33,8 +35,10 @@ import PromptReviewSidebar, {
   type CauldronReview,
 } from "@/app/personnas/components/PromptReviewSidebar";
 import { toaster } from "@/components/ui/toaster";
+import { VoiceAudition, type SelectedVoice } from "@/components/VoiceAudition";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import type { PersonaConfig } from "@/lib/personaConfig";
+import { inferPersonaVoiceHints } from "@/lib/voice/personaInference";
 import { withTimeout } from "@/lib/withTimeout";
 
 type NewPersonnaFormProps = {
@@ -87,6 +91,43 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
   const [isReviewing, setIsReviewing] = useState(false);
   const [validationInfoOpen, setValidationInfoOpen] = useState(false);
   const promptEditorRef = useRef<HTMLDivElement>(null);
+
+  // ─── Voice selection (Phase 2b) ─────────────────────────────────────
+  const [voiceGender, setVoiceGender] = useState<string>("");
+  const [voiceAgeBucket, setVoiceAgeBucket] = useState<string>("");
+  const [selectedVoice, setSelectedVoice] = useState<SelectedVoice | null>(null);
+  const trimmedAgentName = agentName.trim();
+  const voiceInference = useMemo(() => {
+    const ageMap: Record<string, number> = { young: 24, adult: 42, senior: 65 };
+    return inferPersonaVoiceHints({
+      name: trimmedAgentName,
+      prompt: systemPrompt,
+      overrideGender: voiceGender || undefined,
+      overrideAge: voiceAgeBucket ? ageMap[voiceAgeBucket] : undefined,
+    });
+  }, [trimmedAgentName, systemPrompt, voiceGender, voiceAgeBucket]);
+  const voiceAttributes = useMemo(
+    () => ({
+      gender: voiceInference.gender,
+      age: voiceInference.age,
+      language: "fr",
+    }),
+    [voiceInference]
+  );
+  const auditionText = trimmedAgentName
+    ? `Bonjour, je m'appelle ${trimmedAgentName}.`
+    : "Bonjour, comment ça va aujourd'hui ?";
+
+  // Human-readable list of required fields still missing — used to hint
+  // why the "Créer la persona" button is disabled.
+  const missingFieldsLabel = useMemo(() => {
+    const missing: string[] = [];
+    if (!trimmedAgentName) missing.push("Nom du persona");
+    if (!description.trim()) missing.push("Description courte");
+    if (missing.length === 0) return null;
+    if (missing.length === 1) return `Champ requis : ${missing[0]}`;
+    return `Champs requis : ${missing.join(", ")}`;
+  }, [trimmedAgentName, description]);
 
   const editor = useEditor({
     extensions: [
@@ -220,6 +261,22 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
       setIsSaving(true);
       setError(null);
 
+      const voiceProfilePayload = selectedVoice
+        ? {
+            provider: "elevenlabs",
+            voiceId: selectedVoice.voiceId,
+            displayName: selectedVoice.name,
+            language: selectedVoice.language || "fr",
+            modelId: "eleven_multilingual_v2",
+            settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+              style: 0,
+              use_speaker_boost: true,
+            },
+          }
+        : null;
+
       const response = await withTimeout(
         "createPersonna",
         fetch("/api/agents", {
@@ -231,6 +288,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
             interview_guide: trimmedGuide,
             system_prompt: trimmedPrompt,
             edited_by: user.id,
+            voice_profile: voiceProfilePayload,
           }),
         }),
         15000
@@ -438,6 +496,16 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                             </Popover.Positioner>
                           </Portal>
                         </Popover.Root>
+                        {missingFieldsLabel ? (
+                          <Text
+                            fontSize="xs"
+                            color="orange.600"
+                            fontWeight="500"
+                            display={{ base: "none", md: "inline" }}
+                          >
+                            {missingFieldsLabel}
+                          </Text>
+                        ) : null}
                         <Button
                           type="submit"
                           size="sm"
@@ -461,6 +529,130 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       />
                     </Box>
                   )}
+                </Box>
+
+                {/* ─── Voice selection (Phase 2b) ─── */}
+                <Box
+                  borderRadius="2xl"
+                  borderWidth="1px"
+                  borderColor="border.subtle"
+                  backgroundColor="white"
+                  padding={5}
+                >
+                  <VStack align="stretch" gap={4}>
+                    <VStack align="stretch" gap={1}>
+                      <Heading size="md">Voix du persona</Heading>
+                      <Text fontSize="xs" color="fg.muted" lineHeight="1.6">
+                        Optionnel — choisissez une voix qui correspond au profil
+                        sociologique de votre persona. Justifier ce choix dans
+                        votre mémo est un exercice méthodologique en soi.
+                      </Text>
+                    </VStack>
+
+                    {!trimmedAgentName ? (
+                      <Text fontSize="sm" color="fg.muted">
+                        Renseignez d&apos;abord le nom du persona pour activer
+                        l&apos;audition des voix.
+                      </Text>
+                    ) : (
+                      <>
+                        {(voiceInference.source.gender || voiceInference.source.age) && (
+                          <Box
+                            padding={3}
+                            borderRadius="lg"
+                            backgroundColor="var(--color-surface-muted)"
+                            borderWidth="1px"
+                            borderColor="var(--color-border)"
+                          >
+                            <Text fontSize="xs" fontWeight="600" color="fg.muted" mb={1}>
+                              Filtres déduits automatiquement
+                            </Text>
+                            <VStack alignItems="flex-start" gap={0.5}>
+                              {voiceInference.gender && (
+                                <Text fontSize="xs" color="fg.muted">
+                                  · Genre : <b>{voiceInference.gender === "female" ? "Féminin" : "Masculin"}</b>
+                                  {voiceInference.source.gender ? ` (${voiceInference.source.gender})` : ""}
+                                </Text>
+                              )}
+                              {voiceInference.age !== undefined && (
+                                <Text fontSize="xs" color="fg.muted">
+                                  · Âge : <b>{voiceInference.age} ans</b>
+                                  {voiceInference.source.age ? ` (${voiceInference.source.age})` : ""}
+                                </Text>
+                              )}
+                            </VStack>
+                            <Text fontSize="2xs" color="fg.muted" mt={1.5}>
+                              Vous pouvez remplacer ces valeurs avec les menus ci-dessous.
+                            </Text>
+                          </Box>
+                        )}
+                        <HStack gap={3} flexWrap="wrap" alignItems="flex-end">
+                          <Field.Root flex="1" minW="160px">
+                            <Field.Label fontSize="xs">Genre</Field.Label>
+                            <NativeSelect.Root size="sm">
+                              <NativeSelect.Field
+                                value={voiceGender}
+                                onChange={(e) => setVoiceGender(e.target.value)}
+                              >
+                                <option value="">Auto</option>
+                                <option value="female">Féminin</option>
+                                <option value="male">Masculin</option>
+                              </NativeSelect.Field>
+                              <NativeSelect.Indicator />
+                            </NativeSelect.Root>
+                          </Field.Root>
+                          <Field.Root flex="1" minW="180px">
+                            <Field.Label fontSize="xs">Tranche d&apos;âge</Field.Label>
+                            <NativeSelect.Root size="sm">
+                              <NativeSelect.Field
+                                value={voiceAgeBucket}
+                                onChange={(e) => setVoiceAgeBucket(e.target.value)}
+                              >
+                                <option value="">Auto</option>
+                                <option value="young">Jeune (18-30)</option>
+                                <option value="adult">Adulte (30-55)</option>
+                                <option value="senior">Senior (55+)</option>
+                              </NativeSelect.Field>
+                              <NativeSelect.Indicator />
+                            </NativeSelect.Root>
+                          </Field.Root>
+                        </HStack>
+
+                        {selectedVoice && (
+                          <Box
+                            padding={3}
+                            borderRadius="lg"
+                            backgroundColor="var(--color-accent-soft)"
+                            borderWidth="1px"
+                            borderColor="var(--color-accent-border)"
+                          >
+                            <HStack gap={2} alignItems="center" flexWrap="wrap">
+                              <Badge colorPalette="purple" variant="solid" borderRadius="full" px={2}>
+                                Voix retenue
+                              </Badge>
+                              <Text fontSize="sm" fontWeight="600">
+                                {selectedVoice.name}
+                              </Text>
+                              {selectedVoice.gender && (
+                                <Text fontSize="xs" color="fg.muted">
+                                  {selectedVoice.gender}
+                                  {selectedVoice.age ? ` · ${selectedVoice.age}` : ""}
+                                  {selectedVoice.accent ? ` · ${selectedVoice.accent}` : ""}
+                                </Text>
+                              )}
+                            </HStack>
+                          </Box>
+                        )}
+
+                        <VoiceAudition
+                          attributes={voiceAttributes}
+                          auditionText={auditionText}
+                          selectedVoiceId={selectedVoice?.voiceId}
+                          onSelect={setSelectedVoice}
+                        />
+                      </>
+                    )}
+                  </VStack>
                 </Box>
               </VStack>
             </Box>
