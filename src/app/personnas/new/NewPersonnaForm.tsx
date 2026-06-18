@@ -38,6 +38,7 @@ import { toaster } from "@/components/ui/toaster";
 import { VoiceAudition, type SelectedVoice } from "@/components/VoiceAudition";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import type { PersonaConfig } from "@/lib/personaConfig";
+import { inferPersonaVoiceHints } from "@/lib/voice/personaInference";
 import { withTimeout } from "@/lib/withTimeout";
 
 type NewPersonnaFormProps = {
@@ -96,14 +97,23 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
   const [voiceAgeBucket, setVoiceAgeBucket] = useState<string>("");
   const [selectedVoice, setSelectedVoice] = useState<SelectedVoice | null>(null);
   const trimmedAgentName = agentName.trim();
-  const voiceAttributes = useMemo(() => {
+  const voiceInference = useMemo(() => {
     const ageMap: Record<string, number> = { young: 24, adult: 42, senior: 65 };
-    return {
-      gender: voiceGender || undefined,
-      age: voiceAgeBucket ? ageMap[voiceAgeBucket] : undefined,
+    return inferPersonaVoiceHints({
+      name: trimmedAgentName,
+      prompt: systemPrompt,
+      overrideGender: voiceGender || undefined,
+      overrideAge: voiceAgeBucket ? ageMap[voiceAgeBucket] : undefined,
+    });
+  }, [trimmedAgentName, systemPrompt, voiceGender, voiceAgeBucket]);
+  const voiceAttributes = useMemo(
+    () => ({
+      gender: voiceInference.gender,
+      age: voiceInference.age,
       language: "fr",
-    };
-  }, [voiceGender, voiceAgeBucket]);
+    }),
+    [voiceInference]
+  );
   const auditionText = trimmedAgentName
     ? `Bonjour, je m'appelle ${trimmedAgentName}.`
     : "Bonjour, comment ça va aujourd'hui ?";
@@ -525,6 +535,36 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                       </Text>
                     ) : (
                       <>
+                        {(voiceInference.source.gender || voiceInference.source.age) && (
+                          <Box
+                            padding={3}
+                            borderRadius="lg"
+                            backgroundColor="var(--color-surface-muted)"
+                            borderWidth="1px"
+                            borderColor="var(--color-border)"
+                          >
+                            <Text fontSize="xs" fontWeight="600" color="fg.muted" mb={1}>
+                              Filtres déduits automatiquement
+                            </Text>
+                            <VStack alignItems="flex-start" gap={0.5}>
+                              {voiceInference.gender && (
+                                <Text fontSize="xs" color="fg.muted">
+                                  · Genre : <b>{voiceInference.gender === "female" ? "Féminin" : "Masculin"}</b>
+                                  {voiceInference.source.gender ? ` (${voiceInference.source.gender})` : ""}
+                                </Text>
+                              )}
+                              {voiceInference.age !== undefined && (
+                                <Text fontSize="xs" color="fg.muted">
+                                  · Âge : <b>{voiceInference.age} ans</b>
+                                  {voiceInference.source.age ? ` (${voiceInference.source.age})` : ""}
+                                </Text>
+                              )}
+                            </VStack>
+                            <Text fontSize="2xs" color="fg.muted" mt={1.5}>
+                              Vous pouvez remplacer ces valeurs avec les menus ci-dessous.
+                            </Text>
+                          </Box>
+                        )}
                         <HStack gap={3} flexWrap="wrap" alignItems="flex-end">
                           <Field.Root flex="1" minW="160px">
                             <Field.Label fontSize="xs">Genre</Field.Label>
@@ -533,7 +573,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                                 value={voiceGender}
                                 onChange={(e) => setVoiceGender(e.target.value)}
                               >
-                                <option value="">Tous</option>
+                                <option value="">Auto</option>
                                 <option value="female">Féminin</option>
                                 <option value="male">Masculin</option>
                               </NativeSelect.Field>
@@ -547,7 +587,7 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                                 value={voiceAgeBucket}
                                 onChange={(e) => setVoiceAgeBucket(e.target.value)}
                               >
-                                <option value="">Tous</option>
+                                <option value="">Auto</option>
                                 <option value="young">Jeune (18-30)</option>
                                 <option value="adult">Adulte (30-55)</option>
                                 <option value="senior">Senior (55+)</option>
