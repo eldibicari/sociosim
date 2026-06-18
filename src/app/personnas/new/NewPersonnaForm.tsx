@@ -118,6 +118,17 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
     ? `Bonjour, je m'appelle ${trimmedAgentName}.`
     : "Bonjour, comment ça va aujourd'hui ?";
 
+  // Human-readable list of required fields still missing — used to hint
+  // why the "Créer la persona" button is disabled.
+  const missingFieldsLabel = useMemo(() => {
+    const missing: string[] = [];
+    if (!trimmedAgentName) missing.push("Nom du persona");
+    if (!description.trim()) missing.push("Description courte");
+    if (missing.length === 0) return null;
+    if (missing.length === 1) return `Champ requis : ${missing[0]}`;
+    return `Champs requis : ${missing.join(", ")}`;
+  }, [trimmedAgentName, description]);
+
   const editor = useEditor({
     extensions: [
       Document,
@@ -485,6 +496,16 @@ export default function NewPersonnaForm({ templatePrompt }: NewPersonnaFormProps
                             </Popover.Positioner>
                           </Portal>
                         </Popover.Root>
+                        {missingFieldsLabel ? (
+                          <Text
+                            fontSize="xs"
+                            color="orange.600"
+                            fontWeight="500"
+                            display={{ base: "none", md: "inline" }}
+                          >
+                            {missingFieldsLabel}
+                          </Text>
+                        ) : null}
                         <Button
                           type="submit"
                           size="sm"
