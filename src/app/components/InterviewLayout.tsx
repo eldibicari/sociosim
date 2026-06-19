@@ -20,6 +20,8 @@ import { InterviewSidebar } from "@/app/components/InterviewSidebar";
 import { AssistantSkeleton } from "@/components/AssistantSkeleton";
 import { ChatMessage } from "@/components/ChatMessage";
 import { MessageInput } from "@/components/MessageInput";
+import { MicCapture } from "@/components/MicCapture";
+import { toaster } from "@/components/ui/toaster";
 import type { InterviewAnalysis } from "@/lib/schemas";
 import type { UIMessage } from "@/types/ui";
 
@@ -524,14 +526,33 @@ export function InterviewLayout({
           </Box>
 
           {showInput ? (
-            <MessageInput
-              onSendMessage={onSendMessage}
-              isLoading={isStreaming}
-              placeholder="Posez votre question…"
-              containerProps={messageInputContainerProps}
-              value={draftMessage}
-              onValueChange={setDraftMessage}
-            />
+            <VStack alignItems="stretch" gap={2} width="100%">
+              {/* Mic capture — Phase 3 morceau 1. Pour l'instant le callback
+                  ne fait qu'afficher un toast ; la transcription sera branchée
+                  au morceau 2. */}
+              <Box display="flex" justifyContent="center" width="100%">
+                <MicCapture
+                  disabled={isStreaming}
+                  onRecorded={({ blob, durationMs, mimeType }) => {
+                    const sizeKb = Math.round(blob.size / 1024);
+                    const seconds = (durationMs / 1000).toFixed(1);
+                    toaster.create({
+                      title: "Enregistrement capté",
+                      description: `${seconds}s · ${sizeKb} Ko · ${mimeType}. La transcription arrivera au prochain morceau.`,
+                      type: "success",
+                    });
+                  }}
+                />
+              </Box>
+              <MessageInput
+                onSendMessage={onSendMessage}
+                isLoading={isStreaming}
+                placeholder="Posez votre question…"
+                containerProps={messageInputContainerProps}
+                value={draftMessage}
+                onValueChange={setDraftMessage}
+              />
+            </VStack>
           ) : null}
         </Box>
       </Box>
