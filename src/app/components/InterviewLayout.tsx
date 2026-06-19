@@ -649,6 +649,7 @@ export function InterviewLayout({
         agentHasVoice={agentHasVoice}
         isStreaming={isStreaming}
         onSendMessage={onSendMessage}
+        messages={messages}
       />
 
       {/* ── LEFT DRAWER (InterviewSidebar) ─────────────── */}

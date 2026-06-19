@@ -21,7 +21,8 @@ import { Box, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
 import { Mic, Square, X } from "lucide-react";
 import { PersonaSilhouette } from "@/app/personnas/components/PersonaSilhouette";
 import { getPersonaVisual } from "@/lib/personaVisuals";
-import type { STTResponseBody } from "@/lib/voice/types";
+import type { STTResponseBody, TTSResponseBody } from "@/lib/voice/types";
+import type { UIMessage } from "@/types/ui";
 
 type ConversationState =
   | "idle"
@@ -35,12 +36,14 @@ interface VoiceConversationOverlayProps {
   onClose: () => void;
   agentId: string | null;
   agentName: string | null;
-  /** Whether the persona has voice configured (for now informational). */
+  /** Whether the persona has voice configured. */
   agentHasVoice: boolean;
   /** True while the persona's text response is being streamed back. */
   isStreaming: boolean;
   /** Hand the transcribed user text to the existing chat handler. */
   onSendMessage: (text: string) => void;
+  /** Live chat messages. Used to auto-play Jade's reply via TTS. */
+  messages: UIMessage[];
 }
 
 const BAR_COUNT = 32;
@@ -54,6 +57,7 @@ export function VoiceConversationOverlay({
   agentHasVoice,
   isStreaming,
   onSendMessage,
+  messages,
 }: VoiceConversationOverlayProps) {
   const [state, setState] = useState<ConversationState>("idle");
   const [durationMs, setDurationMs] = useState(0);
@@ -70,6 +74,13 @@ export function VoiceConversationOverlay({
   const startTimeRef = useRef(0);
   const animationFrameRef = useRef<number | null>(null);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Playback machinery — separate from the recording pipeline.
+  const playbackAudioRef = useRef<HTMLAudioElement | null>(null);
+  const playbackContextRef = useRef<AudioContext | null>(null);
+  const playbackAnalyserRef = useRef<AnalyserNode | null>(null);
+  const lastPlayedMessageIdRef = useRef<string | null>(null);
+  const playbackAnimationFrameRef = useRef<number | null>(null);
 
   const visual = agentName ? getPersonaVisual(agentName) : null;
   const displayName = agentName
@@ -100,49 +111,80 @@ export function VoiceConversationOverlay({
     analyserRef.current = null;
   }, []);
 
+  const releasePlayback = useCallback(() => {
+    if (playbackAnimationFrameRef.current !== null) {
+      cancelAnimationFrame(playbackAnimationFrameRef.current);
+      playbackAnimationFrameRef.current = null;
+    }
+    if (playbackAudioRef.current) {
+      playbackAudioRef.current.pause();
+      playbackAudioRef.current.src = "";
+      playbackAudioRef.current = null;
+    }
+    if (
+      playbackContextRef.current &&
+      playbackContextRef.current.state !== "closed"
+    ) {
+      playbackContextRef.current.close().catch(() => {});
+      playbackContextRef.current = null;
+    }
+    playbackAnalyserRef.current = null;
+  }, []);
+
   // Reset every time the overlay opens/closes.
   useEffect(() => {
     if (!open) {
       stopAnimations();
       releaseStream();
+      releasePlayback();
       mediaRecorderRef.current = null;
       chunksRef.current = [];
+      lastPlayedMessageIdRef.current = null;
       setState("idle");
       setDurationMs(0);
       setAudioLevels(Array(BAR_COUNT).fill(0));
       setError(null);
+    } else {
+      // When opening, seed "lastPlayed" with whatever the latest assistant
+      // message is, so we DON'T auto-play history when the user opens the
+      // overlay. Only NEW messages will trigger playback.
+      const latestAssistant = [...messages]
+        .reverse()
+        .find((m) => m.role === "assistant" && !m.isStreaming);
+      lastPlayedMessageIdRef.current = latestAssistant?.id ?? null;
     }
-  }, [open, stopAnimations, releaseStream]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Final cleanup on unmount.
   useEffect(
     () => () => {
       stopAnimations();
       releaseStream();
+      releasePlayback();
     },
-    [stopAnimations, releaseStream]
+    [stopAnimations, releaseStream, releasePlayback]
   );
 
   // Reflect the streaming state from the chat into the visual state machine.
+  // While Jade is still streaming text, we keep "personaThinking". When the
+  // streaming finishes, the next useEffect picks up the new message and
+  // triggers TTS playback ("personaSpeaking").
   useEffect(() => {
     if (!open) return;
-    if (isStreaming && state !== "personaSpeaking" && state !== "personaThinking") {
+    if (
+      isStreaming &&
+      state !== "personaSpeaking" &&
+      state !== "personaThinking"
+    ) {
       setState("personaThinking");
-    }
-    if (!isStreaming && state === "personaThinking") {
-      // Streaming ended → would be personaSpeaking once TTS is wired (Morceau 6).
-      // For now go back to idle so the user can take another turn.
-      setState("idle");
     }
   }, [isStreaming, open, state]);
 
   // ─── Audio level visualization ─────────────────────────────────────
-  const updateAudioLevels = useCallback(() => {
-    const analyser = analyserRef.current;
-    if (!analyser) return;
+  const sampleAnalyser = (analyser: AnalyserNode, boost = 2.3): number[] => {
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
     analyser.getByteFrequencyData(dataArray);
-
     const bucketSize = Math.max(1, Math.floor(dataArray.length / BAR_COUNT));
     const levels: number[] = [];
     for (let i = 0; i < BAR_COUNT; i++) {
@@ -151,11 +193,104 @@ export function VoiceConversationOverlay({
         sum += dataArray[i * bucketSize + j] ?? 0;
       }
       const avg = sum / bucketSize / 255;
-      levels.push(Math.min(1, avg * 2.3));
+      levels.push(Math.min(1, avg * boost));
     }
-    setAudioLevels(levels);
+    return levels;
+  };
+
+  const updateAudioLevels = useCallback(() => {
+    const analyser = analyserRef.current;
+    if (!analyser) return;
+    setAudioLevels(sampleAnalyser(analyser));
     animationFrameRef.current = requestAnimationFrame(updateAudioLevels);
   }, []);
+
+  const updatePlaybackLevels = useCallback(() => {
+    const analyser = playbackAnalyserRef.current;
+    if (!analyser) return;
+    setAudioLevels(sampleAnalyser(analyser, 2.6));
+    playbackAnimationFrameRef.current = requestAnimationFrame(updatePlaybackLevels);
+  }, []);
+
+  // ─── Persona TTS playback ──────────────────────────────────────────
+  const playPersonaMessage = useCallback(
+    async (messageId: string, text: string) => {
+      if (!agentId) return;
+      lastPlayedMessageIdRef.current = messageId;
+      setError(null);
+      setState("personaSpeaking");
+
+      try {
+        const response = await fetch("/api/voice/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agentId, text }),
+        });
+        if (!response.ok) {
+          const detail = (await response.json().catch(() => null)) as
+            | { error?: string }
+            | null;
+          throw new Error(
+            detail?.error ?? `Voix indisponible (${response.status})`
+          );
+        }
+        const data = (await response.json()) as TTSResponseBody;
+
+        const audio = new Audio(data.audioUrl);
+        audio.crossOrigin = "anonymous";
+        playbackAudioRef.current = audio;
+
+        // Wire the playing audio into an analyser for the waveform.
+        const ctx = new AudioContext();
+        playbackContextRef.current = ctx;
+        const sourceNode = ctx.createMediaElementSource(audio);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.6;
+        sourceNode.connect(analyser);
+        analyser.connect(ctx.destination);
+        playbackAnalyserRef.current = analyser;
+
+        audio.addEventListener("ended", () => {
+          releasePlayback();
+          setAudioLevels(Array(BAR_COUNT).fill(0));
+          setState("idle");
+        });
+        audio.addEventListener("error", () => {
+          releasePlayback();
+          setError("Lecture de la voix échouée");
+          setState("idle");
+        });
+
+        await audio.play();
+        updatePlaybackLevels();
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Voix indisponible";
+        releasePlayback();
+        setError(message);
+        setState("idle");
+      }
+    },
+    [agentId, releasePlayback, updatePlaybackLevels]
+  );
+
+  // Detect the persona's latest reply and play it.
+  useEffect(() => {
+    if (!open) return;
+    if (!agentHasVoice || !agentId) return;
+    if (state === "recording" || state === "transcribing") return;
+    if (state === "personaSpeaking") return;
+
+    const latestAssistant = [...messages]
+      .reverse()
+      .find((m) => m.role === "assistant" && !m.isStreaming);
+    if (!latestAssistant) return;
+    if (!latestAssistant.text?.trim()) return;
+    if (latestAssistant.id === lastPlayedMessageIdRef.current) return;
+
+    void playPersonaMessage(latestAssistant.id, latestAssistant.text);
+  }, [messages, open, agentId, agentHasVoice, state, playPersonaMessage]);
 
   // ─── Recording lifecycle ───────────────────────────────────────────
   const pickMimeType = (): string => {
