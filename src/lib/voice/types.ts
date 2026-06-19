@@ -36,6 +36,24 @@ export interface TTSResponseBody {
   cached: boolean;
 }
 
+// ─── Speech-to-Text (Phase 3) ──────────────────────────────────────────
+
+/**
+ * STT request body is multipart/form-data with at least a `file` field.
+ * We keep this as a documented shape rather than a JSON type since fetch
+ * sends FormData directly.
+ */
+export interface STTResponseBody {
+  text: string;
+  languageCode?: string;
+}
+
+/** Server-side cap for any audio uploaded to /api/voice/stt. */
+export const MAX_STT_AUDIO_BYTES = 25 * 1024 * 1024; // 25 MB
+
+/** Default Scribe model used for transcription. */
+export const DEFAULT_SCRIBE_MODEL_ID = "scribe_v2";
+
 // ─── Voice catalog & audition ──────────────────────────────────────────
 
 export interface CatalogVoice {
