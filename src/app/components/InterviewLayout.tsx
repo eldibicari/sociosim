@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ArrowRight, BookOpen, FileDown, Menu as MenuIcon, Sparkles, User, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowRight, BookOpen, FileDown, Headphones, Menu as MenuIcon, Sparkles, User, Volume2, VolumeX, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
@@ -21,6 +21,7 @@ import { AssistantSkeleton } from "@/components/AssistantSkeleton";
 import { ChatMessage } from "@/components/ChatMessage";
 import { MessageInput } from "@/components/MessageInput";
 import { MicCapture } from "@/components/MicCapture";
+import { VoiceConversationOverlay } from "@/components/VoiceConversationOverlay";
 import { toaster } from "@/components/ui/toaster";
 import type { InterviewAnalysis } from "@/lib/schemas";
 import type { STTResponseBody } from "@/lib/voice/types";
@@ -115,6 +116,7 @@ export function InterviewLayout({
     return window.localStorage.getItem(AUTOPLAY_STORAGE_KEY) === "1";
   });
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const [voiceModeOpen, setVoiceModeOpen] = useState(false);
   const toggleAutoplay = () => {
     setAutoplayVoice((prev) => {
       const next = !prev;
@@ -262,6 +264,22 @@ export function InterviewLayout({
               onClick={toggleAutoplay}
             >
               {autoplayVoice ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            </IconButton>
+          ) : null}
+
+          {/* Voice conversation mode (fullscreen overlay) */}
+          {agentId ? (
+            <IconButton
+              aria-label="Mode conversation vocale"
+              title="Mode conversation vocale"
+              size="sm"
+              variant="ghost"
+              borderRadius="lg"
+              color="var(--color-text-muted)"
+              _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
+              onClick={() => setVoiceModeOpen(true)}
+            >
+              <Headphones size={16} />
             </IconButton>
           ) : null}
 
@@ -621,6 +639,17 @@ export function InterviewLayout({
           ) : null}
         </Box>
       </Box>
+
+      {/* ── VOICE CONVERSATION OVERLAY (fullscreen) ────── */}
+      <VoiceConversationOverlay
+        open={voiceModeOpen}
+        onClose={() => setVoiceModeOpen(false)}
+        agentId={agentId ?? null}
+        agentName={agentDisplayName ?? agentNameForMessages ?? null}
+        agentHasVoice={agentHasVoice}
+        isStreaming={isStreaming}
+        onSendMessage={onSendMessage}
+      />
 
       {/* ── LEFT DRAWER (InterviewSidebar) ─────────────── */}
       <InterviewSidebar
