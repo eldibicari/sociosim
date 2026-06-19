@@ -23,6 +23,7 @@ import { MessageInput } from "@/components/MessageInput";
 import { MicCapture } from "@/components/MicCapture";
 import { toaster } from "@/components/ui/toaster";
 import type { InterviewAnalysis } from "@/lib/schemas";
+import type { STTResponseBody } from "@/lib/voice/types";
 import type { UIMessage } from "@/types/ui";
 
 type InterviewStats = {
@@ -113,6 +114,7 @@ export function InterviewLayout({
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(AUTOPLAY_STORAGE_KEY) === "1";
   });
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const toggleAutoplay = () => {
     setAutoplayVoice((prev) => {
       const next = !prev;
@@ -527,26 +529,89 @@ export function InterviewLayout({
 
           {showInput ? (
             <VStack alignItems="stretch" gap={2} width="100%">
-              {/* Mic capture — Phase 3 morceau 1. Pour l'instant le callback
-                  ne fait qu'afficher un toast ; la transcription sera branchée
-                  au morceau 2. */}
+              {/* Mic capture — Phase 3. L'audio enregistré est envoyé à
+                  ElevenLabs Scribe via /api/voice/stt, le texte transcrit
+                  est inséré dans le chat comme un message normal. */}
               <Box display="flex" justifyContent="center" width="100%">
                 <MicCapture
-                  disabled={isStreaming}
-                  onRecorded={({ blob, durationMs, mimeType }) => {
-                    const sizeKb = Math.round(blob.size / 1024);
-                    const seconds = (durationMs / 1000).toFixed(1);
-                    toaster.create({
-                      title: "Enregistrement capté",
-                      description: `${seconds}s · ${sizeKb} Ko · ${mimeType}. La transcription arrivera au prochain morceau.`,
-                      type: "success",
-                    });
+                  disabled={isStreaming || isTranscribing}
+                  onRecorded={async ({ blob, mimeType }) => {
+                    setIsTranscribing(true);
+                    try {
+                      const form = new FormData();
+                      const extension = mimeType.includes("mp4")
+                        ? "mp4"
+                        : mimeType.includes("ogg")
+                          ? "ogg"
+                          : "webm";
+                      form.append("file", blob, `voice.${extension}`);
+
+                      const response = await fetch("/api/voice/stt", {
+                        method: "POST",
+                        body: form,
+                      });
+
+                      if (!response.ok) {
+                        const detail = (await response
+                          .json()
+                          .catch(() => null)) as
+                          | { error?: string }
+                          | null;
+                        throw new Error(
+                          detail?.error ?? `Transcription échouée (${response.status})`
+                        );
+                      }
+
+                      const data = (await response.json()) as STTResponseBody;
+                      const text = data.text.trim();
+
+                      if (!text) {
+                        toaster.create({
+                          title: "Aucune transcription",
+                          description:
+                            "Le micro n'a rien capté de compréhensible. Réessayez en parlant plus fort ou plus près du micro.",
+                          type: "warning",
+                        });
+                        return;
+                      }
+
+                      onSendMessage(text);
+                    } catch (err) {
+                      const message =
+                        err instanceof Error ? err.message : "Erreur inconnue";
+                      toaster.create({
+                        title: "Échec de la transcription",
+                        description: message,
+                        type: "error",
+                      });
+                    } finally {
+                      setIsTranscribing(false);
+                    }
                   }}
                 />
               </Box>
+              {isTranscribing ? (
+                <HStack
+                  gap={2}
+                  justifyContent="center"
+                  alignItems="center"
+                  paddingY={1}
+                >
+                  <Box
+                    width="8px"
+                    height="8px"
+                    borderRadius="full"
+                    backgroundColor="var(--color-accent)"
+                    style={{ animation: "pulse 1s infinite" }}
+                  />
+                  <Text fontSize="xs" color="var(--color-text-muted)" fontWeight="500">
+                    Transcription en cours…
+                  </Text>
+                </HStack>
+              ) : null}
               <MessageInput
                 onSendMessage={onSendMessage}
-                isLoading={isStreaming}
+                isLoading={isStreaming || isTranscribing}
                 placeholder="Posez votre question…"
                 containerProps={messageInputContainerProps}
                 value={draftMessage}
