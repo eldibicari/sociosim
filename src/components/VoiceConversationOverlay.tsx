@@ -250,7 +250,10 @@ export function VoiceConversationOverlay({
         const response = await fetch("/api/voice/tts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ agentId, text }),
+          // Force the low-latency flash model for the real-time conversation
+          // mode (~75ms inference vs 1-3s for multilingual_v2). Quality is
+          // slightly lower but the conversational feel is much better.
+          body: JSON.stringify({ agentId, text, modelId: "eleven_flash_v2_5" }),
         });
         if (!response.ok) {
           const detail = (await response.json().catch(() => null)) as

@@ -3,11 +3,22 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { VOICE_CACHE_BUCKET } from "./types";
 
 /**
- * Deterministic cache key for a (voiceId, text) pair.
- * Identical inputs always produce the same key → same audio is generated only once.
+ * Deterministic cache key for a (voiceId, text [, modelSuffix]) tuple.
+ *
+ * When `modelSuffix` is omitted we keep the original 2-input hash so
+ * existing cached audios from earlier phases (no model parameter) keep
+ * matching. Providing a model suffix yields a different hash, isolating
+ * each model's outputs without invalidating the default-model cache.
  */
-export function computeCacheKey(voiceId: string, text: string): string {
-  return createHash("sha256").update(`${voiceId}\n${text}`).digest("hex");
+export function computeCacheKey(
+  voiceId: string,
+  text: string,
+  modelSuffix?: string
+): string {
+  const input = modelSuffix
+    ? `${voiceId}\n${modelSuffix}\n${text}`
+    : `${voiceId}\n${text}`;
+  return createHash("sha256").update(input).digest("hex");
 }
 
 export function buildTtsCachePath(voiceId: string, hash: string): string {
