@@ -41,7 +41,10 @@ interface MicCaptureProps {
 }
 
 const BAR_COUNT = 24;
-const DEFAULT_MAX_DURATION_MS = 60_000;
+// 3 minutes = limite de sécurité par tour de parole. Suffit pour un récit
+// long en entretien sociologique tout en évitant les enregistrements oubliés
+// qui partent en délire. Le total de l'entretien n'est pas limité.
+const DEFAULT_MAX_DURATION_MS = 180_000;
 
 export function MicCapture({
   onRecorded,
