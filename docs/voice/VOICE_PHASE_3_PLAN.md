@@ -31,10 +31,14 @@ Les Phases 1, 2 et 2b sont en prod. L'étudiant peut écouter la voix de Jade/Th
 - **Sera mentionnée dans la doc finale comme alternative considérée** (pour montrer la réflexion architecturale au tuteur)
 
 ### Pourquoi Option C (hybride)
-- **STT** : Gemini Audio Input (free tier + free credit) — transcription rapide
+- **STT** : ElevenLabs Scribe (`/v1/speech-to-text`) — réutilise la même clé API, ≤5% WER en français, $0.40/heure
 - **LLM (réponse persona)** : ADK Agent Service existant (Gemini) — aucune modif
-- **TTS** : ElevenLabs en mode streaming — voix préservées
-- **File audio côté client** : on joue les morceaux dès qu'ils arrivent → latence ~1-1,5s
+- **TTS conversation mode** : ElevenLabs streaming avec **`eleven_flash_v2_5`** (~75ms inférence, <500ms end-to-end)
+- **TTS chat texte (mode actuel)** : on garde `eleven_multilingual_v2` (meilleure qualité, latence pas critique)
+- **File audio côté client** : on joue les chunks dès qu'ils arrivent
+
+### Avantage clé du choix ElevenLabs Scribe
+**Une seule clé API** pour tout le pipeline voix (TTS + STT). Pas de nouvelle variable d'env, pas de nouveau fournisseur, architecture cohérente.
 
 ### Diagramme du flux
 
@@ -90,16 +94,15 @@ On découpe en **6 morceaux**, chacun donne un état stable et testable. Si le 5
 
 ### Morceau 2 — Route STT côté serveur
 **Quoi** : nouvelle route qui reçoit l'audio enregistré et renvoie la transcription.
-**Comment** : appel à Gemini Audio Input avec `inlineData` (audio en base64) + prompt simple "transcris cet audio en français".
+**Comment** : appel à `POST /v1/speech-to-text` d'ElevenLabs avec `file` (audio binaire) + `model_id: "scribe_v2"`. La même clé `ELEVENLABS_API_KEY` est réutilisée.
 **Fichiers nouveaux** :
-- `src/lib/voice/gemini.ts` — client minimal Gemini (juste pour l'audio)
 - `src/app/api/voice/stt/route.ts` — route POST
 **Fichiers modifiés** :
-- `src/lib/voice/types.ts` — types STT
-- `.env.local.example` — documenter `GOOGLE_API_KEY`
+- `src/lib/voice/elevenlabs.ts` — ajoute une fonction `transcribeAudio()`
+- `src/lib/voice/types.ts` — ajoute les types STT (request/response)
 **Test à la fin** : on envoie un blob audio via curl ou via le bouton micro du morceau 1, on récupère du texte français.
 **Durée estimée** : ~1h
-**Risque** : bas (API REST simple Gemini)
+**Risque** : bas (API REST simple, clé déjà configurée)
 
 ### Morceau 3 — Brancher la transcription dans le chat
 **Quoi** : quand on relâche le micro, on transcrit, on injecte le texte transcrit dans le chat comme si l'étudiant l'avait tapé.
@@ -180,17 +183,22 @@ On découpe en **6 morceaux**, chacun donne un état stable et testable. Si le 5
 - Échantillonnage : **16 kHz** suffisant pour la voix (Whisper et Gemini optimisés pour ça)
 - Push-to-talk au début : on garde simple. Plus tard on pourra ajouter détection de silence automatique.
 
-### 5.2 Gemini STT
-- **Modèle** : `gemini-2.0-flash` (rapide, gratuit en quota dev, supporte audio)
-- **Input** : audio inline base64 (la blob enregistrée)
-- **Prompt** : *"Transcris cet enregistrement audio en français. Ne réponds que par la transcription, sans introduction ni commentaire."*
-- **Coût** : ~0,01-0,02 $ par minute audio sur paid tier. Free tier généreux pour le dev.
+### 5.2 ElevenLabs Scribe (STT)
+- **Endpoint** : `POST https://api.elevenlabs.io/v1/speech-to-text`
+- **Modèle** : `scribe_v2` (qualité maximale) — alternative `scribe_v1`
+- **Input** : champ `file` (binaire) — formats acceptés : tous les formats audio majeurs (mp3, wav, webm, opus, m4a)
+- **Auth** : header `xi-api-key` avec notre `ELEVENLABS_API_KEY` (déjà configurée)
+- **Qualité français** : ≤5% WER (excellente précision)
+- **Coût** : $0.40 par heure d'audio transcrit (~0,2c par minute)
+- **Limites** : audio entre 100ms et 5GB
 
-### 5.3 ElevenLabs streaming
-- Endpoint : `POST /v1/text-to-speech/{voice_id}/stream`
-- Réponse : audio/mpeg en chunked transfer encoding
-- Côté client : on consomme le ReadableStream, on fait des AudioBuffer
-- **À vérifier en live** : la doc ElevenLabs streaming via WebFetch pour confirmer les paramètres exacts
+### 5.3 ElevenLabs streaming TTS (mode conversation)
+- **Endpoint** : `POST /v1/text-to-speech/{voice_id}/stream`
+- **Modèle critique** : **`eleven_flash_v2_5`** (~75ms inférence, <500ms end-to-end)
+- **Pourquoi Flash** : c'est le modèle le plus rapide d'ElevenLabs, conçu pour les use cases temps réel comme la nôtre
+- **Réponse** : audio/mpeg en chunked transfer encoding
+- **Côté client** : on consomme le ReadableStream, on alimente une file `AudioBuffer` séquencée
+- **TTS chat texte normal** : on garde `eleven_multilingual_v2` (meilleure qualité, latence pas critique)
 
 ### 5.4 Sécurité
 - Permissions micro demandées au navigateur (HTTPS requis — déjà OK sur Vercel)
@@ -200,11 +208,13 @@ On découpe en **6 morceaux**, chacun donne un état stable et testable. Si le 5
 
 ### 5.5 Coûts estimés
 Pour une session d'entretien typique de 30 min avec ~20 échanges :
-- STT Gemini : 30 min × 0,015 $/min = 0,45 $
-- TTS ElevenLabs : ~20 réponses × 500 chars = 10 000 chars (déjà dans le quota Creator)
-- **Total : ~0,50 $ par entretien complet**
+- STT ElevenLabs Scribe : 30 min × $0.40/h = **~0,20 $**
+- TTS ElevenLabs (Flash en mode conversation) : ~20 réponses × 500 chars = 10 000 chars (dans le quota Creator)
+- **Total : ~0,20 $ par entretien complet**
 
-Pour une classe de 20 étudiants × 1 entretien chacun = ~10 $/mois sur Gemini en plus du plan ElevenLabs. **Confortable.**
+Pour une classe de 20 étudiants × 1 entretien chacun = ~4 $/mois en plus du plan ElevenLabs Creator. **Très confortable.**
+
+**Avantage** : pas de nouveau compte/fournisseur à gérer pour la facturation.
 
 ---
 
@@ -212,25 +222,23 @@ Pour une classe de 20 étudiants × 1 entretien chacun = ~10 $/mois sur Gemini e
 
 | Risque | Probabilité | Mitigation |
 |---|---|---|
-| Audio mal capté (bruit ambiant) | Moyenne | Pas de gestion sophistiquée en Phase 3 — l'utilisateur s'adapte. Phase 4 peut ajouter noise gate. |
-| Gemini transcrit en anglais par erreur | Faible | Prompt explicite "en français" + langue détectée par Gemini |
+| Audio mal capté (bruit ambiant) | Moyenne | Pas de gestion sophistiquée en Phase 3 — l'utilisateur s'adapte. Phase 4 peut activer ElevenLabs Audio Isolation (déjà autorisé sur la clé). |
+| Scribe transcrit dans la mauvaise langue | Faible | Modèle `scribe_v2` détecte la langue automatiquement. Si problème, on peut forcer via paramètre `language_code: "fra"`. |
 | ElevenLabs streaming hang | Moyenne | Timeout client 30s, fallback à TTS non-streamé |
 | Permissions micro refusées | Élevée (1ère fois) | UI claire qui explique pourquoi et comment réactiver |
 | Conflit avec le streaming text du chat existant | Faible | Garder les deux flux séparés, le mode conversation est opt-in |
 | Audio queue glitches (chunks dans le désordre) | Moyenne | Numérotation des chunks, validation de l'ordre côté client |
-| Quota Gemini dépassé | Faible (dev) / Moyenne (prod classe) | Surveiller en début de prod, passer en paid si besoin |
+| Quota ElevenLabs dépassé | Faible (Scribe = $0.40/h, pas dans le quota chars) | STT facturé séparément, surveillance via dashboard ElevenLabs |
 
 ---
 
-## 7. Variables d'environnement à ajouter
+## 7. Variables d'environnement
 
-`.env.local` (dev) ET Vercel (Production + Preview) :
+**Aucune nouvelle variable à ajouter** — on réutilise `ELEVENLABS_API_KEY` qui est déjà configurée dans `.env.local` et sur Vercel pour les Phases précédentes.
 
-```
-GOOGLE_API_KEY=...
-```
-
-On va aussi mettre à jour `.env.local.example` pour documenter cette nouvelle var.
+**Permission à activer côté ElevenLabs** (déjà faite par l'utilisateur le 2026-06-19) :
+- **Speech to Text** : Access ✅
+- (Bonus activées proactivement par l'utilisateur : Pronunciation Dictionaries, Audio Isolation, Forced Alignment, History — voir `ELEVENLABS_API_KEY_REFERENCE.md`)
 
 ---
 
