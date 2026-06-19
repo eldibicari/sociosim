@@ -18,7 +18,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
-import { Mic, Square, X } from "lucide-react";
+import { Mic, Repeat, Square, X } from "lucide-react";
 import { PersonaSilhouette } from "@/app/personnas/components/PersonaSilhouette";
 import { getPersonaVisual } from "@/lib/personaVisuals";
 import type { STTResponseBody, TTSResponseBody } from "@/lib/voice/types";
@@ -65,6 +65,28 @@ export function VoiceConversationOverlay({
     Array(BAR_COUNT).fill(0)
   );
   const [error, setError] = useState<string | null>(null);
+  const [autoLoop, setAutoLoop] = useState(true);
+
+  // Ref-copy so the audio "ended" listener (captured at setup time) can read
+  // the LATEST toggle value without resubscribing.
+  const autoLoopRef = useRef(true);
+  useEffect(() => {
+    autoLoopRef.current = autoLoop;
+  }, [autoLoop]);
+
+  // Ref to the open-state for the same reason (event closures).
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  // Used to schedule the auto-restart timeout so we can cancel it on
+  // unmount or when the overlay closes.
+  const autoRestartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Forward reference to startRecording so the audio.ended listener
+  // (captured at setup time) can invoke the latest closure.
+  const startRecordingRef = useRef<(() => Promise<void>) | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -137,6 +159,10 @@ export function VoiceConversationOverlay({
       stopAnimations();
       releaseStream();
       releasePlayback();
+      if (autoRestartTimeoutRef.current) {
+        clearTimeout(autoRestartTimeoutRef.current);
+        autoRestartTimeoutRef.current = null;
+      }
       mediaRecorderRef.current = null;
       chunksRef.current = [];
       lastPlayedMessageIdRef.current = null;
@@ -255,6 +281,18 @@ export function VoiceConversationOverlay({
           releasePlayback();
           setAudioLevels(Array(BAR_COUNT).fill(0));
           setState("idle");
+          // Auto-restart recording for hands-free conversation.
+          if (autoLoopRef.current && openRef.current) {
+            if (autoRestartTimeoutRef.current) {
+              clearTimeout(autoRestartTimeoutRef.current);
+            }
+            autoRestartTimeoutRef.current = setTimeout(() => {
+              autoRestartTimeoutRef.current = null;
+              if (openRef.current && autoLoopRef.current) {
+                void startRecordingRef.current?.();
+              }
+            }, 600);
+          }
         });
         audio.addEventListener("error", () => {
           releasePlayback();
@@ -417,6 +455,10 @@ export function VoiceConversationOverlay({
     }
   };
 
+  // Keep the ref pointing at the latest startRecording closure so the
+  // audio.ended listener (set up earlier in time) can reach it.
+  startRecordingRef.current = startRecording;
+
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&
@@ -436,6 +478,10 @@ export function VoiceConversationOverlay({
     ) {
       chunksRef.current = []; // Make sure onstop discards the take.
       mediaRecorderRef.current.stop();
+    }
+    if (autoRestartTimeoutRef.current) {
+      clearTimeout(autoRestartTimeoutRef.current);
+      autoRestartTimeoutRef.current = null;
     }
     stopAnimations();
     releaseStream();
@@ -488,22 +534,53 @@ export function VoiceConversationOverlay({
       justifyContent="center"
       backdropFilter="blur(12px)"
     >
-      {/* Close button */}
+      {/* Top-right controls */}
       <Box position="absolute" top={4} right={4}>
-        <IconButton
-          aria-label="Quitter le mode conversation"
-          size="md"
-          variant="ghost"
-          borderRadius="full"
-          color="white"
-          _hover={{ backgroundColor: "rgba(255,255,255,0.1)" }}
-          onClick={() => {
-            cancelRecording();
-            onClose();
-          }}
-        >
-          <X size={20} />
-        </IconButton>
+        <HStack gap={2}>
+          <IconButton
+            aria-label={
+              autoLoop
+                ? "Désactiver la boucle automatique"
+                : "Activer la boucle automatique"
+            }
+            title={
+              autoLoop
+                ? "Boucle auto : ON — le micro se réactive après Jade"
+                : "Boucle auto : OFF — cliquez le micro à chaque tour"
+            }
+            size="md"
+            variant="ghost"
+            borderRadius="full"
+            color={autoLoop ? "var(--color-accent)" : "rgba(255,255,255,0.6)"}
+            _hover={{ backgroundColor: "rgba(255,255,255,0.1)" }}
+            onClick={() => {
+              setAutoLoop((prev) => {
+                const next = !prev;
+                if (!next && autoRestartTimeoutRef.current) {
+                  clearTimeout(autoRestartTimeoutRef.current);
+                  autoRestartTimeoutRef.current = null;
+                }
+                return next;
+              });
+            }}
+          >
+            <Repeat size={18} />
+          </IconButton>
+          <IconButton
+            aria-label="Quitter le mode conversation"
+            size="md"
+            variant="ghost"
+            borderRadius="full"
+            color="white"
+            _hover={{ backgroundColor: "rgba(255,255,255,0.1)" }}
+            onClick={() => {
+              cancelRecording();
+              onClose();
+            }}
+          >
+            <X size={20} />
+          </IconButton>
+        </HStack>
       </Box>
 
       <VStack gap={10} maxWidth="540px" width="100%" px={6}>
