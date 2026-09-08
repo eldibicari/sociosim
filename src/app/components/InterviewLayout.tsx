@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ArrowRight, BookOpen, FileDown, Menu as MenuIcon, Sparkles, User, Volume2, VolumeX, X } from "lucide-react";
+import { ArrowRight, BookOpen, FileDown, Headphones, Menu as MenuIcon, Sparkles, User, Volume2, VolumeX, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { InterviewAnalysisContent } from "@/app/components/InterviewAnalysisContent";
@@ -20,7 +20,11 @@ import { InterviewSidebar } from "@/app/components/InterviewSidebar";
 import { AssistantSkeleton } from "@/components/AssistantSkeleton";
 import { ChatMessage } from "@/components/ChatMessage";
 import { MessageInput } from "@/components/MessageInput";
+import { MicCapture } from "@/components/MicCapture";
+import { VoiceConversationOverlay } from "@/components/VoiceConversationOverlay";
+import { toaster } from "@/components/ui/toaster";
 import type { InterviewAnalysis } from "@/lib/schemas";
+import type { STTResponseBody } from "@/lib/voice/types";
 import type { UIMessage } from "@/types/ui";
 
 type InterviewStats = {
@@ -111,6 +115,8 @@ export function InterviewLayout({
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(AUTOPLAY_STORAGE_KEY) === "1";
   });
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [voiceModeOpen, setVoiceModeOpen] = useState(false);
   const toggleAutoplay = () => {
     setAutoplayVoice((prev) => {
       const next = !prev;
@@ -258,6 +264,22 @@ export function InterviewLayout({
               onClick={toggleAutoplay}
             >
               {autoplayVoice ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            </IconButton>
+          ) : null}
+
+          {/* Voice conversation mode (fullscreen overlay) */}
+          {agentId ? (
+            <IconButton
+              aria-label="Mode conversation vocale"
+              title="Mode conversation vocale"
+              size="sm"
+              variant="ghost"
+              borderRadius="lg"
+              color="var(--color-text-muted)"
+              _hover={{ backgroundColor: "var(--color-accent-muted)", color: "var(--color-accent)" }}
+              onClick={() => setVoiceModeOpen(true)}
+            >
+              <Headphones size={16} />
             </IconButton>
           ) : null}
 
@@ -524,17 +546,111 @@ export function InterviewLayout({
           </Box>
 
           {showInput ? (
-            <MessageInput
-              onSendMessage={onSendMessage}
-              isLoading={isStreaming}
-              placeholder="Posez votre question…"
-              containerProps={messageInputContainerProps}
-              value={draftMessage}
-              onValueChange={setDraftMessage}
-            />
+            <VStack alignItems="stretch" gap={2} width="100%">
+              {/* Mic capture — Phase 3. L'audio enregistré est envoyé à
+                  ElevenLabs Scribe via /api/voice/stt, le texte transcrit
+                  est inséré dans le chat comme un message normal. */}
+              <Box display="flex" justifyContent="center" width="100%">
+                <MicCapture
+                  disabled={isStreaming || isTranscribing}
+                  onRecorded={async ({ blob, mimeType }) => {
+                    setIsTranscribing(true);
+                    try {
+                      const form = new FormData();
+                      const extension = mimeType.includes("mp4")
+                        ? "mp4"
+                        : mimeType.includes("ogg")
+                          ? "ogg"
+                          : "webm";
+                      form.append("file", blob, `voice.${extension}`);
+
+                      const response = await fetch("/api/voice/stt", {
+                        method: "POST",
+                        body: form,
+                      });
+
+                      if (!response.ok) {
+                        const detail = (await response
+                          .json()
+                          .catch(() => null)) as
+                          | { error?: string }
+                          | null;
+                        throw new Error(
+                          detail?.error ?? `Transcription échouée (${response.status})`
+                        );
+                      }
+
+                      const data = (await response.json()) as STTResponseBody;
+                      const text = data.text.trim();
+
+                      if (!text) {
+                        toaster.create({
+                          title: "Aucune transcription",
+                          description:
+                            "Le micro n'a rien capté de compréhensible. Réessayez en parlant plus fort ou plus près du micro.",
+                          type: "warning",
+                        });
+                        return;
+                      }
+
+                      onSendMessage(text);
+                    } catch (err) {
+                      const message =
+                        err instanceof Error ? err.message : "Erreur inconnue";
+                      toaster.create({
+                        title: "Échec de la transcription",
+                        description: message,
+                        type: "error",
+                      });
+                    } finally {
+                      setIsTranscribing(false);
+                    }
+                  }}
+                />
+              </Box>
+              {isTranscribing ? (
+                <HStack
+                  gap={2}
+                  justifyContent="center"
+                  alignItems="center"
+                  paddingY={1}
+                >
+                  <Box
+                    width="8px"
+                    height="8px"
+                    borderRadius="full"
+                    backgroundColor="var(--color-accent)"
+                    style={{ animation: "pulse 1s infinite" }}
+                  />
+                  <Text fontSize="xs" color="var(--color-text-muted)" fontWeight="500">
+                    Transcription en cours…
+                  </Text>
+                </HStack>
+              ) : null}
+              <MessageInput
+                onSendMessage={onSendMessage}
+                isLoading={isStreaming || isTranscribing}
+                placeholder="Posez votre question…"
+                containerProps={messageInputContainerProps}
+                value={draftMessage}
+                onValueChange={setDraftMessage}
+              />
+            </VStack>
           ) : null}
         </Box>
       </Box>
+
+      {/* ── VOICE CONVERSATION OVERLAY (fullscreen) ────── */}
+      <VoiceConversationOverlay
+        open={voiceModeOpen}
+        onClose={() => setVoiceModeOpen(false)}
+        agentId={agentId ?? null}
+        agentName={agentDisplayName ?? agentNameForMessages ?? null}
+        agentHasVoice={agentHasVoice}
+        isStreaming={isStreaming}
+        onSendMessage={onSendMessage}
+        messages={messages}
+      />
 
       {/* ── LEFT DRAWER (InterviewSidebar) ─────────────── */}
       <InterviewSidebar

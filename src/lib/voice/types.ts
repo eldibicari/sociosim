@@ -29,12 +29,36 @@ export interface TTSRequestBody {
   agentId?: string;
   voiceId?: string;
   text: string;
+  /**
+   * Override the model used for generation. Useful for the conversation
+   * overlay which prefers eleven_flash_v2_5 (low-latency) over the default
+   * eleven_multilingual_v2 (higher quality, higher latency).
+   */
+  modelId?: string;
 }
 
 export interface TTSResponseBody {
   audioUrl: string;
   cached: boolean;
 }
+
+// ─── Speech-to-Text (Phase 3) ──────────────────────────────────────────
+
+/**
+ * STT request body is multipart/form-data with at least a `file` field.
+ * We keep this as a documented shape rather than a JSON type since fetch
+ * sends FormData directly.
+ */
+export interface STTResponseBody {
+  text: string;
+  languageCode?: string;
+}
+
+/** Server-side cap for any audio uploaded to /api/voice/stt. */
+export const MAX_STT_AUDIO_BYTES = 25 * 1024 * 1024; // 25 MB
+
+/** Default Scribe model used for transcription. */
+export const DEFAULT_SCRIBE_MODEL_ID = "scribe_v2";
 
 // ─── Voice catalog & audition ──────────────────────────────────────────
 
@@ -95,3 +119,6 @@ export const VOICE_CACHE_BUCKET = "voice-cache";
 export const MAX_TTS_TEXT_LENGTH = 2000;
 
 export const DEFAULT_ELEVENLABS_MODEL_ID = "eleven_multilingual_v2";
+
+/** Ultra-low-latency model used in real-time conversation mode. */
+export const FAST_ELEVENLABS_MODEL_ID = "eleven_flash_v2_5";

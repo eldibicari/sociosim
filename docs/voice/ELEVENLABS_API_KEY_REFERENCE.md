@@ -10,16 +10,25 @@
 
 ## 1. Notre clé Mimesis actuelle — permissions activées
 
-Configuration utilisée en Phase 1 (2026-06-16) :
+**Configuration au 2026-06-19** (après préparation Phase 3) :
 
 | Endpoint | Permission | Pourquoi |
 |---|---|---|
-| **Text to Speech** | ✅ Access | Cœur du système : générer la voix des personas |
-| **Voices** | ✅ Read | Lister les voix disponibles dans le catalogue |
-| **Models** | ✅ Access | Choisir le modèle TTS (eleven_multilingual_v2, etc.) |
-| **Tout le reste** | ❌ No Access | Principe de moindre privilège |
+| **Text to Speech** | ✅ Access | Cœur du système : générer la voix des personas (Phase 1) |
+| **Speech to Text** | ✅ Access | Transcrire la voix de l'étudiant (Phase 3 — conversation vocale) |
+| **Voices** | ✅ Read | Lister les voix disponibles dans le catalogue (Phase 2b — audition) |
+| **Models** | ✅ Access | Choisir le modèle TTS approprié |
+| **Pronunciation Dictionaries** | ✅ Read + Write | Corriger la prononciation des noms propres ("Jade" en français, noms d'auteurs sociologues) |
+| **Audio Isolation** | ✅ Access | Nettoyer le son du micro si bruit ambiant (utile en Phase 3) |
+| **Forced Alignment** | ✅ Access | Sous-titres synchronisés (accessibilité, Phase 4) |
+| **History** | ✅ Read | Debugger l'usage et consulter les générations passées |
+| **Tout le reste** | ❌ No Access | Principe de moindre privilège (admin, workspace members, voice cloning, etc.) |
 
-**Limite d'usage** : 30 000 crédits/mois max sur cette clé (configurable dans l'interface).
+**Limite d'usage** : configurable dans l'interface ElevenLabs (laissée par défaut actuellement).
+
+**Historique** :
+- 2026-06-16 : création de la clé avec seulement TTS + Voices Read + Models Access (Phase 1)
+- 2026-06-19 : ajout de Speech to Text + Pronunciation Dictionaries + Audio Isolation + Forced Alignment + History (préparation Phase 3 + futures améliorations)
 
 ---
 

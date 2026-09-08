@@ -16,6 +16,13 @@ import {
   type VoiceProfile,
 } from "@/lib/voice/types";
 
+const KNOWN_MODELS = new Set([
+  "eleven_multilingual_v2",
+  "eleven_flash_v2_5",
+  "eleven_turbo_v2_5",
+  "eleven_multilingual_v1",
+]);
+
 export async function POST(request: NextRequest) {
   try {
     const { user } = await getAuthenticatedUser(request);
@@ -36,6 +43,12 @@ export async function POST(request: NextRequest) {
     const agentId = body?.agentId?.trim();
     const directVoiceId = body?.voiceId?.trim();
     const text = body?.text?.trim();
+    const requestedModelId = body?.modelId?.trim();
+    // Reject unknown model ids to avoid forwarding garbage to ElevenLabs.
+    const overrideModelId =
+      requestedModelId && KNOWN_MODELS.has(requestedModelId)
+        ? requestedModelId
+        : undefined;
 
     if (!text) {
       return NextResponse.json({ error: "Missing text" }, { status: 400 });
@@ -99,7 +112,18 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    const hash = computeCacheKey(voiceId, text);
+    // Caller can override the model (e.g. flash for the conversation overlay).
+    if (overrideModelId) modelId = overrideModelId;
+
+    // Cache key isolates models so flash and multilingual outputs do not
+    // collide. We omit the suffix when using the default model, keeping
+    // pre-existing cache entries valid.
+    const effectiveModel = modelId ?? DEFAULT_ELEVENLABS_MODEL_ID;
+    const cacheModelSuffix =
+      effectiveModel === DEFAULT_ELEVENLABS_MODEL_ID
+        ? undefined
+        : effectiveModel;
+    const hash = computeCacheKey(voiceId, text, cacheModelSuffix);
     const cachePath = buildTtsCachePath(voiceId, hash);
 
     const cachedUrl = await getCachedAudioUrl(supabase, cachePath);
